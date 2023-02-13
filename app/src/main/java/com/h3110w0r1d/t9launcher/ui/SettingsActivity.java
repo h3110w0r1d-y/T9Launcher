@@ -1,10 +1,12 @@
-package com.h3110w0r1d.t9launcher;
+package com.h3110w0r1d.t9launcher.ui;
 
 import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceFragmentCompat;
+
+import com.h3110w0r1d.t9launcher.R;
 
 public class SettingsActivity extends AppCompatActivity {
 

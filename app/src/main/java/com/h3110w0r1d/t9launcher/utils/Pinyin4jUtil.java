@@ -1,4 +1,6 @@
-package com.h3110w0r1d.t9launcher;
+package com.h3110w0r1d.t9launcher.utils;
+
+import com.h3110w0r1d.t9launcher.vo.AppInfo;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -127,7 +129,7 @@ public class Pinyin4jUtil {
     }
 
     public static boolean Search(AppInfo app, String searchText) {
-        List<List<String>> data = app.getSeatchData();
+        List<List<String>> data = app.getSearchData();
         for (int i = 0; i < data.size(); i++) {
             if (search(data, searchText, i, 0)){
                 return true;

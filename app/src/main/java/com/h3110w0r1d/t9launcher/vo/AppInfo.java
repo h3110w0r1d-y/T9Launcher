@@ -1,24 +1,24 @@
-package com.h3110w0r1d.t9launcher;
+package com.h3110w0r1d.t9launcher.vo;
 
 import android.graphics.drawable.Drawable;
 
 import java.util.List;
 
 public class AppInfo {
-    private String appName;
-    private String packageName;
-    private boolean isSystemApp;
+    private final String appName;
+    private final String packageName;
+    private final boolean isSystemApp;
 
-    private Drawable appIcon;
+    private final Drawable appIcon;
 
-    public List<List<String>> seatchData;
+    public List<List<String>> searchData;
 
-    public AppInfo(String appName, String packageName, Drawable appIcon, boolean isSystemApp, List<List<String>> seatchData) {
+    public AppInfo(String appName, String packageName, Drawable appIcon, boolean isSystemApp, List<List<String>> searchData) {
         this.appName = appName;
         this.packageName = packageName;
         this.isSystemApp = isSystemApp;
         this.appIcon = appIcon;
-        this.seatchData = seatchData;
+        this.searchData = searchData;
     }
 
     public String getAppName() {
@@ -37,8 +37,8 @@ public class AppInfo {
         return isSystemApp;
     }
 
-    public List<List<String>> getSeatchData() {
-        return seatchData;
+    public List<List<String>> getSearchData() {
+        return searchData;
     }
 
 }
