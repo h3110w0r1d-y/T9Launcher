@@ -2,7 +2,6 @@ package com.h3110w0r1d.t9launcher;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
 
 public class AppInfoAdapter extends ArrayAdapter<AppInfo> {
@@ -37,8 +35,9 @@ public class AppInfoAdapter extends ArrayAdapter<AppInfo> {
         listitemView.setOnClickListener(v -> {
             Intent intent = getContext().getPackageManager().getLaunchIntentForPackage(appInfo.getPackageName());
             if (intent != null) {
+                intent.setPackage(null);
                 getContext().startActivity(intent);
-                Data.mainActivity.onBackPressed();
+                Data.mainActivity.moveTaskToBack(true);
             }
         });
         return listitemView;

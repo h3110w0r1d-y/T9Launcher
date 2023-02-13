@@ -127,7 +127,7 @@ public class Pinyin4jUtil {
     }
 
     public static boolean Search(AppInfo app, String searchText) {
-        List<List<String>> data = app.getSeatchData();
+        List<List<String>> data = app.getSearchData();
         for (int i = 0; i < data.size(); i++) {
             if (search(data, searchText, i, 0)){
                 return true;
