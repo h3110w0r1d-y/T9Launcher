@@ -69,7 +69,6 @@ public class Pinyin4jUtil {
     }
 
     public static List<List<String>> getPinYin(String str) {
-        System.out.println("调试输出:" + str);
         List<List<String>> result = new ArrayList<>();
         StringBuilder LatterAndNumber = new StringBuilder();
         for (int i = 0; i < str.length(); i++) {
