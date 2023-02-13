@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">T9启动器</string>
+    <string name="clear">清除</string>
+    <string name="setting">设置</string>
+</resources>
