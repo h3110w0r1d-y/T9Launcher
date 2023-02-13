@@ -4,16 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-public class InstallReceiver extends BroadcastReceiver {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-
-        if (intent.getAction().equals("android.intent.action.PACKAGE_ADDED")) {
-            Data.getPackageList(context);
-        }
-
-        if (intent.getAction().equals("android.intent.action.PACKAGE_REMOVED")) {
-            Data.getPackageList(context);
-        }
-    }
+public class InstallReceiver extends BroadcastReceiver{
+	@Override
+	public void onReceive(Context context, Intent intent){
+		if(intent.getAction().equals("android.intent.action.PACKAGE_ADDED")){
+			((App)context.getApplicationContext()).appListViewModel.loadAppList(context);
+		}else if(intent.getAction().equals("android.intent.action.PACKAGE_REMOVED")){
+			((App)context.getApplicationContext()).appListViewModel.loadAppList(context);
+		}
+	}
 }

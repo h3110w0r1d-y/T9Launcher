@@ -1,4 +1,6 @@
-package com.h3110w0r1d.t9launcher;
+package com.h3110w0r1d.t9launcher.utils;
+
+import com.h3110w0r1d.t9launcher.vo.AppInfo;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;

@@ -3,83 +3,99 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/RLMain"
-    android:clickable="true">
+    android:id="@+id/RLMain">
+    
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="20dp"
+        android:layout_marginHorizontal="24dp"
         android:layout_marginTop="250dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="48dp"
         android:clickable="true"
         app:cardCornerRadius="15dp">
+        
         <LinearLayout
             android:id="@+id/ll_parent"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-            <GridView
-                android:layout_marginHorizontal="10dp"
-                android:id="@+id/idGVApp"
+            
+            <com.h3110w0r1d.t9launcher.widgets.AppListView
+                android:id="@+id/appListView"
                 android:layout_width="match_parent"
                 android:layout_height="220dp"
-                android:numColumns="5"
-                >
-            </GridView>
-            <TextView
-                android:layout_width="match_parent"
+                android:layout_marginHorizontal="10dp"
+                android:numColumns="5" />
+            
+            <EditText
                 android:id="@+id/TVSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:background="@null"
+                android:inputType="none"
+                android:focusable="false"
                 android:textAlignment="center"
-                android:text=""
-                android:textSize="20sp"
-                android:layout_height="30dp">
-
-            </TextView>
+                android:textSize="20sp" />
+            
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:layout_margin="10dp"
-                >
+                android:layout_margin="8dp">
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:orientation="horizontal"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    
                     <Button android:text="1" android:id="@+id/t9btn_1" style="@style/T9Button"/>
                     <Button android:text="2" android:id="@+id/t9btn_2" style="@style/T9Button"/>
                     <Button android:text="3" android:id="@+id/t9btn_3" style="@style/T9Button"/>
+                    
                 </LinearLayout>
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:orientation="horizontal"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    
                     <Button android:text="4" android:id="@+id/t9btn_4" style="@style/T9Button"/>
                     <Button android:text="5" android:id="@+id/t9btn_5" style="@style/T9Button"/>
                     <Button android:text="6" android:id="@+id/t9btn_6" style="@style/T9Button"/>
+                    
                 </LinearLayout>
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:orientation="horizontal"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    
                     <Button android:text="7" android:id="@+id/t9btn_7" style="@style/T9Button"/>
                     <Button android:text="8" android:id="@+id/t9btn_8" style="@style/T9Button"/>
                     <Button android:text="9" android:id="@+id/t9btn_9" style="@style/T9Button"/>
+                    
                 </LinearLayout>
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:orientation="horizontal"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    
                     <Button android:text="@string/setting" android:id="@+id/t9btn_setting" android:textSize="15sp" style="@style/T9Button"/>
                     <Button android:text="0" android:id="@+id/t9btn_0" style="@style/T9Button"/>
                     <Button android:text="@string/clear" android:id="@+id/t9btn_clear" android:textSize="15sp" style="@style/T9Button"/>
+                
                 </LinearLayout>
+                
             </LinearLayout>
+            
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
+    
 </RelativeLayout>

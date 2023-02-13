@@ -1,4 +1,4 @@
-package com.h3110w0r1d.t9launcher;
+package com.h3110w0r1d.t9launcher.vo;
 
 import android.graphics.drawable.Drawable;
 
@@ -8,7 +8,9 @@ public class AppInfo {
     private final String appName;
     private final String packageName;
     private final boolean isSystemApp;
+
     private final Drawable appIcon;
+
     public List<List<String>> searchData;
 
     public AppInfo(String appName, String packageName, Drawable appIcon, boolean isSystemApp, List<List<String>> searchData) {
