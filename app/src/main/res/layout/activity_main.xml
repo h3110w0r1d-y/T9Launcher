@@ -24,7 +24,9 @@
                 android:id="@+id/appListView"
                 android:layout_width="match_parent"
                 android:layout_height="220dp"
-                android:layout_marginHorizontal="10dp"
+                android:listSelector="@android:color/transparent"
+                android:paddingHorizontal="10dp"
+                android:paddingTop="10dp"
                 android:numColumns="5" />
             
             <EditText

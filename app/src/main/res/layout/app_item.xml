@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:clickable="true"
+    android:background="@android:color/transparent"
     android:orientation="vertical">
     
     <com.h3110w0r1d.t9launcher.widgets.SquareImage
@@ -17,8 +20,10 @@
         android:id="@+id/idTVApp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:maxLines="1"
+        android:textAlignment="center"
+        android:maxLines="2"
+        android:textSize="12sp"
+        android:height="32dp"
         android:ellipsize="end"
         tools:text="@string/app_name"/>
     

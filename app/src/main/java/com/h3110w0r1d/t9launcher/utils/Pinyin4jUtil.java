@@ -75,7 +75,7 @@ public class Pinyin4jUtil {
         StringBuilder LatterAndNumber = new StringBuilder();
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
-            if ("abcdefghijklmnopqrstuvwxyz".contains(String.valueOf(c))) {
+            if ('a' <= c && c <= 'z') {
                 LatterAndNumber.append(String.valueOf(c).toLowerCase());
                 continue;
             }
@@ -86,7 +86,7 @@ public class Pinyin4jUtil {
                 result.add(newlist);
                 LatterAndNumber = new StringBuilder();
             }
-            if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".contains(String.valueOf(c))) {
+            if ('A' <= c && c <= 'Z') {
                 LatterAndNumber.append(String.valueOf(c).toLowerCase());
                 continue;
             }
@@ -113,7 +113,7 @@ public class Pinyin4jUtil {
             if (" ".equals(String.valueOf(c))) {
                 continue;
             }
-            if ("1234567890".contains(String.valueOf(c))){
+            if ('0' <= c && c <= '9'){
                 result.add(Collections.singletonList(String.valueOf(c)));
                 continue;
             }
