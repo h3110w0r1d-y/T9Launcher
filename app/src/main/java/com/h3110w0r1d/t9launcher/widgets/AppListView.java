@@ -2,7 +2,6 @@ package com.h3110w0r1d.t9launcher.widgets;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -12,21 +11,20 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.h3110w0r1d.t9launcher.R;
-import com.h3110w0r1d.t9launcher.ui.MainActivity;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-public class AppListView extends GridView{
+public class AppListView extends GridView implements View.OnTouchListener{
 	
 	private final AppListAdapter adapter;
+	
+	private OnItemClickListener listener;
 	
 	private ArrayList<AppInfo> appInfo;
 	
@@ -43,6 +41,12 @@ public class AppListView extends GridView{
 		appInfo = new ArrayList<>();
 		adapter = new AppListAdapter();
 		setAdapter(adapter);
+		listener = new OnItemClickListener(){
+			@Override
+			public void onItemClick(View v, AppInfo app){ }
+			@Override
+			public void onItemLongClick(View v, AppInfo app){ }
+		};
 	}
 	
 	public void updateAppInfo(ArrayList<AppInfo> appInfo){
@@ -52,6 +56,17 @@ public class AppListView extends GridView{
 	
 	public AppInfo getItem(int position){
 		return appInfo.get(position);
+	}
+	
+	@Override
+	public boolean onTouch(View v, MotionEvent event){
+		int action = event.getAction();
+		if(action == MotionEvent.ACTION_DOWN){
+			v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(200).start();
+		}else if(action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL){
+			v.animate().scaleX(1f).scaleY(1f).setDuration(200).start();
+		}
+		return false;
 	}
 	
 	private class AppListAdapter extends BaseAdapter{
@@ -86,33 +101,27 @@ public class AppListView extends GridView{
 			courseTV.setText(app.getAppName());
 			courseIV.setImageDrawable(app.getAppIcon());
 
-			convertView.setOnTouchListener((view, event) -> {
-				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-					view.animate().scaleX(0.9f).scaleY(0.9f).setDuration(200).start();
-				} else if (event.getAction() == MotionEvent.ACTION_UP){
-					view.animate().scaleX(1f).scaleY(1f).setDuration(200).start();
-				} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-					view.animate().scaleX(1f).scaleY(1f).setDuration(200).start();
-				}
-				return false;
-			});
-
-			convertView.setOnLongClickListener(view -> {
-				view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(200).start();
-				Toast.makeText(getContext(), app.getAppName(), Toast.LENGTH_SHORT).show();
+			convertView.setOnTouchListener(AppListView.this);
+			
+			convertView.setOnClickListener(v -> listener.onItemClick(v, appInfo.get(position)));
+			
+			convertView.setOnLongClickListener(v -> {
+				v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(200).start();
+				listener.onItemLongClick(v, appInfo.get(position));
 				return true;
 			});
-
-			convertView.setOnClickListener(v -> {
-				Intent intent = getContext().getPackageManager().getLaunchIntentForPackage(app.getPackageName());
-				if(intent != null){
-					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					getContext().startActivity(intent);
-					MainActivity.instance.clearSearchAndBack();
-				}
-			});
-
+			
 			return convertView;
 		}
+	}
+	
+	public void setOnItemClickListener(OnItemClickListener listener){
+		this.listener = listener;
+	}
+	
+	public interface OnItemClickListener{
+		void onItemClick(View v, AppInfo app);
+		
+		void onItemLongClick(View v, AppInfo app);
 	}
 }

@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,12 +15,15 @@ import com.h3110w0r1d.t9launcher.R;
 import com.h3110w0r1d.t9launcher.model.AppListViewModel;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
 import com.h3110w0r1d.t9launcher.widgets.AppListView;
+import com.h3110w0r1d.t9launcher.widgets.AppPopMenu;
 
 public class MainActivity extends AppCompatActivity{
 	
 	private EditText searchText;
-	public static MainActivity instance;
+	
 	private AppListView appListView;
+	
+	private AppPopMenu appPopMenu;
 	
 	private AppListViewModel appListViewModel;
 	
@@ -35,6 +37,24 @@ public class MainActivity extends AppCompatActivity{
 		
 		searchText = findViewById(R.id.TVSearch);
 		appListView = findViewById(R.id.appListView);
+		appListView.setOnItemClickListener(new AppListView.OnItemClickListener(){
+			@Override
+			public void onItemClick(View v, AppInfo app){
+				Intent intent = getPackageManager().getLaunchIntentForPackage(app.getPackageName());
+				if(intent != null){
+					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					startActivity(intent);
+					clearSearchAndBack();
+				}
+			}
+			
+			@Override
+			public void onItemLongClick(View v, AppInfo app){
+				appPopMenu.show(v, app);
+			}
+		});
+		
+		appPopMenu = new AppPopMenu(this);
 		
 		appListViewModel = ((App)getApplication()).appListViewModel;
 		appListViewModel.getAppListLiveData().observe(this, appInfo -> {
@@ -44,7 +64,6 @@ public class MainActivity extends AppCompatActivity{
 		appListViewModel.getSearchResultLiveData().observe(this, searchResult -> {
 			appListView.updateAppInfo(searchResult);
 		});
-		instance = this;
 	}
 	
 	@Override
