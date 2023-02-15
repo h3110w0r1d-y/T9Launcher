@@ -17,8 +17,10 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
+import com.h3110w0r1d.t9launcher.vo.AppInfoComparator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class AppListViewModel extends AndroidViewModel{
@@ -73,8 +75,14 @@ public class AppListViewModel extends AndroidViewModel{
 		}
 		ArrayList<AppInfo> appInfo = new ArrayList<>();
 		for(AppInfo app : getAppList()){
-			if(Pinyin4jUtil.Search(app, key)) appInfo.add(app);
+			float matchRate = Pinyin4jUtil.Search(app, key); // 匹配度
+			System.out.println("匹配度: " + matchRate);
+			if (matchRate > 0) {
+				app.setMatchRate(matchRate);
+				appInfo.add(app);
+			}
 		}
+		appInfo.sort(new AppInfoComparator());
 		searchResultLiveData.postValue(appInfo);
 	}
 	

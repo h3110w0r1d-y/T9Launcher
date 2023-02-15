@@ -1,5 +1,9 @@
 package com.h3110w0r1d.t9launcher.widgets;
 
+import static android.content.Context.CLIPBOARD_SERVICE;
+
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -37,7 +41,7 @@ public class AppPopMenu extends PopupWindow{
 		
 		popWidth = contentView.getMeasuredWidth();
 		popHeight = contentView.getMeasuredHeight();
-		
+
 		contentView.findViewById(R.id.pop_app_info).setOnClickListener(v -> {
 			Intent intent = new Intent();
 			intent.setAction(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -45,7 +49,14 @@ public class AppPopMenu extends PopupWindow{
 			this.context.startActivity(intent);
 			dismiss();
 		});
-		
+
+		contentView.findViewById(R.id.pop_copy_package_name).setOnClickListener(v -> {
+			ClipboardManager clipboard = (ClipboardManager)this.context.getSystemService(CLIPBOARD_SERVICE);
+			ClipData clip = ClipData.newPlainText("text", currentApp.getPackageName());
+			clipboard.setPrimaryClip(clip);
+			dismiss();
+		});
+
 		setContentView(contentView);
 	}
 	

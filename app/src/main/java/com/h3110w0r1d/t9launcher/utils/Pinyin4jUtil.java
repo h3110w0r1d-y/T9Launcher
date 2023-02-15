@@ -128,35 +128,45 @@ public class Pinyin4jUtil {
         return result;
     }
 
-    public static boolean Search(AppInfo app, String searchText) {
+    /**
+     * 搜索
+     * @param app
+     * @param searchText
+     * @return 匹配度 匹配度为0时匹配失败
+     */
+    public static float Search(AppInfo app, String searchText) {
         List<List<String>> data = app.getSearchData();
         for (int i = 0; i < data.size(); i++) {
-            if (search(data, searchText, i, 0)){
-                return true;
+            int position = search(data, searchText, i, 0);
+            System.out.println("调试输出: POSITION：" + (position-i) + app.getAppName() + (float)(position-i)/(float)data.size());
+            if (position > 0){
+                return (float)(position-i)/(float)data.size();
             }
         }
-        return false;
+        return 0;
     }
 
-    private static boolean search(List<List<String>> data, String searchText, int i, int k) {
+    // 递归搜索 返回0匹配失败, 否则返回匹配到了第几个字
+    private static int search(List<List<String>> data, String searchText, int i, int k) {
         if (searchText.length() <= k) { // 全部匹配完成
-            return true;
+            return i; // 返回匹配到了第几个字
         }
         if (i >= data.size()) { // 没有下一个字了
-            return false;
+            return 0;
         }
 
         for (int j = 0; j < data.get(i).size(); j++) {
-            if (pipei(searchText, data.get(i).get(j), k)) { // 当前字匹配, 匹配下一个字
-                if (search(data, searchText, i + 1, k + data.get(i).get(j).length())) {
-                    return true;
+            if (match(searchText, data.get(i).get(j), k)) { // 当前字匹配, 匹配下一个字
+                int position = search(data, searchText, i + 1, k + data.get(i).get(j).length());
+                if (position != 0) {
+                    return position;
                 }
             }
         }
-        return false;
+        return 0;
     }
 
-    private static boolean pipei(String searchText, String chr, int k) {
+    private static boolean match(String searchText, String chr, int k) {
         return searchText.startsWith(chr, k) || chr.startsWith(searchText.substring(k));
     }
 }
