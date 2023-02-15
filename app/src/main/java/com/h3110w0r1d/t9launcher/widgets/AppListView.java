@@ -1,7 +1,10 @@
 package com.h3110w0r1d.t9launcher.widgets;
 
+import static com.h3110w0r1d.t9launcher.utils.Image.DrawableToBitmap;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -14,6 +17,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.h3110w0r1d.t9launcher.R;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
@@ -97,14 +102,12 @@ public class AppListView extends GridView implements View.OnTouchListener{
 			AppInfo app = appInfo.get(position);
 			TextView courseTV = convertView.findViewById(R.id.idTVApp);
 			ImageView courseIV = convertView.findViewById(R.id.idIVApp);
-			
 			courseTV.setText(app.getAppName());
+
 			courseIV.setImageDrawable(app.getAppIcon());
 
 			convertView.setOnTouchListener(AppListView.this);
-			
 			convertView.setOnClickListener(v -> listener.onItemClick(v, appInfo.get(position)));
-			
 			convertView.setOnLongClickListener(v -> {
 				v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(200).start();
 				listener.onItemLongClick(v, appInfo.get(position));
@@ -118,7 +121,7 @@ public class AppListView extends GridView implements View.OnTouchListener{
 	public void setOnItemClickListener(OnItemClickListener listener){
 		this.listener = listener;
 	}
-	
+
 	public interface OnItemClickListener{
 		void onItemClick(View v, AppInfo app);
 		

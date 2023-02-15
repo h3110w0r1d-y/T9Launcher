@@ -138,7 +138,6 @@ public class Pinyin4jUtil {
         List<List<String>> data = app.getSearchData();
         for (int i = 0; i < data.size(); i++) {
             int position = search(data, searchText, i, 0);
-            System.out.println("调试输出: POSITION：" + (position-i) + app.getAppName() + (float)(position-i)/(float)data.size());
             if (position > 0){
                 return (float)(position-i)/(float)data.size();
             }

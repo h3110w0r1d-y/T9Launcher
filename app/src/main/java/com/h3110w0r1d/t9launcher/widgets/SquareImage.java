@@ -1,6 +1,8 @@
 package com.h3110w0r1d.t9launcher.widgets;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 
 /**

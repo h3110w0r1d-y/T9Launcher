@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -112,6 +113,7 @@ public class MainActivity extends AppCompatActivity{
 		findViewById(R.id.t9btn_7).setOnClickListener(t9btnClick);
 		findViewById(R.id.t9btn_8).setOnClickListener(t9btnClick);
 		findViewById(R.id.t9btn_9).setOnClickListener(t9btnClick);
+
 		
 		Button clear = findViewById(R.id.t9btn_clear);
 		clear.setOnClickListener(view -> {
@@ -130,6 +132,9 @@ public class MainActivity extends AppCompatActivity{
 		findViewById(R.id.t9btn_setting).setOnLongClickListener(view -> {
 			MainActivity.this.startActivity(new Intent(MainActivity.this, SettingsActivity.class));
 			return true;
+		});
+		findViewById(R.id.t9btn_setting).setOnClickListener(view -> {
+			Toast.makeText(MainActivity.this, R.string.long_press_open_settings, Toast.LENGTH_SHORT).show();
 		});
 		
 	}

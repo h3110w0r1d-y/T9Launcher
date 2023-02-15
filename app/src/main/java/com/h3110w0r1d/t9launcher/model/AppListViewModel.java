@@ -1,5 +1,7 @@
 package com.h3110w0r1d.t9launcher.model;
 
+import static com.h3110w0r1d.t9launcher.utils.Image.DrawableToBitmap;
+
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +14,8 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
@@ -98,12 +102,17 @@ public class AppListViewModel extends AndroidViewModel{
 				
 				String label = app.loadLabel(packageManager).toString();
 				Drawable icon = app.loadIcon(packageManager);
+				RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), DrawableToBitmap(icon));
+				roundedDrawable.getPaint().setAntiAlias(true);
+
+				float cornerRadius = roundedDrawable.getIntrinsicHeight() * 0.26f;
+				roundedDrawable.setCornerRadius(cornerRadius);
 				List<List<String>> searchData = Pinyin4jUtil.getPinYin(label);
 				
 				ApplicationInfo applicationInfo = packageInfo.applicationInfo;
 				boolean isSystemApp = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
 				
-				appInfo.add(new AppInfo(label, packageName, icon, isSystemApp, searchData));
+				appInfo.add(new AppInfo(label, packageName, roundedDrawable, isSystemApp, searchData));
 			}catch(PackageManager.NameNotFoundException e){
 				e.printStackTrace();
 			}

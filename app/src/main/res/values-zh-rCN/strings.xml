@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">T9启动器</string>
+    <string name="title_activity_settings">设置</string>
     <string name="clear">清除</string>
     <string name="setting">设置</string>
     <string name="app_info">应用信息</string>
     <string name="copy_package_name">复制包名</string>
+    <string name="long_press_open_settings">长按进入设置界面</string>
 </resources>
