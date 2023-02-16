@@ -13,6 +13,7 @@
 		app:cardElevation="4dp">
 		
 		<LinearLayout
+			android:layout_margin="8dp"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:orientation="vertical">
@@ -22,7 +23,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:background="?attr/selectableItemBackground"
-				android:padding="16dp"
+				android:padding="8dp"
 				android:minWidth="150dp"
 				android:gravity="start|center"
 				android:text="@string/app_info"
@@ -34,13 +35,26 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:background="?attr/selectableItemBackground"
-				android:padding="16dp"
+				android:padding="8dp"
 				android:minWidth="150dp"
 				android:gravity="start|center"
 				android:text="@string/copy_package_name"
 				android:drawablePadding="8dp"
 				app:drawableTint="?attr/colorAccent"
 				app:drawableLeftCompat="@drawable/ic_copy_package_name" />
+
+			<TextView
+				android:id="@+id/pop_uninstall_app"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:background="?attr/selectableItemBackground"
+				android:padding="8dp"
+				android:minWidth="150dp"
+				android:gravity="start|center"
+				android:text="@string/uninstall_app"
+				android:drawablePadding="8dp"
+				app:drawableTint="?attr/colorAccent"
+				app:drawableLeftCompat="@drawable/ic_uninstall_app" />
 
 		</LinearLayout>
 	

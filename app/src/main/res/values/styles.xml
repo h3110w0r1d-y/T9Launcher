@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="T9Button" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <style name="T9ButtonStyle" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:layout_height">match_parent</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">24sp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:background">@drawable/t9btn_ripple</item>
     </style>
-    <style name="SettingsTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <style name="MainActivityStyle" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item> // 设置虚拟键透明
+        <!-- 虚拟键透明 -->
+        <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowAnimationStyle">@null</item>
     </style>
 </resources>

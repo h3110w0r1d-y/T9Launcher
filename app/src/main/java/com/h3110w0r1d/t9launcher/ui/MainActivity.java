@@ -1,8 +1,10 @@
 package com.h3110w0r1d.t9launcher.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity{
 	}
 	
 	public void clearSearchAndBack(){
-		moveTaskToBack(true);
+		super.onBackPressed();
 		searchText.setText("");
 		appListViewModel.searchApp("");
 	}
@@ -87,32 +89,36 @@ public class MainActivity extends AppCompatActivity{
 	
 	private void addListener(){
 		findViewById(R.id.RLMain).setOnClickListener(v -> clearSearchAndBack());
-		
-		View.OnClickListener t9btnClick = view -> {
-			int id = view.getId();
-			if(id == R.id.t9btn_0) searchText.append("0");
-			else if(id == R.id.t9btn_1) searchText.append("1");
-			else if(id == R.id.t9btn_2) searchText.append("2");
-			else if(id == R.id.t9btn_3) searchText.append("3");
-			else if(id == R.id.t9btn_4) searchText.append("4");
-			else if(id == R.id.t9btn_5) searchText.append("5");
-			else if(id == R.id.t9btn_6) searchText.append("6");
-			else if(id == R.id.t9btn_7) searchText.append("7");
-			else if(id == R.id.t9btn_8) searchText.append("8");
-			else if(id == R.id.t9btn_9) searchText.append("9");
-			appListViewModel.searchApp(searchText.getText().toString());
+
+		@SuppressLint("ClickableViewAccessibility")
+		View.OnTouchListener t9btnTouch = (view, motionEvent) -> {
+			if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+				int id = view.getId();
+				if(id == R.id.t9btn_0) searchText.append("0");
+				else if(id == R.id.t9btn_1) searchText.append("1");
+				else if(id == R.id.t9btn_2) searchText.append("2");
+				else if(id == R.id.t9btn_3) searchText.append("3");
+				else if(id == R.id.t9btn_4) searchText.append("4");
+				else if(id == R.id.t9btn_5) searchText.append("5");
+				else if(id == R.id.t9btn_6) searchText.append("6");
+				else if(id == R.id.t9btn_7) searchText.append("7");
+				else if(id == R.id.t9btn_8) searchText.append("8");
+				else if(id == R.id.t9btn_9) searchText.append("9");
+				appListViewModel.searchApp(searchText.getText().toString());
+			}
+			return false;
 		};
-		
-		findViewById(R.id.t9btn_0).setOnClickListener(t9btnClick);
-		findViewById(R.id.t9btn_1).setOnClickListener(t9btnClick);
-		findViewById(R.id.t9btn_2).setOnClickListener(t9btnClick);
-		findViewById(R.id.t9btn_3).setOnClickListener(t9btnClick);
-		findViewById(R.id.t9btn_4).setOnClickListener(t9btnClick);
-		findViewById(R.id.t9btn_5).setOnClickListener(t9btnClick);
-		findViewById(R.id.t9btn_6).setOnClickListener(t9btnClick);
-		findViewById(R.id.t9btn_7).setOnClickListener(t9btnClick);
-		findViewById(R.id.t9btn_8).setOnClickListener(t9btnClick);
-		findViewById(R.id.t9btn_9).setOnClickListener(t9btnClick);
+
+		findViewById(R.id.t9btn_0).setOnTouchListener(t9btnTouch);
+		findViewById(R.id.t9btn_1).setOnTouchListener(t9btnTouch);
+		findViewById(R.id.t9btn_2).setOnTouchListener(t9btnTouch);
+		findViewById(R.id.t9btn_3).setOnTouchListener(t9btnTouch);
+		findViewById(R.id.t9btn_4).setOnTouchListener(t9btnTouch);
+		findViewById(R.id.t9btn_5).setOnTouchListener(t9btnTouch);
+		findViewById(R.id.t9btn_6).setOnTouchListener(t9btnTouch);
+		findViewById(R.id.t9btn_7).setOnTouchListener(t9btnTouch);
+		findViewById(R.id.t9btn_8).setOnTouchListener(t9btnTouch);
+		findViewById(R.id.t9btn_9).setOnTouchListener(t9btnTouch);
 
 		
 		Button clear = findViewById(R.id.t9btn_clear);
@@ -136,6 +142,5 @@ public class MainActivity extends AppCompatActivity{
 		findViewById(R.id.t9btn_setting).setOnClickListener(view -> {
 			Toast.makeText(MainActivity.this, R.string.long_press_open_settings, Toast.LENGTH_SHORT).show();
 		});
-		
 	}
 }

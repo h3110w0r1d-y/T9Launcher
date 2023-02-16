@@ -57,6 +57,13 @@ public class AppPopMenu extends PopupWindow{
 			dismiss();
 		});
 
+		contentView.findViewById(R.id.pop_uninstall_app).setOnClickListener(v -> {
+			Uri uri = Uri.fromParts("package", currentApp.getPackageName(), null);
+			Intent intent = new Intent(Intent.ACTION_DELETE, uri);
+			this.context.startActivity(intent);
+			dismiss();
+		});
+
 		setContentView(contentView);
 	}
 	
