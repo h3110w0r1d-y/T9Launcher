@@ -36,6 +36,8 @@ import java.util.Objects;
 
 public class AppListViewModel extends AndroidViewModel{
 
+	private boolean isLoading = false;
+
 	private final boolean enableCache = true;
 	
 	private final MutableLiveData<ArrayList<AppInfo>> appListLiveData = new MutableLiveData<>(new ArrayList<>());
@@ -44,11 +46,10 @@ public class AppListViewModel extends AndroidViewModel{
 	
 	private final MutableLiveData<ArrayList<AppInfo>> searchResultLiveData = new MutableLiveData<>(new ArrayList<>());
 
-	public static SQLiteDatabase AppListDB;
+	public SQLiteDatabase AppListDB;
 	
 	public AppListViewModel(@NonNull Application application){
 		super(application);
-		AppListDB = new DBHelper(application, "AppList.db", null, 1).getWritableDatabase();
 	}
 	
 	public MutableLiveData<ArrayList<AppInfo>> getAppListLiveData(){
@@ -86,6 +87,10 @@ public class AppListViewModel extends AndroidViewModel{
 	 */
 	@SuppressLint("Recycle")
 	public void loadAppList(Context context){
+		if (isLoading) {
+			return;
+		}
+		isLoading = true;
 		Objects.requireNonNull(appListLiveData.getValue()).clear();
 		if (enableCache) {
 			Cursor cursor = AppListDB.query(
@@ -93,6 +98,7 @@ public class AppListViewModel extends AndroidViewModel{
 					new String[]{
 							"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
 					}, null, null, null, null, null);
+
 			while (cursor.moveToNext()) {
 				String packageName = cursor.getString(0);
 				String appName = cursor.getString(1);
@@ -115,28 +121,31 @@ public class AppListViewModel extends AndroidViewModel{
 				setLoadingStatus(false);
 			}
 		}
-		RefreshAppInfo(context);
-		if (enableCache) {
-			Cursor cursor = AppListDB.query(
-					"T_AppInfo",
-					new String[]{
-							"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
-					}, null, null, null, null, null);
-			while (cursor.moveToNext()) {
-				String packageName = cursor.getString(0);
-				boolean inDB = false;
-				for (AppInfo app : Objects.requireNonNull(appListLiveData.getValue())) {
-					if (app.getPackageName().equals(packageName)) {
-						inDB = true;
-						break;
+		new Thread(()->{
+			RefreshAppInfo(context);
+			if (enableCache) {
+				Cursor cursor = AppListDB.query(
+						"T_AppInfo",
+						new String[]{
+								"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
+						}, null, null, null, null, null);
+				while (cursor.moveToNext()) {
+					String packageName = cursor.getString(0);
+					boolean inDB = false;
+					for (AppInfo app : Objects.requireNonNull(appListLiveData.getValue())) {
+						if (app.getPackageName().equals(packageName)) {
+							inDB = true;
+							break;
+						}
+					}
+					if (!inDB) {
+						AppListDB.execSQL("DELETE FROM T_AppInfo WHERE packageName = ?", new Object[]{packageName});
 					}
 				}
-				if (!inDB) {
-					AppListDB.execSQL("DELETE FROM T_AppInfo WHERE packageName = ?", new Object[]{packageName});
-				}
 			}
-		}
-		System.out.println("加载完成");
+			isLoading = false;
+		}).start();
+
 	}
 	
 	/**
@@ -162,7 +171,7 @@ public class AppListViewModel extends AndroidViewModel{
 	}
 
 	private void RefreshAppInfo(Context context){
-		ArrayList<AppInfo> appInfo = new ArrayList<>(64);
+		ArrayList<AppInfo> appInfo = new ArrayList<>();
 		PackageManager packageManager = context.getPackageManager();
 		List<ResolveInfo> apps = packageManager.queryIntentActivities(new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
 		for(ResolveInfo app : apps){
