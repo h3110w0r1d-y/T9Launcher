@@ -8,4 +8,5 @@
     <string name="copy_package_name">复制包名</string>
     <string name="long_press_open_settings">长按进入设置界面</string>
     <string name="uninstall_app" >卸载</string>
+    <string name="hide_app_list">隐藏应用</string>
 </resources>

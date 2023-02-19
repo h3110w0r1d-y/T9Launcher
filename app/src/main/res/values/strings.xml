@@ -21,5 +21,6 @@
     <string name="app_info">App Detail</string>
     <string name="copy_package_name">Copy Package Name</string>
     <string name="long_press_open_settings">Long press to enter the setting</string>
-    <string name="uninstall_app" >Uninstall</string>
+    <string name="uninstall_app">Uninstall</string>
+    <string name="hide_app_list">Hide apps</string>
 </resources>

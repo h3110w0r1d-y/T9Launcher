@@ -17,16 +17,26 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-            
-            <com.h3110w0r1d.t9launcher.widgets.AppListView
-                android:id="@+id/appListView"
+            <ProgressBar
                 android:layout_width="match_parent"
+                android:id="@+id/loading"
+                android:padding="90dp"
+                android:layout_height="220dp" />
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:visibility="gone"
+                android:id="@+id/swipeRefreshLayout"
                 android:layout_height="220dp"
-                android:listSelector="@android:color/transparent"
-                android:paddingHorizontal="15dp"
-                android:paddingTop="15dp"
-                android:numColumns="5" />
-            
+                android:layout_width="match_parent">
+                <com.h3110w0r1d.t9launcher.widgets.AppListView
+                    android:id="@+id/appListView"
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp"
+                    android:listSelector="@android:color/transparent"
+                    android:paddingHorizontal="15dp"
+                    android:paddingTop="15dp"
+                    android:numColumns="5" />
+
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
             <EditText
                 android:id="@+id/TVSearch"
                 android:layout_width="match_parent"

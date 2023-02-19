@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
+import androidx.databinding.ObservableBoolean;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
@@ -29,14 +30,14 @@ import java.util.List;
 
 public class AppListViewModel extends AndroidViewModel{
 	
-	private final MutableLiveData<ArrayList<AppInfo>> appListLiveData;
+	private final MutableLiveData<ArrayList<AppInfo>> appListLiveData = new MutableLiveData<>(new ArrayList<>());
+
+	private final MutableLiveData<Boolean> Loading = new MutableLiveData<>(true);
 	
-	private final MutableLiveData<ArrayList<AppInfo>> searchResultLiveData;
+	private final MutableLiveData<ArrayList<AppInfo>> searchResultLiveData = new MutableLiveData<>(new ArrayList<>());
 	
 	public AppListViewModel(@NonNull Application application){
 		super(application);
-		appListLiveData = new MutableLiveData<>(getAppList(application));
-		searchResultLiveData = new MutableLiveData<>(new ArrayList<>());
 	}
 	
 	public MutableLiveData<ArrayList<AppInfo>> getAppListLiveData(){
@@ -45,6 +46,14 @@ public class AppListViewModel extends AndroidViewModel{
 	
 	public MutableLiveData<ArrayList<AppInfo>> getSearchResultLiveData(){
 		return searchResultLiveData;
+	}
+
+	public MutableLiveData<Boolean> getLoadingStatus(){
+		return Loading;
+	}
+
+	public void setLoadingStatus(boolean loading){
+		Loading.postValue(loading);
 	}
 	
 	/**
@@ -66,6 +75,7 @@ public class AppListViewModel extends AndroidViewModel{
 	 */
 	public void loadAppList(Context context){
 		appListLiveData.postValue(getAppList(context));
+		Loading.postValue(false);
 	}
 	
 	/**
@@ -80,7 +90,6 @@ public class AppListViewModel extends AndroidViewModel{
 		ArrayList<AppInfo> appInfo = new ArrayList<>();
 		for(AppInfo app : getAppList()){
 			float matchRate = Pinyin4jUtil.Search(app, key); // 匹配度
-			System.out.println("匹配度: " + matchRate);
 			if (matchRate > 0) {
 				app.setMatchRate(matchRate);
 				appInfo.add(app);

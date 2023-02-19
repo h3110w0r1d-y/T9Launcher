@@ -16,8 +16,5 @@ public class App extends Application{
 	public void onCreate(){
 		super.onCreate();
 		appListViewModel = new AppListViewModel(this);
-		
-		Pinyin4jUtil.defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
-		Pinyin4jUtil.defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
 	}
 }

@@ -12,13 +12,18 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.h3110w0r1d.t9launcher.App;
 import com.h3110w0r1d.t9launcher.R;
 import com.h3110w0r1d.t9launcher.model.AppListViewModel;
+import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
 import com.h3110w0r1d.t9launcher.widgets.AppListView;
 import com.h3110w0r1d.t9launcher.widgets.AppPopMenu;
+
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 
 public class MainActivity extends AppCompatActivity{
 	
@@ -34,10 +39,9 @@ public class MainActivity extends AppCompatActivity{
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
 		initStatusBar();
 		addListener();
-		
+
 		searchText = findViewById(R.id.TVSearch);
 		appListView = findViewById(R.id.appListView);
 		appListView.setOnItemClickListener(new AppListView.OnItemClickListener(){
@@ -63,10 +67,20 @@ public class MainActivity extends AppCompatActivity{
 		appListViewModel.getAppListLiveData().observe(this, appInfo -> {
 		
 		});
-		
+		appListViewModel.getLoadingStatus().observe(this, loading -> {
+			findViewById(R.id.loading).setVisibility(loading ? View.VISIBLE : View.GONE);
+			findViewById(R.id.swipeRefreshLayout).setVisibility(loading ? View.GONE : View.VISIBLE);
+		});
 		appListViewModel.getSearchResultLiveData().observe(this, searchResult -> {
 			appListView.updateAppInfo(searchResult);
 		});
+
+		new Thread(()-> {
+			((App) getApplication()).appListViewModel.loadAppList(getApplication());
+			Pinyin4jUtil.defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
+			Pinyin4jUtil.defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+			appListViewModel.searchApp(searchText.getText().toString());
+		}).start();
 	}
 	
 	@Override
@@ -75,9 +89,9 @@ public class MainActivity extends AppCompatActivity{
 	}
 	
 	public void clearSearchAndBack(){
-		super.onBackPressed();
 		searchText.setText("");
 		appListViewModel.searchApp("");
+		moveTaskToBack(true);
 	}
 	
 	private void initStatusBar(){
@@ -141,6 +155,16 @@ public class MainActivity extends AppCompatActivity{
 		});
 		findViewById(R.id.t9btn_setting).setOnClickListener(view -> {
 			Toast.makeText(MainActivity.this, R.string.long_press_open_settings, Toast.LENGTH_SHORT).show();
+		});
+
+		((SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout)).setOnRefreshListener(() -> {
+			new Thread(()-> {
+				((App) getApplication()).appListViewModel.loadAppList(getApplication());
+				runOnUiThread(() -> {
+					((SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout)).setRefreshing(false);
+					appListViewModel.searchApp(searchText.getText().toString());
+				});
+			}).start();
 		});
 	}
 }

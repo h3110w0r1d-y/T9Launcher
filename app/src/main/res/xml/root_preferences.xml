@@ -29,7 +29,9 @@
             app:summaryOff="@string/attachment_summary_off"
             app:summaryOn="@string/attachment_summary_on"
             app:title="@string/attachment_title" />
-
+        <MultiSelectListPreference
+            app:key="ignore_app_list"
+            app:title="@string/hide_app_list"/>
     </PreferenceCategory>
 
 </PreferenceScreen>
