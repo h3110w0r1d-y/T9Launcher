@@ -13,10 +13,10 @@ public class AppInfo {
 
     private int startCount = 0;
     private float matchRate = 0;
-    private final Bitmap appIcon;
+    private final Drawable appIcon;
     public List<List<String>> searchData;
 
-    public AppInfo(String packageName, String appName, int startCount, Bitmap appIcon, boolean isSystemApp, List<List<String>> searchData) {
+    public AppInfo(String packageName, String appName, int startCount, Drawable appIcon, boolean isSystemApp, List<List<String>> searchData) {
         this.packageName = packageName;
         this.appName = appName;
         this.startCount = startCount;
@@ -33,7 +33,7 @@ public class AppInfo {
         return packageName;
     }
 
-    public Bitmap getAppIcon() {
+    public Drawable getAppIcon() {
         return appIcon;
     }
 

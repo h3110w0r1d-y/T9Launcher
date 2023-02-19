@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class AppListViewModel extends AndroidViewModel{
+
+	private final boolean enableCache = true;
 	
 	private final MutableLiveData<ArrayList<AppInfo>> appListLiveData = new MutableLiveData<>(new ArrayList<>());
 
@@ -85,50 +87,56 @@ public class AppListViewModel extends AndroidViewModel{
 	@SuppressLint("Recycle")
 	public void loadAppList(Context context){
 		Objects.requireNonNull(appListLiveData.getValue()).clear();
+		if (enableCache) {
+			Cursor cursor = AppListDB.query(
+					"T_AppInfo",
+					new String[]{
+							"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
+					}, null, null, null, null, null);
+			while (cursor.moveToNext()) {
+				String packageName = cursor.getString(0);
+				String appName = cursor.getString(1);
+				int startCount = cursor.getInt(2);
+				Bitmap appIcon = ImageUtil.Bytes2Bitmap(cursor.getBlob(3));
 
-		Cursor cursor = AppListDB.query(
-				"T_AppInfo",
-				new String[]{
-						"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
-				}, null, null, null, null, null);
+				RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), appIcon);
+				roundedDrawable.getPaint().setAntiAlias(true);
+				float cornerRadius = roundedDrawable.getIntrinsicHeight() * 0.26f;
+				roundedDrawable.setCornerRadius(cornerRadius);
 
-		while (cursor.moveToNext()) {
-			String packageName = cursor.getString(0);
-			String appName = cursor.getString(1);
-			int startCount = cursor.getInt(2);
-			Bitmap appIcon = ImageUtil.Bytes2Bitmap(cursor.getBlob(3));
-			boolean isSystemApp = cursor.getInt(4) == 1;
-			List<List<String>> searchData = JSON.parseObject(cursor.getString(5),new TypeReference<List<List<String>>>(){});
+				boolean isSystemApp = cursor.getInt(4) == 1;
+				List<List<String>> searchData = JSON.parseObject(cursor.getString(5),new TypeReference<List<List<String>>>(){});
 
-			Objects.requireNonNull(appListLiveData.getValue()).add(new AppInfo(
-					packageName, appName, startCount, appIcon, isSystemApp, searchData
-			));
-		}
-
-		if (appListLiveData.getValue().size() != 0) {
-			setLoadingStatus(false);
+				Objects.requireNonNull(appListLiveData.getValue()).add(new AppInfo(
+						packageName, appName, startCount, roundedDrawable, isSystemApp, searchData
+				));
+			}
+			if (appListLiveData.getValue().size() != 0) {
+				setLoadingStatus(false);
+			}
 		}
 		RefreshAppInfo(context);
-		cursor = AppListDB.query(
-				"T_AppInfo",
-				new String[]{
-						"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
-				}, null, null, null, null, null);
-		while (cursor.moveToNext()) {
-			String packageName = cursor.getString(0);
-			boolean inDB = false;
-			for (AppInfo app : Objects.requireNonNull(appListLiveData.getValue())) {
-				if (app.getPackageName().equals(packageName)) {
-					inDB = true;
-					break;
+		if (enableCache) {
+			Cursor cursor = AppListDB.query(
+					"T_AppInfo",
+					new String[]{
+							"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
+					}, null, null, null, null, null);
+			while (cursor.moveToNext()) {
+				String packageName = cursor.getString(0);
+				boolean inDB = false;
+				for (AppInfo app : Objects.requireNonNull(appListLiveData.getValue())) {
+					if (app.getPackageName().equals(packageName)) {
+						inDB = true;
+						break;
+					}
 				}
-			}
-			if (!inDB) {
-				AppListDB.execSQL("DELETE FROM T_AppInfo WHERE packageName = ?", new Object[]{packageName});
+				if (!inDB) {
+					AppListDB.execSQL("DELETE FROM T_AppInfo WHERE packageName = ?", new Object[]{packageName});
+				}
 			}
 		}
 		System.out.println("加载完成");
-
 	}
 	
 	/**
@@ -173,19 +181,20 @@ public class AppListViewModel extends AndroidViewModel{
 				ApplicationInfo applicationInfo = packageInfo.applicationInfo;
 				boolean isSystemApp = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
 
-				appInfo.add(new AppInfo(packageName, appName, 0, appIcon, isSystemApp, searchData));
-
-				try {
-					assert appIcon != null;
-					AppListDB.execSQL("INSERT INTO T_AppInfo VALUES(?,?,?,?,?,?)",
-							new Object[]{
-									packageName, appName, 0, ImageUtil.Bitmap2Bytes(appIcon), isSystemApp ? 1 : 0, JSON.toJSONString(searchData)
-							});
-				} catch (Exception e) {
-					AppListDB.execSQL("UPDATE T_AppInfo SET appName = ?, appIcon = ?, isSystemApp = ?, searchData = ? WHERE packageName = ?",
-							new Object[]{
-									appName, ImageUtil.Bitmap2Bytes(appIcon), isSystemApp ? 1 : 0, JSON.toJSONString(searchData), packageName
-							});
+				appInfo.add(new AppInfo(packageName, appName, 0, roundedDrawable, isSystemApp, searchData));
+				if (enableCache) {
+					try {
+						assert appIcon != null;
+						AppListDB.execSQL("INSERT INTO T_AppInfo VALUES(?,?,?,?,?,?)",
+								new Object[]{
+										packageName, appName, 0, ImageUtil.Bitmap2Bytes(appIcon), isSystemApp ? 1 : 0, JSON.toJSONString(searchData)
+								});
+					} catch (Exception e) {
+						AppListDB.execSQL("UPDATE T_AppInfo SET appName = ?, appIcon = ?, isSystemApp = ?, searchData = ? WHERE packageName = ?",
+								new Object[]{
+										appName, ImageUtil.Bitmap2Bytes(appIcon), isSystemApp ? 1 : 0, JSON.toJSONString(searchData), packageName
+								});
+					}
 				}
 			}catch(PackageManager.NameNotFoundException e){
 				e.printStackTrace();

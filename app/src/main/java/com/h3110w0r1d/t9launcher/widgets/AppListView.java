@@ -99,7 +99,7 @@ public class AppListView extends GridView implements View.OnTouchListener{
 			ImageView courseIV = convertView.findViewById(R.id.idIVApp);
 			courseTV.setText(app.getAppName());
 
-			courseIV.setImageBitmap(app.getAppIcon());
+			courseIV.setImageDrawable(app.getAppIcon());
 
 			convertView.setOnTouchListener(AppListView.this);
 			convertView.setOnClickListener(v -> listener.onItemClick(v, appInfo.get(position)));
