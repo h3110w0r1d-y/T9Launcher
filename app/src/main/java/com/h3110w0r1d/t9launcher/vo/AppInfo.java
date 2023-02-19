@@ -1,5 +1,6 @@
 package com.h3110w0r1d.t9launcher.vo;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 import java.util.Comparator;
@@ -9,15 +10,18 @@ public class AppInfo {
     private final String appName;
     private final String packageName;
     private final boolean isSystemApp;
+
+    private int startCount = 0;
     private float matchRate = 0;
-    private final Drawable appIcon;
+    private final Bitmap appIcon;
     public List<List<String>> searchData;
 
-    public AppInfo(String appName, String packageName, Drawable appIcon, boolean isSystemApp, List<List<String>> searchData) {
-        this.appName = appName;
+    public AppInfo(String packageName, String appName, int startCount, Bitmap appIcon, boolean isSystemApp, List<List<String>> searchData) {
         this.packageName = packageName;
-        this.isSystemApp = isSystemApp;
+        this.appName = appName;
+        this.startCount = startCount;
         this.appIcon = appIcon;
+        this.isSystemApp = isSystemApp;
         this.searchData = searchData;
     }
 
@@ -29,7 +33,7 @@ public class AppInfo {
         return packageName;
     }
 
-    public Drawable getAppIcon() {
+    public Bitmap getAppIcon() {
         return appIcon;
     }
 
