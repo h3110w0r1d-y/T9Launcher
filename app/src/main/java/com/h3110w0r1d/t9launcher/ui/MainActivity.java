@@ -18,7 +18,6 @@ import com.h3110w0r1d.t9launcher.App;
 import com.h3110w0r1d.t9launcher.R;
 import com.h3110w0r1d.t9launcher.model.AppListViewModel;
 import com.h3110w0r1d.t9launcher.model.DBHelper;
-import com.h3110w0r1d.t9launcher.utils.DebugUtil;
 import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
 import com.h3110w0r1d.t9launcher.widgets.AppListView;

@@ -104,7 +104,6 @@ public class AppListViewModel extends AndroidViewModel{
 				String appName = cursor.getString(1);
 				int startCount = cursor.getInt(2);
 				Bitmap appIcon = ImageUtil.Bytes2Bitmap(cursor.getBlob(3));
-
 				RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), appIcon);
 				roundedDrawable.getPaint().setAntiAlias(true);
 				float cornerRadius = roundedDrawable.getIntrinsicHeight() * 0.26f;
