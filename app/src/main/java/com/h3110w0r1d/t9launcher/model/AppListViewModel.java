@@ -28,11 +28,9 @@ import com.alibaba.fastjson.TypeReference;
 import com.h3110w0r1d.t9launcher.utils.ImageUtil;
 import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
-import com.h3110w0r1d.t9launcher.vo.AppInfoComparator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class AppListViewModel extends AndroidViewModel{
 
@@ -40,7 +38,7 @@ public class AppListViewModel extends AndroidViewModel{
 
 	private final boolean enableCache = true;
 	
-	private final MutableLiveData<ArrayList<AppInfo>> appListLiveData = new MutableLiveData<>(new ArrayList<>());
+	private final ArrayList<AppInfo> appList = new ArrayList<>();
 
 	private final MutableLiveData<Boolean> Loading = new MutableLiveData<>(true);
 	
@@ -51,11 +49,7 @@ public class AppListViewModel extends AndroidViewModel{
 	public AppListViewModel(@NonNull Application application){
 		super(application);
 	}
-	
-	public MutableLiveData<ArrayList<AppInfo>> getAppListLiveData(){
-		return appListLiveData;
-	}
-	
+
 	public MutableLiveData<ArrayList<AppInfo>> getSearchResultLiveData(){
 		return searchResultLiveData;
 	}
@@ -67,23 +61,9 @@ public class AppListViewModel extends AndroidViewModel{
 	public void setLoadingStatus(boolean loading){
 		Loading.postValue(loading);
 	}
-	
+
 	/**
-	 * 获取应用列表
-	 */
-	public ArrayList<AppInfo> getAppList(){
-		return appListLiveData.getValue();
-	}
-	
-	/**
-	 * 获取搜索结果
-	 */
-	public ArrayList<AppInfo> getSearchResult(){
-		return searchResultLiveData.getValue();
-	}
-	
-	/**
-	 * 更新应用列表
+	 * 加载并更新应用列表
 	 */
 	@SuppressLint("Recycle")
 	public void loadAppList(Context context){
@@ -91,7 +71,7 @@ public class AppListViewModel extends AndroidViewModel{
 			return;
 		}
 		isLoading = true;
-		Objects.requireNonNull(appListLiveData.getValue()).clear();
+		appList.clear();
 		if (enableCache) {
 			Cursor cursor = AppListDB.query(
 					"T_AppInfo",
@@ -112,11 +92,11 @@ public class AppListViewModel extends AndroidViewModel{
 				boolean isSystemApp = cursor.getInt(4) == 1;
 				List<List<String>> searchData = JSON.parseObject(cursor.getString(5),new TypeReference<List<List<String>>>(){});
 
-				Objects.requireNonNull(appListLiveData.getValue()).add(new AppInfo(
+				appList.add(new AppInfo(
 						packageName, appName, startCount, roundedDrawable, isSystemApp, searchData
 				));
 			}
-			if (appListLiveData.getValue().size() != 0) {
+			if (appList.size() != 0) {
 				setLoadingStatus(false);
 			}
 		}
@@ -131,7 +111,7 @@ public class AppListViewModel extends AndroidViewModel{
 				while (cursor.moveToNext()) {
 					String packageName = cursor.getString(0);
 					boolean inDB = false;
-					for (AppInfo app : Objects.requireNonNull(appListLiveData.getValue())) {
+					for (AppInfo app : appList) {
 						if (app.getPackageName().equals(packageName)) {
 							inDB = true;
 							break;
@@ -157,59 +137,97 @@ public class AppListViewModel extends AndroidViewModel{
 			return;
 		}
 		ArrayList<AppInfo> appInfo = new ArrayList<>();
-		for(AppInfo app : getAppList()){
+		for(AppInfo app : appList){
 			float matchRate = Pinyin4jUtil.Search(app, key); // 匹配度
 			if (matchRate > 0) {
 				app.setMatchRate(matchRate);
 				appInfo.add(app);
 			}
 		}
-		appInfo.sort(new AppInfoComparator());
+		appInfo.sort(new AppInfo.SortByStartCount());
+		appInfo.sort(new AppInfo.SortByMatchRate());
 
 		searchResultLiveData.postValue(appInfo);
 	}
 
 	private void RefreshAppInfo(Context context){
-		ArrayList<AppInfo> appInfo = new ArrayList<>();
 		PackageManager packageManager = context.getPackageManager();
-		List<ResolveInfo> apps = packageManager.queryIntentActivities(new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
-		for(ResolveInfo app : apps){
+		List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
+		for(ResolveInfo resolveInfo : resolveInfoList){
 			try{
-				String packageName = app.activityInfo.packageName;
+				String packageName = resolveInfo.activityInfo.packageName;
 				PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
-				String appName = app.loadLabel(packageManager).toString();
-				Drawable icon = app.loadIcon(packageManager);
+				String appName = resolveInfo.loadLabel(packageManager).toString();
+				Drawable icon = resolveInfo.loadIcon(packageManager);
 				RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), Drawable2IconBitmap(icon));
 				roundedDrawable.getPaint().setAntiAlias(true);
 
 				float cornerRadius = roundedDrawable.getIntrinsicHeight() * 0.26f;
 				roundedDrawable.setCornerRadius(cornerRadius);
-				Bitmap appIcon = roundedDrawable.getBitmap();
 				List<List<String>> searchData = Pinyin4jUtil.getPinYin(appName);
 				ApplicationInfo applicationInfo = packageInfo.applicationInfo;
 				boolean isSystemApp = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-
-				appInfo.add(new AppInfo(packageName, appName, 0, roundedDrawable, isSystemApp, searchData));
-				if (enableCache) {
-					try {
-						assert appIcon != null;
-						AppListDB.execSQL("INSERT INTO T_AppInfo VALUES(?,?,?,?,?,?)",
-								new Object[]{
-										packageName, appName, 0, ImageUtil.Bitmap2Bytes(appIcon), isSystemApp ? 1 : 0, JSON.toJSONString(searchData)
-								});
-					} catch (Exception e) {
-						AppListDB.execSQL("UPDATE T_AppInfo SET appName = ?, appIcon = ?, isSystemApp = ?, searchData = ? WHERE packageName = ?",
-								new Object[]{
-										appName, ImageUtil.Bitmap2Bytes(appIcon), isSystemApp ? 1 : 0, JSON.toJSONString(searchData), packageName
-								});
+				boolean findInAppList = false;
+				for (AppInfo app : appList){
+					if (app.getPackageName().equals(packageName)){
+						findInAppList = true;
+						app.setAppName(appName);
+						app.setAppIcon(roundedDrawable);
+						app.setIsSystemApp(isSystemApp);
+						app.setSearchData(searchData);
+						InsertOrUpdate(app);
+						break;
 					}
 				}
+				if (findInAppList){
+					continue;
+				}
+				AppInfo app = new AppInfo(packageName, appName, 0, roundedDrawable, isSystemApp, searchData);
+				appList.add(app);
+				InsertOrUpdate(app);
 			}catch(PackageManager.NameNotFoundException e){
 				e.printStackTrace();
 			}
 		}
-
-		appListLiveData.postValue(appInfo);
 		setLoadingStatus(false);
+	}
+
+	public void InsertOrUpdate(AppInfo app) {
+		if (!enableCache){
+			return;
+		}
+		String packageName = app.getPackageName();
+		String appName = app.getAppName();
+		Bitmap appIcon = ((RoundedBitmapDrawable)app.getAppIcon()).getBitmap();
+		boolean isSystemApp = app.isSystemApp();
+		List<List<String>> searchData = app.getSearchData();
+		try {
+			assert appIcon != null;
+			AppListDB.execSQL("INSERT INTO T_AppInfo VALUES(?,?,?,?,?,?)",
+					new Object[]{
+							packageName, appName, 0, ImageUtil.Bitmap2Bytes(appIcon), isSystemApp ? 1 : 0, JSON.toJSONString(searchData)
+					});
+		} catch (Exception e) {
+			AppListDB.execSQL("UPDATE T_AppInfo SET appName = ?, appIcon = ?, isSystemApp = ?, searchData = ? WHERE packageName = ?",
+					new Object[]{
+							appName, ImageUtil.Bitmap2Bytes(appIcon), isSystemApp ? 1 : 0, JSON.toJSONString(searchData), packageName
+					});
+		}
+	}
+
+	public void UpdateStartCount(AppInfo app) {
+		if (!enableCache){
+			return;
+		}
+		String packageName = app.getPackageName();
+		int startCount = app.getStartCount();
+		try {
+			AppListDB.execSQL("UPDATE T_AppInfo SET startCount = ? WHERE packageName = ?",
+					new Object[]{
+							startCount, packageName
+					});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

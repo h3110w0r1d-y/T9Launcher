@@ -48,10 +48,8 @@ public class MainActivity extends AppCompatActivity{
 		appListView.setOnItemClickListener(new AppListView.OnItemClickListener(){
 			@Override
 			public void onItemClick(View v, AppInfo app){
-				Intent intent = getPackageManager().getLaunchIntentForPackage(app.getPackageName());
-				if(intent != null){
-					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					startActivity(intent);
+				if (app.Start(getApplicationContext())){
+					appListViewModel.UpdateStartCount(app);
 					clearSearchAndBack();
 				}
 			}
@@ -65,21 +63,23 @@ public class MainActivity extends AppCompatActivity{
 		appPopMenu = new AppPopMenu(this);
 		
 		appListViewModel = ((App)getApplication()).appListViewModel;
-		appListViewModel.getAppListLiveData().observe(this, appInfo -> {
-		
-		});
+
 		appListViewModel.getLoadingStatus().observe(this, loading -> {
 			findViewById(R.id.loading).setVisibility(loading ? View.VISIBLE : View.GONE);
 			findViewById(R.id.swipeRefreshLayout).setVisibility(loading ? View.GONE : View.VISIBLE);
 		});
-		appListViewModel.getSearchResultLiveData().observe(this, searchResult -> {
-			appListView.updateAppInfo(searchResult);
-		});
+		appListViewModel.getSearchResultLiveData().observe(this, searchResult -> appListView.updateAppInfo(searchResult));
 
 		new Thread(()-> {
 			Pinyin4jUtil.defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
 			Pinyin4jUtil.defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
-			((App) getApplication()).appListViewModel.AppListDB = new DBHelper((App) getApplication(), "AppList.db", null, 1).getWritableDatabase();
+			try {
+				((App) getApplication()).appListViewModel.AppListDB = new DBHelper((App) getApplication(), "AppList.db", null, 1).getWritableDatabase();
+			} catch (Exception e) {
+				Toast.makeText(this, R.string.failed_init_database, Toast.LENGTH_LONG).show();
+				onBackPressed();
+			}
+			((App) getApplication()).appListViewModel.loadAppList(getApplication());
 			((App) getApplication()).appListViewModel.loadAppList(getApplication());
 			appListViewModel.searchApp(searchText.getText().toString());
 		}).start();
