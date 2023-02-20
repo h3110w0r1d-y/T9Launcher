@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -22,6 +23,7 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
+import androidx.preference.PreferenceManager;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
@@ -30,28 +32,50 @@ import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AppListViewModel extends AndroidViewModel{
-
+	private final SharedPreferences.Editor sharedPreferencesEditor;
 	private boolean isLoading = false;
+	private boolean isHideSystemApp = false;
 
 	private final boolean enableCache = true;
+
+	private final Set<String> hideAppList;
 	
 	private final ArrayList<AppInfo> appList = new ArrayList<>();
 
 	private final MutableLiveData<Boolean> Loading = new MutableLiveData<>(true);
-	
+
 	private final MutableLiveData<ArrayList<AppInfo>> searchResultLiveData = new MutableLiveData<>(new ArrayList<>());
+	private final MutableLiveData<ArrayList<AppInfo>> hideAppListLiveData = new MutableLiveData<>(new ArrayList<>());
 
 	public SQLiteDatabase AppListDB;
 	
 	public AppListViewModel(@NonNull Application application){
 		super(application);
+		SharedPreferences sharedPreferences = application.getSharedPreferences("T9Launcher", Context.MODE_PRIVATE);
+		sharedPreferencesEditor = sharedPreferences.edit();
+		hideAppList = sharedPreferences.getStringSet("hideAppList", new HashSet<>());
+		isHideSystemApp =  PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("hide_system_app", false);
 	}
 
 	public MutableLiveData<ArrayList<AppInfo>> getSearchResultLiveData(){
 		return searchResultLiveData;
+	}
+
+	public MutableLiveData<ArrayList<AppInfo>> getHideAppListLiveData(){
+		return hideAppListLiveData;
+	}
+
+	public void setAppHide(String packageName, boolean isHide){
+		if (isHide) {
+			hideAppList.add(packageName);
+		} else {
+			hideAppList.remove(packageName);
+		}
 	}
 
 	public MutableLiveData<Boolean> getLoadingStatus(){
@@ -138,6 +162,12 @@ public class AppListViewModel extends AndroidViewModel{
 		}
 		ArrayList<AppInfo> appInfo = new ArrayList<>();
 		for(AppInfo app : appList){
+			if (isHideSystemApp && app.isSystemApp()){
+				continue;
+			}
+			if (hideAppList.contains(app.getPackageName())) {
+				continue;
+			}
 			float matchRate = Pinyin4jUtil.Search(app, key); // 匹配度
 			if (matchRate > 0) {
 				app.setMatchRate(matchRate);
@@ -149,6 +179,26 @@ public class AppListViewModel extends AndroidViewModel{
 
 		searchResultLiveData.postValue(appInfo);
 	}
+
+	public void searchHideApp(String key){
+		ArrayList<AppInfo> appInfo = new ArrayList<>();
+		for(AppInfo app : appList){
+			if (hideAppList.contains(app.getPackageName()) && (app.getPackageName().contains(key) || app.getAppName().contains(key))) {
+				appInfo.add(app);
+			}
+		}
+		for(AppInfo app : appList){
+			if (!hideAppList.contains(app.getPackageName()) && (app.getPackageName().contains(key) || app.getAppName().contains(key))) {
+				appInfo.add(app);
+			}
+		}
+		hideAppListLiveData.postValue(appInfo);
+	}
+
+	public boolean isAppHide(String packageName){
+		return hideAppList.contains(packageName);
+	}
+
 
 	private void RefreshAppInfo(Context context){
 		PackageManager packageManager = context.getPackageManager();
@@ -229,5 +279,10 @@ public class AppListViewModel extends AndroidViewModel{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void SaveHideList() {
+		sharedPreferencesEditor.putStringSet("hideAppList", hideAppList);
+		sharedPreferencesEditor.commit();
 	}
 }

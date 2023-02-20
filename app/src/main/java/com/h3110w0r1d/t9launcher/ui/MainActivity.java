@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity{
 				onBackPressed();
 			}
 			((App) getApplication()).appListViewModel.loadAppList(getApplication());
-			((App) getApplication()).appListViewModel.loadAppList(getApplication());
 			appListViewModel.searchApp(searchText.getText().toString());
 		}).start();
 	}
@@ -152,7 +151,7 @@ public class MainActivity extends AppCompatActivity{
 		});
 		
 		findViewById(R.id.t9btn_setting).setOnLongClickListener(view -> {
-			MainActivity.this.startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+			startActivity(new Intent(this, SettingsActivity.class));
 			return true;
 		});
 		findViewById(R.id.t9btn_setting).setOnClickListener(view -> {

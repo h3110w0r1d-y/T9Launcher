@@ -1,6 +1,8 @@
 package com.h3110w0r1d.t9launcher.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +32,19 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
+            findPreference("hide_app_list").setOnPreferenceClickListener(preference -> {
+                startActivity(new Intent(getActivity(), HideAppActivity.class));
+                return false;
+            });
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            this.finish(); // back button
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

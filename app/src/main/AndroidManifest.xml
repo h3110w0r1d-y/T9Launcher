@@ -18,17 +18,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.T9Launcher">
         <activity
+            android:name=".ui.HideAppActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.SettingsActivity"
             android:exported="false"
-            android:label="@string/title_activity_settings" />
+            android:label="@string/title_activity_settings"
+            android:theme="@style/Theme.T9Launcher.SettingActivity" />
         <activity
             android:name=".ui.MainActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/MainActivityStyle">
+            android:theme="@style/Theme.T9Launcher.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
