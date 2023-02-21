@@ -19,7 +19,7 @@
             app:iconSpaceReserved="false"
             app:key="version"
             app:title="@string/version"
-            app:summary="1.1.0"/>
+            app:summary="1.1.1"/>
         <Preference
             app:iconSpaceReserved="false"
             app:key="author"

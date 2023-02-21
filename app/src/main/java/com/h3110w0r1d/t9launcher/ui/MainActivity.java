@@ -1,9 +1,14 @@
 package com.h3110w0r1d.t9launcher.ui;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -65,27 +70,16 @@ public class MainActivity extends AppCompatActivity{
 		});
 		
 		appPopMenu = new AppPopMenu(this);
-		
 		appViewModel = ((App)getApplication()).appViewModel;
 
 		appViewModel.getLoadingStatus().observe(this, loading -> {
 			findViewById(R.id.loading).setVisibility(loading ? View.VISIBLE : View.GONE);
 			findViewById(R.id.swipeRefreshLayout).setVisibility(loading ? View.GONE : View.VISIBLE);
+			appViewModel.searchApp(searchText.getText().toString());
 		});
 		appViewModel.getSearchResultLiveData().observe(this, searchResult -> appListView.updateAppInfo(searchResult));
 
-		new Thread(()-> {
-			Pinyin4jUtil.defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
-			Pinyin4jUtil.defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
-			try {
-				((App) getApplication()).appViewModel.AppListDB = new DBHelper((App) getApplication(), "AppList.db", null, 1).getWritableDatabase();
-			} catch (Exception e) {
-				Toast.makeText(this, R.string.failed_init_database, Toast.LENGTH_LONG).show();
-				onBackPressed();
-			}
-			((App) getApplication()).appViewModel.loadAppList(getApplication());
-			appViewModel.searchApp(searchText.getText().toString());
-		}).start();
+		ignoreBatteryOptimization(this);
 	}
 	
 	@Override
@@ -192,5 +186,30 @@ public class MainActivity extends AppCompatActivity{
 				});
 			}).start();
 		});
+	}
+
+	public void ignoreBatteryOptimization(Activity activity) {
+		PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+		boolean hasIgnored = false;
+		hasIgnored = powerManager.isIgnoringBatteryOptimizations(activity.getPackageName());
+		//  判断当前APP是否有加入电池优化的白名单，如果没有，弹出加入电池优化的白名单的设置对话框。
+		if (!hasIgnored) {
+			try {//先调用系统显示 电池优化权限
+				@SuppressLint("BatteryLife")
+				Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+				intent.setData(Uri.parse("package:" + activity.getPackageName()));
+				startActivity(intent);
+			} catch (Exception e) {//如果失败了则引导用户到电池优化界面
+				try {
+					Intent intent = new Intent(Intent.ACTION_MAIN);
+					intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					intent.addCategory(Intent.CATEGORY_LAUNCHER);
+					ComponentName cn = ComponentName.unflattenFromString("com.android.settings/.Settings$HighPowerApplicationsActivity");
+					intent.setComponent(cn);
+					startActivity(intent);
+				}catch (Exception ex) { //如果全部失败则说明没有电池优化功能
+				}
+			}
+		}
 	}
 }

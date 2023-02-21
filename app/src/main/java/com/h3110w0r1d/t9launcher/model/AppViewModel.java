@@ -16,6 +16,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,9 +28,14 @@ import androidx.preference.PreferenceManager;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.h3110w0r1d.t9launcher.App;
+import com.h3110w0r1d.t9launcher.R;
 import com.h3110w0r1d.t9launcher.utils.ImageUtil;
 import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
+
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,6 +66,17 @@ public class AppViewModel extends AndroidViewModel{
 		spEditor = sharedPreferences.edit();
 		hideAppList = sharedPreferences.getStringSet("hideAppList", new HashSet<>());
 		isHideSystemApp =  sharedPreferences.getBoolean("hide_system_app", false);
+
+		new Thread(()-> {
+			Pinyin4jUtil.defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
+			Pinyin4jUtil.defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+			try {
+				((App) getApplication()).appViewModel.AppListDB = new DBHelper((App) getApplication(), "AppList.db", null, 1).getWritableDatabase();
+			} catch (Exception e) {
+				Toast.makeText(application, R.string.failed_init_database, Toast.LENGTH_LONG).show();
+			}
+			((App) getApplication()).appViewModel.loadAppList(getApplication());
+		}).start();
 	}
 
 	public MutableLiveData<ArrayList<AppInfo>> getSearchResultLiveData(){
@@ -306,4 +323,5 @@ public class AppViewModel extends AndroidViewModel{
 	public void setHideSystemApp(boolean newValue) {
 		isHideSystemApp = newValue;
 	}
+
 }

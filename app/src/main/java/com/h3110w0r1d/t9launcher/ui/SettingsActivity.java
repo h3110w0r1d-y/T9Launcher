@@ -46,7 +46,7 @@ public class SettingsActivity extends AppCompatActivity {
             });
             findPreference("hide_system_app").setOnPreferenceChangeListener((preference, newValue) -> {
                 ((App) requireActivity().getApplication()).appViewModel.setHideSystemApp((Boolean) newValue);
-                return false;
+                return true;
             });
             findPreference("github").setOnPreferenceClickListener(preference -> {
                 Uri uri = Uri.parse("https://github.com/h3110w0r1d-y/T9Launcher");
