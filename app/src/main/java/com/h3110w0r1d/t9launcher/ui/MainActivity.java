@@ -16,7 +16,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.h3110w0r1d.t9launcher.App;
 import com.h3110w0r1d.t9launcher.R;
-import com.h3110w0r1d.t9launcher.model.AppListViewModel;
+import com.h3110w0r1d.t9launcher.model.AppViewModel;
 import com.h3110w0r1d.t9launcher.model.DBHelper;
 import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
@@ -26,6 +26,8 @@ import com.h3110w0r1d.t9launcher.widgets.AppPopMenu;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 
+import java.util.HashSet;
+
 public class MainActivity extends AppCompatActivity{
 	
 	private EditText searchText;
@@ -34,7 +36,9 @@ public class MainActivity extends AppCompatActivity{
 	
 	private AppPopMenu appPopMenu;
 	
-	private AppListViewModel appListViewModel;
+	private AppViewModel appViewModel;
+
+	private boolean keyLongClick = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -49,7 +53,7 @@ public class MainActivity extends AppCompatActivity{
 			@Override
 			public void onItemClick(View v, AppInfo app){
 				if (app.Start(getApplicationContext())){
-					appListViewModel.UpdateStartCount(app);
+					appViewModel.UpdateStartCount(app);
 					clearSearchAndBack();
 				}
 			}
@@ -62,25 +66,25 @@ public class MainActivity extends AppCompatActivity{
 		
 		appPopMenu = new AppPopMenu(this);
 		
-		appListViewModel = ((App)getApplication()).appListViewModel;
+		appViewModel = ((App)getApplication()).appViewModel;
 
-		appListViewModel.getLoadingStatus().observe(this, loading -> {
+		appViewModel.getLoadingStatus().observe(this, loading -> {
 			findViewById(R.id.loading).setVisibility(loading ? View.VISIBLE : View.GONE);
 			findViewById(R.id.swipeRefreshLayout).setVisibility(loading ? View.GONE : View.VISIBLE);
 		});
-		appListViewModel.getSearchResultLiveData().observe(this, searchResult -> appListView.updateAppInfo(searchResult));
+		appViewModel.getSearchResultLiveData().observe(this, searchResult -> appListView.updateAppInfo(searchResult));
 
 		new Thread(()-> {
 			Pinyin4jUtil.defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
 			Pinyin4jUtil.defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
 			try {
-				((App) getApplication()).appListViewModel.AppListDB = new DBHelper((App) getApplication(), "AppList.db", null, 1).getWritableDatabase();
+				((App) getApplication()).appViewModel.AppListDB = new DBHelper((App) getApplication(), "AppList.db", null, 1).getWritableDatabase();
 			} catch (Exception e) {
 				Toast.makeText(this, R.string.failed_init_database, Toast.LENGTH_LONG).show();
 				onBackPressed();
 			}
-			((App) getApplication()).appListViewModel.loadAppList(getApplication());
-			appListViewModel.searchApp(searchText.getText().toString());
+			((App) getApplication()).appViewModel.loadAppList(getApplication());
+			appViewModel.searchApp(searchText.getText().toString());
 		}).start();
 	}
 	
@@ -91,7 +95,7 @@ public class MainActivity extends AppCompatActivity{
 	
 	public void clearSearchAndBack(){
 		searchText.setText("");
-		appListViewModel.searchApp("");
+		appViewModel.searchApp("");
 		moveTaskToBack(true);
 	}
 	
@@ -108,6 +112,10 @@ public class MainActivity extends AppCompatActivity{
 		@SuppressLint("ClickableViewAccessibility")
 		View.OnTouchListener t9btnTouch = (view, motionEvent) -> {
 			if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+				if (keyLongClick){
+					keyLongClick = false;
+					return false;
+				}
 				int id = view.getId();
 				if(id == R.id.t9btn_0) searchText.append("0");
 				else if(id == R.id.t9btn_1) searchText.append("1");
@@ -119,9 +127,15 @@ public class MainActivity extends AppCompatActivity{
 				else if(id == R.id.t9btn_7) searchText.append("7");
 				else if(id == R.id.t9btn_8) searchText.append("8");
 				else if(id == R.id.t9btn_9) searchText.append("9");
-				appListViewModel.searchApp(searchText.getText().toString());
+				appViewModel.searchApp(searchText.getText().toString());
 			}
 			return false;
+		};
+
+		View.OnLongClickListener t9btnLongClick = view -> {
+			keyLongClick = true;
+			appViewModel.ShowHideApps();
+			return true;
 		};
 
 		findViewById(R.id.t9btn_0).setOnTouchListener(t9btnTouch);
@@ -135,6 +149,17 @@ public class MainActivity extends AppCompatActivity{
 		findViewById(R.id.t9btn_8).setOnTouchListener(t9btnTouch);
 		findViewById(R.id.t9btn_9).setOnTouchListener(t9btnTouch);
 
+		findViewById(R.id.t9btn_0).setOnLongClickListener(t9btnLongClick);
+		findViewById(R.id.t9btn_1).setOnLongClickListener(t9btnLongClick);
+		findViewById(R.id.t9btn_2).setOnLongClickListener(t9btnLongClick);
+		findViewById(R.id.t9btn_3).setOnLongClickListener(t9btnLongClick);
+		findViewById(R.id.t9btn_4).setOnLongClickListener(t9btnLongClick);
+		findViewById(R.id.t9btn_5).setOnLongClickListener(t9btnLongClick);
+		findViewById(R.id.t9btn_6).setOnLongClickListener(t9btnLongClick);
+		findViewById(R.id.t9btn_7).setOnLongClickListener(t9btnLongClick);
+		findViewById(R.id.t9btn_8).setOnLongClickListener(t9btnLongClick);
+		findViewById(R.id.t9btn_9).setOnLongClickListener(t9btnLongClick);
+
 		
 		Button clear = findViewById(R.id.t9btn_clear);
 		clear.setOnClickListener(view -> {
@@ -142,11 +167,11 @@ public class MainActivity extends AppCompatActivity{
 			if(len > 0){
 				searchText.setText(searchText.getText().delete(len - 1, len));
 			}
-			appListViewModel.searchApp(searchText.getText().toString());
+			appViewModel.searchApp(searchText.getText().toString());
 		});
 		clear.setOnLongClickListener(view -> {
 			searchText.setText("");
-			appListViewModel.searchApp("");
+			appViewModel.searchApp("");
 			return true;
 		});
 		
@@ -160,10 +185,10 @@ public class MainActivity extends AppCompatActivity{
 
 		((SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout)).setOnRefreshListener(() -> {
 			new Thread(()-> {
-				((App) getApplication()).appListViewModel.loadAppList(getApplication());
+				((App) getApplication()).appViewModel.loadAppList(getApplication());
 				runOnUiThread(() -> {
 					((SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout)).setRefreshing(false);
-					appListViewModel.searchApp(searchText.getText().toString());
+					appViewModel.searchApp(searchText.getText().toString());
 				});
 			}).start();
 		});

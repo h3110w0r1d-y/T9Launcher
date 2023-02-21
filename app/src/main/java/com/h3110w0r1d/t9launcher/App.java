@@ -2,15 +2,15 @@ package com.h3110w0r1d.t9launcher;
 
 import android.app.Application;
 
-import com.h3110w0r1d.t9launcher.model.AppListViewModel;
+import com.h3110w0r1d.t9launcher.model.AppViewModel;
 
 public class App extends Application{
 	
-	public AppListViewModel appListViewModel;
+	public AppViewModel appViewModel;
 	
 	@Override
 	public void onCreate(){
 		super.onCreate();
-		appListViewModel = new AppListViewModel(this);
+		appViewModel = new AppViewModel(this);
 	}
 }

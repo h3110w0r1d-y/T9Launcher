@@ -36,10 +36,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class AppListViewModel extends AndroidViewModel{
-	private final SharedPreferences.Editor sharedPreferencesEditor;
+public class AppViewModel extends AndroidViewModel{
+	private final SharedPreferences.Editor spEditor;
 	private boolean isLoading = false;
-	private boolean isHideSystemApp = false;
+	private boolean isHideSystemApp;
 
 	private final boolean enableCache = true;
 
@@ -54,12 +54,12 @@ public class AppListViewModel extends AndroidViewModel{
 
 	public SQLiteDatabase AppListDB;
 	
-	public AppListViewModel(@NonNull Application application){
+	public AppViewModel(@NonNull Application application){
 		super(application);
-		SharedPreferences sharedPreferences = application.getSharedPreferences("T9Launcher", Context.MODE_PRIVATE);
-		sharedPreferencesEditor = sharedPreferences.edit();
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+		spEditor = sharedPreferences.edit();
 		hideAppList = sharedPreferences.getStringSet("hideAppList", new HashSet<>());
-		isHideSystemApp =  PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("hide_system_app", false);
+		isHideSystemApp =  sharedPreferences.getBoolean("hide_system_app", false);
 	}
 
 	public MutableLiveData<ArrayList<AppInfo>> getSearchResultLiveData(){
@@ -282,7 +282,28 @@ public class AppListViewModel extends AndroidViewModel{
 	}
 
 	public void SaveHideList() {
-		sharedPreferencesEditor.remove("hideAppList").commit();
-		sharedPreferencesEditor.putStringSet("hideAppList", hideAppList).commit();
+		spEditor.remove("hideAppList").commit();
+		spEditor.putStringSet("hideAppList", hideAppList).commit();
+	}
+
+	public void ShowHideApps() {
+		ArrayList<AppInfo> appInfo = new ArrayList<>();
+		for (AppInfo app : appList){
+			if (hideAppList.contains(app.getPackageName())){
+				appInfo.add(app);
+			}
+		}
+		if (isHideSystemApp){
+			for (AppInfo app : appList){
+				if (!hideAppList.contains(app.getPackageName()) && app.isSystemApp()){
+					appInfo.add(app);
+				}
+			}
+		}
+		searchResultLiveData.postValue(appInfo);
+	}
+
+	public void setHideSystemApp(boolean newValue) {
+		isHideSystemApp = newValue;
 	}
 }

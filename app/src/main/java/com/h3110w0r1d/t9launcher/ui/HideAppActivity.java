@@ -21,7 +21,7 @@ import android.widget.TextView;
 
 import com.h3110w0r1d.t9launcher.App;
 import com.h3110w0r1d.t9launcher.R;
-import com.h3110w0r1d.t9launcher.model.AppListViewModel;
+import com.h3110w0r1d.t9launcher.model.AppViewModel;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.List;
 
 public class HideAppActivity extends AppCompatActivity {
 
-    private AppListViewModel appListViewModel;
+    private AppViewModel appViewModel;
 
     private HideAppListAdapter adapter;
 
@@ -45,18 +45,18 @@ public class HideAppActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         setContentView(R.layout.activity_hide_app);
-        appListViewModel = ((App)getApplication()).appListViewModel;
+        appViewModel = ((App)getApplication()).appViewModel;
 
         adapter = new HideAppListAdapter(this, R.layout.hide_app_list_item, hideAppList);
 
         ListView listView = findViewById(R.id.hideAppListView);
         listView.setAdapter(adapter);
 
-        appListViewModel.getHideAppListLiveData().observe(this, searchResult -> {
+        appViewModel.getHideAppListLiveData().observe(this, searchResult -> {
             adapter.clear();
             adapter.addAll(searchResult);
         });
-        appListViewModel.searchHideApp("");
+        appViewModel.searchHideApp("");
     }
 
     @Override
@@ -70,13 +70,13 @@ public class HideAppActivity extends AppCompatActivity {
 
     @Override
     public void finish() {
-        appListViewModel.SaveHideList();
+        appViewModel.SaveHideList();
         super.finish();
     }
 
     @Override
     public void onBackPressed() {
-        appListViewModel.SaveHideList();
+        appViewModel.SaveHideList();
         super.onBackPressed();
     }
 
@@ -89,13 +89,13 @@ public class HideAppActivity extends AppCompatActivity {
         sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                appListViewModel.searchHideApp(query);
+                appViewModel.searchHideApp(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String query) {
-                appListViewModel.searchHideApp(query);
+                appViewModel.searchHideApp(query);
                 return false;
             }
         });
@@ -127,11 +127,11 @@ public class HideAppActivity extends AppCompatActivity {
             icon.setImageDrawable(app.getAppIcon());
             text1.setText(app.getAppName());
             text2.setText(app.getPackageName());
-            checkBox.setChecked(appListViewModel.isAppHide(app.getPackageName()));
+            checkBox.setChecked(appViewModel.isAppHide(app.getPackageName()));
 
             view.setOnClickListener(v -> {
                 checkBox.setChecked(!checkBox.isChecked());
-                appListViewModel.setAppHide(app.getPackageName(), checkBox.isChecked());
+                appViewModel.setAppHide(app.getPackageName(), checkBox.isChecked());
             });
 
             return view;

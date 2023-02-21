@@ -12,4 +12,9 @@
     <string name="failed_init_database">初始化失败，请清空应用数据后重试</string>
     <string name="hide_system_app">隐藏系统应用</string>
     <string name="search">搜索</string>
+    <string name="about">关于</string>
+    <string name="author">作者</string>
+    <string name="github">Github</string>
+    <string name="version">版本</string>
+    <string name="donate">捐赠</string>
 </resources>

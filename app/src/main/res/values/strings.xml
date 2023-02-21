@@ -1,13 +1,7 @@
 <resources>
     <string name="app_name">T9 Launcher</string>
     <string name="title_activity_settings">Settings</string>
-
-    <!-- Preference Titles -->
-
-    <!-- Messages Preferences -->
     <string name="hide_system_app">Hide system apps</string>
-
-    <!-- Sync Preferences -->
     <string name="clear">Clear</string>
     <string name="setting">Setting</string>
     <string name="app_info">App Detail</string>
@@ -16,16 +10,11 @@
     <string name="uninstall_app">Uninstall</string>
     <string name="hide_app_list">Hide apps</string>
     <string name="failed_init_database">Failed to init database, please clear app data</string>
-    <string name="title_activity_hide_app">HideAppActivity</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
-
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="search">Search</string>
+    <string name="about">About</string>
+    <string name="author">Author</string>
+    <string name="github">Github</string>
+    <string name="version">Version</string>
+    <string name="donate">Donate</string>
 
-    <!-- Messages Preferences -->
 </resources>

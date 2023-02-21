@@ -1,16 +1,23 @@
 package com.h3110w0r1d.t9launcher.ui;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.h3110w0r1d.t9launcher.App;
 import com.h3110w0r1d.t9launcher.R;
+import com.h3110w0r1d.t9launcher.model.AppViewModel;
+
+import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity {
+    private AppViewModel appViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +33,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        appViewModel = ((App)getApplication()).appViewModel;
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
@@ -35,6 +43,20 @@ public class SettingsActivity extends AppCompatActivity {
             findPreference("hide_app_list").setOnPreferenceClickListener(preference -> {
                 startActivity(new Intent(getActivity(), HideAppActivity.class));
                 return false;
+            });
+            findPreference("hide_system_app").setOnPreferenceChangeListener((preference, newValue) -> {
+                ((App) requireActivity().getApplication()).appViewModel.setHideSystemApp((Boolean) newValue);
+                return false;
+            });
+            findPreference("github").setOnPreferenceClickListener(preference -> {
+                Uri uri = Uri.parse("https://github.com/h3110w0r1d-y/T9Launcher");
+                startActivity(new Intent(Intent.ACTION_VIEW,uri));
+                return true;
+            });
+            findPreference("author").setOnPreferenceClickListener(preference -> {
+                Uri uri = Uri.parse("https://github.com/h3110w0r1d-y");
+                startActivity(new Intent(Intent.ACTION_VIEW,uri));
+                return true;
             });
         }
     }
