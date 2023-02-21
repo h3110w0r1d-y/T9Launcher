@@ -282,7 +282,7 @@ public class AppListViewModel extends AndroidViewModel{
 	}
 
 	public void SaveHideList() {
-		sharedPreferencesEditor.putStringSet("hideAppList", hideAppList);
-		sharedPreferencesEditor.commit();
+		sharedPreferencesEditor.remove("hideAppList").commit();
+		sharedPreferencesEditor.putStringSet("hideAppList", hideAppList).commit();
 	}
 }
