@@ -46,9 +46,7 @@ public class AppViewModel extends AndroidViewModel{
 	private final SharedPreferences.Editor spEditor;
 	private boolean isLoading = false;
 	private boolean isHideSystemApp;
-
-	private final boolean enableCache = true;
-
+	private final Set<String> localPackageName = new HashSet<>();
 	private final Set<String> hideAppList;
 	
 	private final ArrayList<AppInfo> appList = new ArrayList<>();
@@ -113,57 +111,36 @@ public class AppViewModel extends AndroidViewModel{
 		}
 		isLoading = true;
 		appList.clear();
-		if (enableCache) {
-			Cursor cursor = AppListDB.query(
-					"T_AppInfo",
-					new String[]{
-							"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
-					}, null, null, null, null, null);
+		Cursor cursor = AppListDB.query(
+				"T_AppInfo",
+				new String[]{
+						"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
+				}, null, null, null, null, null);
 
-			while (cursor.moveToNext()) {
-				String packageName = cursor.getString(0);
-				String appName = cursor.getString(1);
-				int startCount = cursor.getInt(2);
-				Bitmap appIcon = ImageUtil.Bytes2Bitmap(cursor.getBlob(3));
-				RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), appIcon);
-				roundedDrawable.getPaint().setAntiAlias(true);
-				float cornerRadius = roundedDrawable.getIntrinsicHeight() * 0.26f;
-				roundedDrawable.setCornerRadius(cornerRadius);
+		while (cursor.moveToNext()) {
+			String packageName = cursor.getString(0);
+			String appName = cursor.getString(1);
+			int startCount = cursor.getInt(2);
+			Bitmap appIcon = ImageUtil.Bytes2Bitmap(cursor.getBlob(3));
+			RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), appIcon);
+			roundedDrawable.getPaint().setAntiAlias(true);
+			float cornerRadius = roundedDrawable.getIntrinsicHeight() * 0.26f;
+			roundedDrawable.setCornerRadius(cornerRadius);
 
-				boolean isSystemApp = cursor.getInt(4) == 1;
-				List<List<String>> searchData = JSON.parseObject(cursor.getString(5),new TypeReference<List<List<String>>>(){});
+			boolean isSystemApp = cursor.getInt(4) == 1;
+			List<List<String>> searchData = JSON.parseObject(cursor.getString(5),new TypeReference<List<List<String>>>(){});
 
-				appList.add(new AppInfo(
-						packageName, appName, startCount, roundedDrawable, isSystemApp, searchData
-				));
-			}
-			if (appList.size() != 0) {
-				setLoadingStatus(false);
-			}
+			appList.add(new AppInfo(
+					packageName, appName, startCount, roundedDrawable, isSystemApp, searchData
+			));
+		}
+		cursor.close();
+		if (appList.size() != 0) {
+			setLoadingStatus(false);
 		}
 		new Thread(()->{
 			RefreshAppInfo(context);
-			if (enableCache) {
-				Cursor cursor = AppListDB.query(
-						"T_AppInfo",
-						new String[]{
-								"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
-						}, null, null, null, null, null);
-				while (cursor.moveToNext()) {
-					String packageName = cursor.getString(0);
-					boolean inDB = false;
-					for (AppInfo app : appList) {
-						if (app.getPackageName().equals(packageName)) {
-							inDB = true;
-							break;
-						}
-					}
-					if (!inDB) {
-						AppListDB.execSQL("DELETE FROM T_AppInfo WHERE packageName = ?", new Object[]{packageName});
-					}
-				}
-			}
-			isLoading = false;
+
 		}).start();
 
 	}
@@ -218,11 +195,15 @@ public class AppViewModel extends AndroidViewModel{
 
 
 	private void RefreshAppInfo(Context context){
+		localPackageName.clear();
 		PackageManager packageManager = context.getPackageManager();
 		List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
 		for(ResolveInfo resolveInfo : resolveInfoList){
 			try{
 				String packageName = resolveInfo.activityInfo.packageName;
+
+				localPackageName.add(packageName);
+
 				PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
 				String appName = resolveInfo.loadLabel(packageManager).toString();
 				Drawable icon = resolveInfo.loadIcon(packageManager);
@@ -256,13 +237,35 @@ public class AppViewModel extends AndroidViewModel{
 				e.printStackTrace();
 			}
 		}
+
+		Cursor cursor = AppListDB.query(
+				"T_AppInfo",
+				new String[]{
+						"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
+				}, null, null, null, null, null);
+		List<String> needDelete = new ArrayList<>();
+		while (cursor.moveToNext()) {
+			String packageName = cursor.getString(0);
+			if (!localPackageName.contains(packageName)) {
+				needDelete.add(packageName);
+			}
+		}
+		cursor.close();
+		for (String packageName : needDelete) {
+			for (AppInfo app : appList){
+				if (app.getPackageName().equals(packageName)){
+					appList.remove(app);
+					break;
+				}
+			}
+			AppListDB.delete("T_AppInfo", "packageName = ?", new String[]{packageName});
+		}
 		setLoadingStatus(false);
+
+		isLoading = false;
 	}
 
 	public void InsertOrUpdate(AppInfo app) {
-		if (!enableCache){
-			return;
-		}
 		String packageName = app.getPackageName();
 		String appName = app.getAppName();
 		Bitmap appIcon = ((RoundedBitmapDrawable)app.getAppIcon()).getBitmap();
@@ -283,9 +286,6 @@ public class AppViewModel extends AndroidViewModel{
 	}
 
 	public void UpdateStartCount(AppInfo app) {
-		if (!enableCache){
-			return;
-		}
 		String packageName = app.getPackageName();
 		int startCount = app.getStartCount();
 		try {
