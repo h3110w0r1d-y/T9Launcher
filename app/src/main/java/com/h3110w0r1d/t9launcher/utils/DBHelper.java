@@ -1,4 +1,4 @@
-package com.h3110w0r1d.t9launcher.model;
+package com.h3110w0r1d.t9launcher.utils;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

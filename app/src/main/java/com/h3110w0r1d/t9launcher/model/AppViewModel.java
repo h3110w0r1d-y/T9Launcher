@@ -30,6 +30,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.h3110w0r1d.t9launcher.App;
 import com.h3110w0r1d.t9launcher.R;
+import com.h3110w0r1d.t9launcher.utils.DBHelper;
 import com.h3110w0r1d.t9launcher.utils.ImageUtil;
 import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
@@ -43,19 +44,20 @@ import java.util.List;
 import java.util.Set;
 
 public class AppViewModel extends AndroidViewModel{
-	private final SharedPreferences.Editor spEditor;
-	private boolean isLoading = false;
+
 	private boolean isHideSystemApp;
-	private final Set<String> localPackageName = new HashSet<>();
 	private final Set<String> hideAppList;
-	
+
+	public boolean isLoadingAppList = false;
+	public boolean isShowingHideApp = false;
+
+	private final SharedPreferences.Editor spEditor;
+	private final Set<String> localPackageName = new HashSet<>();
 	private final ArrayList<AppInfo> appList = new ArrayList<>();
-
 	private final MutableLiveData<Boolean> Loading = new MutableLiveData<>(true);
-
 	private final MutableLiveData<ArrayList<AppInfo>> searchResultLiveData = new MutableLiveData<>(new ArrayList<>());
 	private final MutableLiveData<ArrayList<AppInfo>> hideAppListLiveData = new MutableLiveData<>(new ArrayList<>());
-
+	public String SearchText = "";
 	public SQLiteDatabase AppListDB;
 	
 	public AppViewModel(@NonNull Application application){
@@ -106,10 +108,10 @@ public class AppViewModel extends AndroidViewModel{
 	 */
 	@SuppressLint("Recycle")
 	public void loadAppList(Context context){
-		if (isLoading) {
+		if (isLoadingAppList) {
 			return;
 		}
-		isLoading = true;
+		isLoadingAppList = true;
 		appList.clear();
 		Cursor cursor = AppListDB.query(
 				"T_AppInfo",
@@ -129,7 +131,6 @@ public class AppViewModel extends AndroidViewModel{
 
 			boolean isSystemApp = cursor.getInt(4) == 1;
 			List<List<String>> searchData = JSON.parseObject(cursor.getString(5),new TypeReference<List<List<String>>>(){});
-
 			appList.add(new AppInfo(
 					packageName, appName, startCount, roundedDrawable, isSystemApp, searchData
 			));
@@ -138,11 +139,22 @@ public class AppViewModel extends AndroidViewModel{
 		if (appList.size() != 0) {
 			setLoadingStatus(false);
 		}
-		new Thread(()->{
-			RefreshAppInfo(context);
+		RefreshAppInfo(context);
+	}
 
-		}).start();
-
+	public void showDefaultAppList(){
+		ArrayList<AppInfo> appInfo = new ArrayList<>();
+		for (AppInfo app : appList) {
+			if (isHideSystemApp && app.isSystemApp()){
+				continue;
+			}
+			if (hideAppList.contains(app.getPackageName())) {
+				continue;
+			}
+			appInfo.add(app);
+		}
+		appList.sort(new AppInfo.SortByStartCount());
+		searchResultLiveData.postValue(appInfo);
 	}
 	
 	/**
@@ -150,8 +162,17 @@ public class AppViewModel extends AndroidViewModel{
 	 * @param key 关键词
 	 */
 	public void searchApp(@Nullable String key){
+		if (key == null) {
+			key = SearchText;
+		} else {
+			SearchText = key;
+		}
+		if (isShowingHideApp) {
+			ShowHideApp();
+			return;
+		}
 		if(TextUtils.isEmpty(key)){
-			searchResultLiveData.postValue(new ArrayList<>());
+			showDefaultAppList();
 			return;
 		}
 		ArrayList<AppInfo> appInfo = new ArrayList<>();
@@ -175,14 +196,15 @@ public class AppViewModel extends AndroidViewModel{
 	}
 
 	public void searchHideApp(String key){
+		key = key.toLowerCase();
 		ArrayList<AppInfo> appInfo = new ArrayList<>();
 		for(AppInfo app : appList){
-			if (hideAppList.contains(app.getPackageName()) && (app.getPackageName().contains(key) || app.getAppName().contains(key))) {
+			if (hideAppList.contains(app.getPackageName()) && (app.getPackageName().contains(key) || app.getAppName().toLowerCase().contains(key))) {
 				appInfo.add(app);
 			}
 		}
 		for(AppInfo app : appList){
-			if (!hideAppList.contains(app.getPackageName()) && (app.getPackageName().contains(key) || app.getAppName().contains(key))) {
+			if (!hideAppList.contains(app.getPackageName()) && (app.getPackageName().contains(key) || app.getAppName().toLowerCase().contains(key))) {
 				appInfo.add(app);
 			}
 		}
@@ -198,44 +220,8 @@ public class AppViewModel extends AndroidViewModel{
 		localPackageName.clear();
 		PackageManager packageManager = context.getPackageManager();
 		List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
-		for(ResolveInfo resolveInfo : resolveInfoList){
-			try{
-				String packageName = resolveInfo.activityInfo.packageName;
-
-				localPackageName.add(packageName);
-
-				PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
-				String appName = resolveInfo.loadLabel(packageManager).toString();
-				Drawable icon = resolveInfo.loadIcon(packageManager);
-				RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), Drawable2IconBitmap(icon));
-				roundedDrawable.getPaint().setAntiAlias(true);
-
-				float cornerRadius = roundedDrawable.getIntrinsicHeight() * 0.26f;
-				roundedDrawable.setCornerRadius(cornerRadius);
-				List<List<String>> searchData = Pinyin4jUtil.getPinYin(appName);
-				ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-				boolean isSystemApp = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-				boolean findInAppList = false;
-				for (AppInfo app : appList){
-					if (app.getPackageName().equals(packageName)){
-						findInAppList = true;
-						app.setAppName(appName);
-						app.setAppIcon(roundedDrawable);
-						app.setIsSystemApp(isSystemApp);
-						app.setSearchData(searchData);
-						InsertOrUpdate(app);
-						break;
-					}
-				}
-				if (findInAppList){
-					continue;
-				}
-				AppInfo app = new AppInfo(packageName, appName, 0, roundedDrawable, isSystemApp, searchData);
-				appList.add(app);
-				InsertOrUpdate(app);
-			}catch(PackageManager.NameNotFoundException e){
-				e.printStackTrace();
-			}
+		for (ResolveInfo resolveInfo : resolveInfoList) {
+			localPackageName.add(resolveInfo.activityInfo.packageName);
 		}
 
 		Cursor cursor = AppListDB.query(
@@ -243,26 +229,68 @@ public class AppViewModel extends AndroidViewModel{
 				new String[]{
 						"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
 				}, null, null, null, null, null);
-		List<String> needDelete = new ArrayList<>();
+		List<String> needRemove = new ArrayList<>();
 		while (cursor.moveToNext()) {
 			String packageName = cursor.getString(0);
 			if (!localPackageName.contains(packageName)) {
-				needDelete.add(packageName);
+				needRemove.add(packageName);
 			}
 		}
 		cursor.close();
-		for (String packageName : needDelete) {
-			for (AppInfo app : appList){
-				if (app.getPackageName().equals(packageName)){
-					appList.remove(app);
-					break;
-				}
+		for (int i=appList.size()-1; i>=0; i--){
+			AppInfo app = appList.get(i);
+			if (needRemove.contains(app.getPackageName())){
+				AppListDB.delete("T_AppInfo", "packageName = ?", new String[]{app.getPackageName()});
+				appList.remove(app);
 			}
-			AppListDB.delete("T_AppInfo", "packageName = ?", new String[]{packageName});
 		}
 		setLoadingStatus(false);
 
-		isLoading = false;
+		searchApp(null);
+
+		new Thread(() -> {
+			for(ResolveInfo resolveInfo : resolveInfoList){
+				try{
+					String packageName = resolveInfo.activityInfo.packageName;
+					PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
+					String appName = resolveInfo.loadLabel(packageManager).toString();
+					Drawable icon = resolveInfo.loadIcon(packageManager);
+					RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), Drawable2IconBitmap(icon));
+					roundedDrawable.getPaint().setAntiAlias(true);
+
+					float cornerRadius = roundedDrawable.getIntrinsicHeight() * 0.26f;
+					roundedDrawable.setCornerRadius(cornerRadius);
+					List<List<String>> searchData = Pinyin4jUtil.getPinYin(appName);
+					ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+					boolean isSystemApp = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+					boolean findInAppList = false;
+					for (AppInfo app : appList){
+						if (app.getPackageName().equals(packageName)){
+							findInAppList = true;
+							app.setAppName(appName);
+							app.setAppIcon(roundedDrawable);
+							app.setIsSystemApp(isSystemApp);
+							app.setSearchData(searchData);
+							InsertOrUpdate(app);
+							break;
+						}
+					}
+					if (findInAppList){
+						continue;
+					}
+					AppInfo app = new AppInfo(packageName, appName, 0, roundedDrawable, isSystemApp, searchData);
+					appList.add(app);
+					InsertOrUpdate(app);
+				}catch(PackageManager.NameNotFoundException e){
+					e.printStackTrace();
+				}
+			}
+
+			searchApp(null);
+
+			isLoadingAppList = false;
+		}).start();
+
 	}
 
 	public void InsertOrUpdate(AppInfo app) {
@@ -303,7 +331,8 @@ public class AppViewModel extends AndroidViewModel{
 		spEditor.putStringSet("hideAppList", hideAppList).commit();
 	}
 
-	public void ShowHideApps() {
+	public void ShowHideApp() {
+		isShowingHideApp = true;
 		ArrayList<AppInfo> appInfo = new ArrayList<>();
 		for (AppInfo app : appList){
 			if (hideAppList.contains(app.getPackageName())){

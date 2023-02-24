@@ -18,11 +18,14 @@ import android.widget.PopupWindow;
 import com.h3110w0r1d.t9launcher.R;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
 
+import io.alterac.blurkit.BlurLayout;
+
 public class AppPopMenu extends PopupWindow{
 	
 	private Context context;
 	
-	private int popWidth, popHeight;
+	private int popWidth;
+	private final int popHeight;
 	
 	private AppInfo currentApp;
 	
@@ -75,7 +78,7 @@ public class AppPopMenu extends PopupWindow{
 
 		int[] location = new int[2];
 		v.getLocationOnScreen(location);
-		
 		showAtLocation(v, Gravity.START | Gravity.TOP, location[0], location[1] - popHeight);
+
 	}
 }

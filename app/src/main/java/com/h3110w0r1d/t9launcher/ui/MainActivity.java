@@ -22,16 +22,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.h3110w0r1d.t9launcher.App;
 import com.h3110w0r1d.t9launcher.R;
 import com.h3110w0r1d.t9launcher.model.AppViewModel;
-import com.h3110w0r1d.t9launcher.model.DBHelper;
-import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
 import com.h3110w0r1d.t9launcher.widgets.AppListView;
 import com.h3110w0r1d.t9launcher.widgets.AppPopMenu;
-
-import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
-import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
-
-import java.util.HashSet;
 
 public class MainActivity extends AppCompatActivity{
 	
@@ -43,7 +36,7 @@ public class MainActivity extends AppCompatActivity{
 	
 	private AppViewModel appViewModel;
 
-	private boolean keyLongClick = false;
+	private boolean longClickDown = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -88,6 +81,7 @@ public class MainActivity extends AppCompatActivity{
 	}
 	
 	public void clearSearchAndBack(){
+		appViewModel.isShowingHideApp = false;
 		searchText.setText("");
 		appViewModel.searchApp("");
 		moveTaskToBack(true);
@@ -106,10 +100,11 @@ public class MainActivity extends AppCompatActivity{
 		@SuppressLint("ClickableViewAccessibility")
 		View.OnTouchListener t9btnTouch = (view, motionEvent) -> {
 			if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-				if (keyLongClick){
-					keyLongClick = false;
+				if (longClickDown) {
+					longClickDown = false;
 					return false;
 				}
+				appViewModel.isShowingHideApp = false;
 				int id = view.getId();
 				if(id == R.id.t9btn_0) searchText.append("0");
 				else if(id == R.id.t9btn_1) searchText.append("1");
@@ -127,8 +122,8 @@ public class MainActivity extends AppCompatActivity{
 		};
 
 		View.OnLongClickListener t9btnLongClick = view -> {
-			keyLongClick = true;
-			appViewModel.ShowHideApps();
+			longClickDown = true;
+			appViewModel.ShowHideApp();
 			return true;
 		};
 
@@ -212,4 +207,5 @@ public class MainActivity extends AppCompatActivity{
 			}
 		}
 	}
+
 }
