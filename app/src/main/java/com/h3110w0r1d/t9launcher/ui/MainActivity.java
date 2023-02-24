@@ -13,7 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,9 +26,10 @@ import com.h3110w0r1d.t9launcher.vo.AppInfo;
 import com.h3110w0r1d.t9launcher.widgets.AppListView;
 import com.h3110w0r1d.t9launcher.widgets.AppPopMenu;
 
+
 public class MainActivity extends AppCompatActivity{
 	
-	private EditText searchText;
+	private TextView searchText;
 	
 	private AppListView appListView;
 	
@@ -152,13 +153,15 @@ public class MainActivity extends AppCompatActivity{
 		
 		Button clear = findViewById(R.id.t9btn_clear);
 		clear.setOnClickListener(view -> {
-			int len = searchText.length();
+			appViewModel.isShowingHideApp = false;
+			int len = searchText.getText().length();
 			if(len > 0){
-				searchText.setText(searchText.getText().delete(len - 1, len));
+				searchText.setText(searchText.getText().toString().substring(0, len-1));
 			}
 			appViewModel.searchApp(searchText.getText().toString());
 		});
 		clear.setOnLongClickListener(view -> {
+			appViewModel.isShowingHideApp = false;
 			searchText.setText("");
 			appViewModel.searchApp("");
 			return true;
@@ -168,25 +171,20 @@ public class MainActivity extends AppCompatActivity{
 			startActivity(new Intent(this, SettingsActivity.class));
 			return true;
 		});
-		findViewById(R.id.t9btn_setting).setOnClickListener(view -> {
-			Toast.makeText(MainActivity.this, R.string.long_press_open_settings, Toast.LENGTH_SHORT).show();
-		});
+		findViewById(R.id.t9btn_setting).setOnClickListener(view -> Toast.makeText(MainActivity.this, R.string.long_press_open_settings, Toast.LENGTH_SHORT).show());
 
-		((SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout)).setOnRefreshListener(() -> {
-			new Thread(()-> {
-				((App) getApplication()).appViewModel.loadAppList(getApplication());
-				runOnUiThread(() -> {
-					((SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout)).setRefreshing(false);
-					appViewModel.searchApp(searchText.getText().toString());
-				});
-			}).start();
-		});
+		((SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout)).setOnRefreshListener(() -> new Thread(()-> {
+			((App) getApplication()).appViewModel.loadAppList(getApplication());
+			runOnUiThread(() -> {
+				((SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout)).setRefreshing(false);
+				appViewModel.searchApp(searchText.getText().toString());
+			});
+		}).start());
 	}
 
 	public void ignoreBatteryOptimization(Activity activity) {
 		PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-		boolean hasIgnored = false;
-		hasIgnored = powerManager.isIgnoringBatteryOptimizations(activity.getPackageName());
+		boolean hasIgnored = powerManager.isIgnoringBatteryOptimizations(activity.getPackageName());
 		//  判断当前APP是否有加入电池优化的白名单，如果没有，弹出加入电池优化的白名单的设置对话框。
 		if (!hasIgnored) {
 			try {//先调用系统显示 电池优化权限
