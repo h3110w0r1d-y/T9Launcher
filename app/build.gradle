@@ -28,9 +28,7 @@ android {
         minSdk 26
         targetSdk 33
         versionCode 4
-        versionName "1.1.1"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionName "1.1.2"
     }
 
     buildTypes {
@@ -51,16 +49,11 @@ android {
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.preference:preference:1.2.0'
-    implementation 'com.belerweb:pinyin4j:2.5.1'
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.databinding:databinding-runtime:7.4.1'
+    implementation 'androidx.preference:preference:1.2.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.alibaba:fastjson:2.0.24'
-    implementation 'io.alterac.blurkit:blurkit:1.1.1'
-
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'com.belerweb:pinyin4j:2.5.1'
+    implementation 'com.google.android.material:material:1.8.0'
 }
