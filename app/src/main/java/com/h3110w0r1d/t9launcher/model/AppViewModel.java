@@ -31,13 +31,15 @@ import com.alibaba.fastjson.TypeReference;
 import com.h3110w0r1d.t9launcher.App;
 import com.h3110w0r1d.t9launcher.R;
 import com.h3110w0r1d.t9launcher.utils.DBHelper;
-import com.h3110w0r1d.t9launcher.utils.ImageUtil;
 import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
 
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -71,7 +73,7 @@ public class AppViewModel extends AndroidViewModel{
 			Pinyin4jUtil.defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
 			Pinyin4jUtil.defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
 			try {
-				((App) getApplication()).appViewModel.AppListDB = new DBHelper((App) getApplication(), "AppList.db", null, 1).getWritableDatabase();
+				((App) getApplication()).appViewModel.AppListDB = new DBHelper((App) getApplication(), "AppList2.db", null, 1).getWritableDatabase();
 			} catch (Exception e) {
 				Toast.makeText(application, R.string.failed_init_database, Toast.LENGTH_LONG).show();
 			}
@@ -116,21 +118,25 @@ public class AppViewModel extends AndroidViewModel{
 		Cursor cursor = AppListDB.query(
 				"T_AppInfo",
 				new String[]{
-						"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
+						"packageName", "appName", "startCount", "isSystemApp", "searchData"
 				}, null, null, null, null, null);
 
+		File data_dir = context.getDataDir();
 		while (cursor.moveToNext()) {
 			String packageName = cursor.getString(0);
 			String appName = cursor.getString(1);
 			int startCount = cursor.getInt(2);
-			Bitmap appIcon = ImageUtil.Bytes2Bitmap(cursor.getBlob(3));
-			RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), appIcon);
+			File app_icon = new File(data_dir, packageName + ".icon");
+			if (!app_icon.exists()) {
+				continue;
+			}
+			RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), app_icon.getAbsolutePath());
 			roundedDrawable.getPaint().setAntiAlias(true);
 			float cornerRadius = roundedDrawable.getIntrinsicHeight() * 0.26f;
 			roundedDrawable.setCornerRadius(cornerRadius);
 
-			boolean isSystemApp = cursor.getInt(4) == 1;
-			List<List<String>> searchData = JSON.parseObject(cursor.getString(5),new TypeReference<List<List<String>>>(){});
+			boolean isSystemApp = cursor.getInt(3) == 1;
+			List<List<String>> searchData = JSON.parseObject(cursor.getString(4),new TypeReference<List<List<String>>>(){});
 			appList.add(new AppInfo(
 					packageName, appName, startCount, roundedDrawable, isSystemApp, searchData
 			));
@@ -227,7 +233,7 @@ public class AppViewModel extends AndroidViewModel{
 		Cursor cursor = AppListDB.query(
 				"T_AppInfo",
 				new String[]{
-						"packageName", "appName", "startCount", "appIcon", "isSystemApp", "searchData"
+						"packageName", "appName", "startCount", "isSystemApp", "searchData"
 				}, null, null, null, null, null);
 		List<String> needRemove = new ArrayList<>();
 		while (cursor.moveToNext()) {
@@ -249,6 +255,7 @@ public class AppViewModel extends AndroidViewModel{
 		searchApp(null);
 
 		new Thread(() -> {
+			File data_dir = context.getDataDir();
 			for(ResolveInfo resolveInfo : resolveInfoList){
 				try{
 					String packageName = resolveInfo.activityInfo.packageName;
@@ -257,9 +264,16 @@ public class AppViewModel extends AndroidViewModel{
 					Drawable icon = resolveInfo.loadIcon(packageManager);
 					RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), Drawable2IconBitmap(icon));
 					roundedDrawable.getPaint().setAntiAlias(true);
-
 					float cornerRadius = roundedDrawable.getIntrinsicHeight() * 0.26f;
 					roundedDrawable.setCornerRadius(cornerRadius);
+
+					File app_icon = new File(data_dir, packageName + ".icon");
+					try (FileOutputStream out = new FileOutputStream(app_icon)) {
+						assert roundedDrawable.getBitmap() != null;
+						roundedDrawable.getBitmap().compress(Bitmap.CompressFormat.PNG, 100, out);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 					List<List<String>> searchData = Pinyin4jUtil.getPinYin(appName);
 					ApplicationInfo applicationInfo = packageInfo.applicationInfo;
 					boolean isSystemApp = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
@@ -301,14 +315,14 @@ public class AppViewModel extends AndroidViewModel{
 		List<List<String>> searchData = app.getSearchData();
 		try {
 			assert appIcon != null;
-			AppListDB.execSQL("INSERT INTO T_AppInfo VALUES(?,?,?,?,?,?)",
+			AppListDB.execSQL("INSERT INTO T_AppInfo VALUES(?,?,?,?,?)",
 					new Object[]{
-							packageName, appName, 0, ImageUtil.Bitmap2Bytes(appIcon), isSystemApp ? 1 : 0, JSON.toJSONString(searchData)
+							packageName, appName, 0, isSystemApp ? 1 : 0, JSON.toJSONString(searchData)
 					});
 		} catch (Exception e) {
-			AppListDB.execSQL("UPDATE T_AppInfo SET appName = ?, appIcon = ?, isSystemApp = ?, searchData = ? WHERE packageName = ?",
+			AppListDB.execSQL("UPDATE T_AppInfo SET appName = ?, isSystemApp = ?, searchData = ? WHERE packageName = ?",
 					new Object[]{
-							appName, ImageUtil.Bitmap2Bytes(appIcon), isSystemApp ? 1 : 0, JSON.toJSONString(searchData), packageName
+							appName, isSystemApp ? 1 : 0, JSON.toJSONString(searchData), packageName
 					});
 		}
 	}

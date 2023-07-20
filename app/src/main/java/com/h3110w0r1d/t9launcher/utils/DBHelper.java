@@ -26,7 +26,6 @@ public class DBHelper extends SQLiteOpenHelper {
                     "packageName VARCHAR(256) NOT NULL UNIQUE," +
                     "appName NTEXT NOT NULL," +
                     "startCount INTEGER NOT NULL DEFAULT 0," +
-                    "appIcon TEXT NOT NULL," +
                     "isSystemApp BOOLEAN NOT NULL DEFAULT 0," +
                     "searchData TEXT NOT NULL)";
 }

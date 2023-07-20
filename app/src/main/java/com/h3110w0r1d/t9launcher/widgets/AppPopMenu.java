@@ -18,15 +18,12 @@ import android.widget.PopupWindow;
 import com.h3110w0r1d.t9launcher.R;
 import com.h3110w0r1d.t9launcher.vo.AppInfo;
 
-import io.alterac.blurkit.BlurLayout;
-
 public class AppPopMenu extends PopupWindow{
 	
-	private Context context;
-	
-	private int popWidth;
+	private final Context context;
+
 	private final int popHeight;
-	
+
 	private AppInfo currentApp;
 	
 	public AppPopMenu(Context context){
@@ -41,8 +38,7 @@ public class AppPopMenu extends PopupWindow{
 		
 		View contentView = LayoutInflater.from(context).inflate(R.layout.layout_app_pop, null);
 		contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-		
-		popWidth = contentView.getMeasuredWidth();
+
 		popHeight = contentView.getMeasuredHeight();
 
 		contentView.findViewById(R.id.pop_app_info).setOnClickListener(v -> {
