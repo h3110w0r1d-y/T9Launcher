@@ -26,8 +26,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.h3110w0r1d.t9launcher.App;
 import com.h3110w0r1d.t9launcher.R;
 import com.h3110w0r1d.t9launcher.utils.DBHelper;
@@ -136,13 +136,14 @@ public class AppViewModel extends AndroidViewModel{
 			roundedDrawable.setCornerRadius(cornerRadius);
 
 			boolean isSystemApp = cursor.getInt(3) == 1;
-			List<List<String>> searchData = JSON.parseObject(cursor.getString(4),new TypeReference<List<List<String>>>(){});
+			Gson gson = new Gson();
+			List<List<String>> searchData = gson.fromJson(cursor.getString(4),new TypeToken<List<List<String>>>(){}.getType());
 			appList.add(new AppInfo(
 					packageName, appName, startCount, roundedDrawable, isSystemApp, searchData
 			));
 		}
 		cursor.close();
-		if (appList.size() != 0) {
+		if (!appList.isEmpty()) {
 			setLoadingStatus(false);
 		}
 		RefreshAppInfo(context);
@@ -317,12 +318,12 @@ public class AppViewModel extends AndroidViewModel{
 			assert appIcon != null;
 			AppListDB.execSQL("INSERT INTO T_AppInfo VALUES(?,?,?,?,?)",
 					new Object[]{
-							packageName, appName, 0, isSystemApp ? 1 : 0, JSON.toJSONString(searchData)
+							packageName, appName, 0, isSystemApp ? 1 : 0, new Gson().toJson(searchData)
 					});
 		} catch (Exception e) {
 			AppListDB.execSQL("UPDATE T_AppInfo SET appName = ?, isSystemApp = ?, searchData = ? WHERE packageName = ?",
 					new Object[]{
-							appName, isSystemApp ? 1 : 0, JSON.toJSONString(searchData), packageName
+							appName, isSystemApp ? 1 : 0, new Gson().toJson(searchData), packageName
 					});
 		}
 	}

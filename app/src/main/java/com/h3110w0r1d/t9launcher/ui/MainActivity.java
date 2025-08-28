@@ -76,9 +76,11 @@ public class MainActivity extends AppCompatActivity{
 		ignoreBatteryOptimization(this);
 	}
 	
-	@Override
+    @SuppressLint("MissingSuperCall")
+    @Override
 	public void onBackPressed(){
 		clearSearchAndBack();
+
 	}
 	
 	public void clearSearchAndBack(){
