@@ -16,12 +16,12 @@
         android:theme="@style/Theme.T9Launcher">
         <activity
             android:name=".ui.HideAppActivity"
+            android:label="@string/hide_app_list"
             android:exported="false" />
         <activity
             android:name=".ui.SettingsActivity"
             android:exported="false"
-            android:label="@string/title_activity_settings"
-            android:theme="@style/Theme.T9Launcher.SettingActivity" />
+            android:label="@string/title_activity_settings" />
         <activity
             android:name=".ui.MainActivity"
             android:excludeFromRecents="true"

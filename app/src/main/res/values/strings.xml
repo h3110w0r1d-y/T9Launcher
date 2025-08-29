@@ -1,14 +1,14 @@
 <resources>
     <string name="app_name">T9 Launcher</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="hide_system_app">Hide system apps</string>
+    <string name="hide_system_app">Hide System Apps</string>
     <string name="clear">Clear</string>
     <string name="setting">Setting</string>
     <string name="app_info">App Detail</string>
     <string name="copy_package_name">Copy Package Name</string>
     <string name="long_press_open_settings">Long press to enter the setting</string>
     <string name="uninstall_app">Uninstall</string>
-    <string name="hide_app_list">Hide apps</string>
+    <string name="hide_app_list">Manage Hidden Apps</string>
     <string name="failed_init_database">Failed to init database, please clear app data</string>
     <string name="search">Search</string>
     <string name="about">About</string>
@@ -16,5 +16,6 @@
     <string name="github">Github</string>
     <string name="version">Version</string>
     <string name="donate">Donate</string>
+    <string name="hide">Hiding</string>
 
 </resources>
