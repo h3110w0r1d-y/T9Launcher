@@ -1,63 +1,59 @@
-package com.h3110w0r1d.t9launcher.ui;
+package com.h3110w0r1d.t9launcher.ui
 
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.MenuItem;
+import android.content.Intent
+import android.os.Bundle
+import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import com.h3110w0r1d.t9launcher.App
+import com.h3110w0r1d.t9launcher.BuildConfig
+import com.h3110w0r1d.t9launcher.R
+import androidx.core.net.toUri
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceFragmentCompat;
-
-import com.h3110w0r1d.t9launcher.App;
-import com.h3110w0r1d.t9launcher.BuildConfig;
-import com.h3110w0r1d.t9launcher.R;
-
-public class SettingsActivity extends AppCompatActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings_activity);
+class SettingsActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.settings_activity)
         if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.settings, new SettingsFragment())
-                    .commit();
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.settings, SettingsFragment())
+                .commit()
         }
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    class SettingsFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            setPreferencesFromResource(R.xml.root_preferences, rootKey)
+            findPreference<Preference?>("hide_app_list")!!.onPreferenceClickListener =
+                Preference.OnPreferenceClickListener { preference: Preference? ->
+                    startActivity(Intent(activity, HideAppActivity::class.java))
+                    false
+                }
+            findPreference<Preference?>("hide_system_app")!!.onPreferenceChangeListener =
+                Preference.OnPreferenceChangeListener { preference: Preference?, newValue: Any ->
+                    (requireActivity().application as App).appViewModel.setHideSystemApp(
+                        (newValue as Boolean)
+                    )
+                    true
+                }
+            findPreference<Preference?>("github")!!.onPreferenceClickListener =
+                Preference.OnPreferenceClickListener { preference: Preference? ->
+                    val uri = "https://github.com/h3110w0r1d-y/T9Launcher".toUri()
+                    startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    true
+                }
+            findPreference<Preference?>("version")!!.setSummary(BuildConfig.VERSION_NAME)
         }
     }
 
-    public static class SettingsFragment extends PreferenceFragmentCompat {
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.root_preferences, rootKey);
-            findPreference("hide_app_list").setOnPreferenceClickListener(preference -> {
-                startActivity(new Intent(getActivity(), HideAppActivity.class));
-                return false;
-            });
-            findPreference("hide_system_app").setOnPreferenceChangeListener((preference, newValue) -> {
-                ((App) requireActivity().getApplication()).appViewModel.setHideSystemApp((Boolean) newValue);
-                return true;
-            });
-            findPreference("github").setOnPreferenceClickListener(preference -> {
-                Uri uri = Uri.parse("https://github.com/h3110w0r1d-y/T9Launcher");
-                startActivity(new Intent(Intent.ACTION_VIEW,uri));
-                return true;
-            });
-            findPreference("version").setSummary(BuildConfig.VERSION_NAME);
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            this.finish() // back button
+            return true
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            this.finish(); // back button
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item)
     }
 }

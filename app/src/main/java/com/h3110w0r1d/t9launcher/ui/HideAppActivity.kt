@@ -1,139 +1,124 @@
-package com.h3110w0r1d.t9launcher.ui;
+package com.h3110w0r1d.t9launcher.ui
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
+import android.content.Context
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.CheckBox
+import android.widget.ImageView
+import android.widget.ListView
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.Observer
+import com.h3110w0r1d.t9launcher.App
+import com.h3110w0r1d.t9launcher.R
+import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.vo.AppInfo
 
-import android.content.Context;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
+class HideAppActivity : AppCompatActivity() {
+    private val appViewModel: AppViewModel by lazy { (application as App).appViewModel }
 
-import com.h3110w0r1d.t9launcher.App;
-import com.h3110w0r1d.t9launcher.R;
-import com.h3110w0r1d.t9launcher.model.AppViewModel;
-import com.h3110w0r1d.t9launcher.vo.AppInfo;
+    private val hideAppList: MutableList<AppInfo> = ArrayList()
 
-import java.util.ArrayList;
-import java.util.List;
+    private val adapter: HideAppListAdapter by lazy {
+        HideAppListAdapter(
+            this,
+            R.layout.hide_app_list_item,
+            hideAppList
+        )
+    }
 
-public class HideAppActivity extends AppCompatActivity {
 
-    private AppViewModel appViewModel;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setContentView(R.layout.activity_hide_app)
 
-    private HideAppListAdapter adapter;
+        findViewById<ListView>(R.id.hideAppListView).adapter = adapter
 
-    private final List<AppInfo> hideAppList = new ArrayList<>();
+        appViewModel.hideAppListLiveData.observe(
+            this,
+            Observer { searchResult: ArrayList<AppInfo> ->
+                adapter.clear()
+                adapter.addAll(searchResult)
+            })
+        appViewModel.searchHideApp("")
+    }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null){
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            this.finish()
+            return true
         }
-        setContentView(R.layout.activity_hide_app);
-        appViewModel = ((App)getApplication()).appViewModel;
-
-        adapter = new HideAppListAdapter(this, R.layout.hide_app_list_item, hideAppList);
-
-        ListView listView = findViewById(R.id.hideAppListView);
-        listView.setAdapter(adapter);
-
-        appViewModel.getHideAppListLiveData().observe(this, searchResult -> {
-            adapter.clear();
-            adapter.addAll(searchResult);
-        });
-        appViewModel.searchHideApp("");
+        return super.onOptionsItemSelected(item)
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            this.finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    override fun finish() {
+        appViewModel.saveHideList()
+        super.finish()
     }
 
-    @Override
-    public void finish() {
-        appViewModel.SaveHideList();
-        super.finish();
+    override fun onBackPressed() {
+        appViewModel.saveHideList()
+        super.onBackPressed()
     }
 
-    @Override
-    public void onBackPressed() {
-        appViewModel.SaveHideList();
-        super.onBackPressed();
-    }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.hide_app_menu, menu)
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.hide_app_menu, menu);
-
-        SearchView sv = (SearchView) menu.findItem(R.id.search).getActionView();
+        val sv = menu.findItem(R.id.search).actionView as SearchView
         //设置监听
-        sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                appViewModel.searchHideApp(query);
-                return false;
+        sv.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                appViewModel.searchHideApp(query)
+                return false
             }
 
-            @Override
-            public boolean onQueryTextChange(String query) {
-                appViewModel.searchHideApp(query);
-                return false;
+            override fun onQueryTextChange(query: String): Boolean {
+                appViewModel.searchHideApp(query)
+                return false
             }
-        });
-        return super.onCreateOptionsMenu(menu);
+        })
+        return super.onCreateOptionsMenu(menu)
     }
 
-    private class HideAppListAdapter extends ArrayAdapter<AppInfo> {
-        Context context;
-        List<AppInfo> array;
-        public HideAppListAdapter(@NonNull Context context, int resource, @NonNull List<AppInfo> objects) {
-            super(context, resource, objects);
-            this.context = context;
-            this.array = objects;
-        }
+    inner class HideAppListAdapter(
+        context: Context,
+        resource: Int,
+        objects: MutableList<AppInfo>
+    ) : ArrayAdapter<AppInfo?>(context, resource, objects) {
+        var array: MutableList<AppInfo> = objects
 
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View view, @NonNull ViewGroup parent){
-            if(view == null){
-                view = LayoutInflater.from(getContext()).inflate(R.layout.hide_app_list_item, parent, false);
+        override fun getView(position: Int, view: View?, parent: ViewGroup): View {
+            var view = view
+            if (view == null) {
+                view = LayoutInflater.from(context)
+                    .inflate(R.layout.hide_app_list_item, parent, false)
             }
-            AppInfo app = array.get(position);
+            val app = array[position]
 
-            ImageView icon = view.findViewById(R.id.appIcon);
-            TextView text1 = view.findViewById(R.id.text1);
-            TextView text2 = view.findViewById(R.id.text2);
-            CheckBox checkBox = view.findViewById(R.id.checkbox);
+            val icon = view.findViewById<ImageView>(R.id.appIcon)
+            val text1 = view.findViewById<TextView>(R.id.text1)
+            val text2 = view.findViewById<TextView>(R.id.text2)
+            val checkBox = view.findViewById<CheckBox>(R.id.checkbox)
 
-            icon.setImageDrawable(app.getAppIcon());
-            text1.setText(app.getAppName());
-            text2.setText(app.getPackageName());
-            checkBox.setChecked(appViewModel.isAppHide(app.getPackageName()));
+            icon.setImageDrawable(app.appIcon)
+            text1.text = app.appName
+            text2.text = app.packageName
+            checkBox.isChecked = appViewModel.isAppHide(app.packageName)
 
-            view.setOnClickListener(v -> {
-                checkBox.setChecked(!checkBox.isChecked());
-                appViewModel.setAppHide(app.getPackageName(), checkBox.isChecked());
-            });
+            view.setOnClickListener { v: View? ->
+                checkBox.isChecked = !checkBox.isChecked
+                appViewModel.setAppHide(app.packageName, checkBox.isChecked)
+            }
 
-            return view;
+            return view
         }
     }
 }

@@ -1,28 +1,24 @@
-package com.h3110w0r1d.t9launcher;
+package com.h3110w0r1d.t9launcher
 
-import android.app.Application;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.app.Application
+import android.content.Intent
+import android.content.IntentFilter
+import com.h3110w0r1d.t9launcher.model.AppViewModel
 
-import com.h3110w0r1d.t9launcher.model.AppViewModel;
+class App : Application() {
+	val appViewModel: AppViewModel by lazy { AppViewModel(this) }
 
-public class App extends Application{
-	
-	public AppViewModel appViewModel;
-	
-	@Override
-	public void onCreate(){
-		super.onCreate();
-		register();
-		appViewModel = new AppViewModel(this);
-	}
+    override fun onCreate() {
+        super.onCreate()
+        register()
+    }
 
-	private void register() {
-		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-		intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-		intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-		intentFilter.addDataScheme("package");
-		registerReceiver(new PackageReceiver(), intentFilter);
-	}
+    private fun register() {
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED)
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED)
+        intentFilter.addDataScheme("package")
+        registerReceiver(PackageReceiver(), intentFilter)
+    }
 }

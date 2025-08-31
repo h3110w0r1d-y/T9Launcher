@@ -1,63 +1,50 @@
-package com.h3110w0r1d.t9launcher.widgets;
+package com.h3110w0r1d.t9launcher.widgets
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.widget.GridView;
+import android.content.Context
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.widget.GridView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+class GSwipeRefreshLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    SwipeRefreshLayout(context, attrs) {
+    private var mHasScrollingChild = false
+    private var mScrollingChild: GridView? = null
+    private var mDragUp = false
+    private var mDragPosition = 0f
 
-
-public class GSwipeRefreshLayout extends SwipeRefreshLayout {
-    private boolean mHasScrollingChild = false;
-    private GridView mScrollingChild = null;
-    private boolean mDragUp = false;
-    private float mDragPosition = 0;
-
-    public GSwipeRefreshLayout(Context context) {
-        this(context, null);
-    }
-
-    public GSwipeRefreshLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        if(getChildCount() > 1 && getChildAt(1) instanceof GridView) {
-            mHasScrollingChild = true;
-            mScrollingChild = (GridView) getChildAt(1);
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        if (childCount > 1 && getChildAt(1) is GridView) {
+            mHasScrollingChild = true
+            mScrollingChild = getChildAt(1) as GridView?
         }
     }
 
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        if(mHasScrollingChild) {
-            switch (ev.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    setEnabled(true);
-                    mDragPosition = ev.getY();
-                    if(mScrollingChild.getChildAt(0) != null &&  mScrollingChild.getChildAt(0).getTop() < 45) {
-                        setEnabled(false);
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (mHasScrollingChild) {
+            when (ev.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    isEnabled = true
+                    mDragPosition = ev.y
+                    if (mScrollingChild?.getChildAt(0) != null && mScrollingChild?.getChildAt(0)?.top!! < 45) {
+                        isEnabled = false
                     }
-                    break;
-                case MotionEvent.ACTION_MOVE:
+                }
+                MotionEvent.ACTION_MOVE -> {
                     if (mDragUp) {
-                        break;
+                        return super.dispatchTouchEvent(ev)
                     }
-                    if (ev.getY() - mDragPosition < 0) {
-                        mDragUp = true;
-                        setEnabled(false);
+                    if (ev.y - mDragPosition < 0) {
+                        mDragUp = true
+                        isEnabled = false
                     }
-                    break;
-                case MotionEvent.ACTION_UP:
-                    mDragUp = false;
-                    break;
+                }
+                MotionEvent.ACTION_UP -> {
+                    mDragUp = false
+                }
             }
         }
-        return super.dispatchTouchEvent(ev);
+        return super.dispatchTouchEvent(ev)
     }
-
 }

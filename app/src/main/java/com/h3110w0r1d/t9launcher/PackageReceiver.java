@@ -4,15 +4,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import java.util.Objects;
+
 public class PackageReceiver extends BroadcastReceiver{
 	@Override
 	public void onReceive(Context context, Intent intent){
-		if(intent.getAction().equals("android.intent.action.PACKAGE_ADDED")){
-			((App)context.getApplicationContext()).appViewModel.loadAppList(context);
-		}else if(intent.getAction().equals("android.intent.action.PACKAGE_REMOVED")){
-			((App)context.getApplicationContext()).appViewModel.loadAppList(context);
-		} else if (intent.getAction().equals("android.intent.action.PACKAGE_REPLACED")) {
-			((App)context.getApplicationContext()).appViewModel.loadAppList(context);
-		}
+//		if(Objects.equals(intent.getAction(), "android.intent.action.PACKAGE_ADDED")){
+//			Objects.requireNonNull(((App) context.getApplicationContext()).getAppViewModel()).loadAppList(context);
+//		}else if(Objects.equals(intent.getAction(), "android.intent.action.PACKAGE_REMOVED")){
+//			Objects.requireNonNull(((App) context.getApplicationContext()).getAppViewModel()).loadAppList(context);
+//		} else if (Objects.equals(intent.getAction(), "android.intent.action.PACKAGE_REPLACED")) {
+//			Objects.requireNonNull(((App) context.getApplicationContext()).getAppViewModel()).loadAppList(context);
+//		}
 	}
 }

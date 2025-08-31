@@ -1,131 +1,87 @@
-package com.h3110w0r1d.t9launcher.utils;
+package com.h3110w0r1d.t9launcher.utils
 
-import com.h3110w0r1d.t9launcher.vo.AppInfo;
+import com.h3110w0r1d.t9launcher.vo.AppInfo
+import net.sourceforge.pinyin4j.PinyinHelper
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat
+import java.util.Locale
 
-import net.sourceforge.pinyin4j.PinyinHelper;
-import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+object Pinyin4jUtil {
+    var defaultFormat: HanyuPinyinOutputFormat = HanyuPinyinOutputFormat()
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-public class Pinyin4jUtil {
-    public static HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();
-
-    public static String Letter2Number(String letters) {
-        StringBuilder number = new StringBuilder();
-        for (int i = 0; i < letters.length(); i++) {
-            char c = letters.charAt(i);
-            switch (c) {
-                case 'a':
-                case 'b':
-                case 'c':
-                    number.append("2");
-                    break;
-                case 'd':
-                case 'e':
-                case 'f':
-                    number.append("3");
-                    break;
-                case 'g':
-                case 'h':
-                case 'i':
-                    number.append("4");
-                    break;
-                case 'j':
-                case 'k':
-                case 'l':
-                    number.append("5");
-                    break;
-                case 'm':
-                case 'n':
-                case 'o':
-                    number.append("6");
-                    break;
-                case 'p':
-                case 'q':
-                case 'r':
-                case 's':
-                    number.append("7");
-                    break;
-                case 't':
-                case 'u':
-                case 'v':
-                    number.append("8");
-                    break;
-                case 'w':
-                case 'x':
-                case 'y':
-                case 'z':
-                    number.append("9");
-                    break;
-                default:
-                    number.append("0");
-                    break;
+    fun letter2Number(letters: String): String {
+        val number = StringBuilder()
+        for (i in 0..<letters.length) {
+            val c = letters[i]
+            when (c) {
+                'a', 'b', 'c' -> number.append("2")
+                'd', 'e', 'f' -> number.append("3")
+                'g', 'h', 'i' -> number.append("4")
+                'j', 'k', 'l' -> number.append("5")
+                'm', 'n', 'o' -> number.append("6")
+                'p', 'q', 'r', 's' -> number.append("7")
+                't', 'u', 'v' -> number.append("8")
+                'w', 'x', 'y', 'z' -> number.append("9")
+                else -> number.append("0")
             }
         }
-        return number.toString();
+        return number.toString()
     }
 
-    public static List<List<String>> getPinYin(String str) {
-        List<List<String>> result = new ArrayList<>();
-        StringBuilder LatterAndNumber = new StringBuilder();
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
+    fun getPinYin(str: String): MutableList<MutableList<String>> {
+        val result: MutableList<MutableList<String>> = ArrayList()
+        var latterAndNumber = StringBuilder()
+        for (i in 0..<str.length) {
+            val c = str.get(i)
             if ('a' <= c && c <= 'z') {
-                LatterAndNumber.append(String.valueOf(c).toLowerCase());
-                continue;
+                latterAndNumber.append(c.toString().lowercase(Locale.getDefault()))
+                continue
             }
-            if (LatterAndNumber.length() != 0) {
-                List<String> newlist = new ArrayList<>();
-                newlist.add(Letter2Number(LatterAndNumber.toString()));
-                newlist.add(Letter2Number(LatterAndNumber.substring(0, 1)));
-                result.add(newlist);
-                LatterAndNumber = new StringBuilder();
+            if (latterAndNumber.isNotEmpty()) {
+                val newList: MutableList<String> = ArrayList()
+                newList.add(letter2Number(latterAndNumber.toString()))
+                newList.add(letter2Number(latterAndNumber.substring(0, 1)))
+                result.add(newList)
+                latterAndNumber = StringBuilder()
             }
             if ('A' <= c && c <= 'Z') {
-                LatterAndNumber.append(String.valueOf(c).toLowerCase());
-                continue;
+                latterAndNumber.append(c.toString().lowercase(Locale.getDefault()))
+                continue
             }
 
-            String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray(c); // 获取拼音列表
+            val pinyinArray = PinyinHelper.toHanyuPinyinStringArray(c) // 获取拼音列表
             if (pinyinArray != null) {
-                List<String> pinyinList = Arrays.asList(pinyinArray);
-                pinyinList.replaceAll(s -> s.substring(0, s.length() - 1)); // 去掉声调
-                List<String> newlist = new ArrayList<>();
-                int size = pinyinList.size();
+                val pinyinList = pinyinArray.map { s: String -> s.substring(0, s.length - 1) } // 去掉声调
+                val newList: MutableList<String> = ArrayList()
+                val size = pinyinList.size
 
-                Set<String> pinyinset = new HashSet<>();
-                for (int j = 0; j < size; j++) {
-                    if(pinyinset.add(pinyinList.get(j).substring(0, 1))) {
-                        newlist.add(Letter2Number(pinyinList.get(j).substring(0, 1)));
+                val pinyinSet: MutableSet<String> = HashSet()
+                for (j in 0..<size) {
+                    if (pinyinSet.add(pinyinList[j].substring(0, 1))) {
+                        newList.add(letter2Number(pinyinList[j].substring(0, 1)))
                     }
-                    if(pinyinset.add(pinyinList.get(j))) {
-                        newlist.add(Letter2Number(pinyinList.get(j)));
+                    if (pinyinSet.add(pinyinList[j])) {
+                        newList.add(letter2Number(pinyinList[j]))
                     }
                 }
-                result.add(newlist);
-                continue;
+                result.add(newList)
+                continue
             }
-            if (" ".equals(String.valueOf(c))) {
-                continue;
+            if (" " == c.toString()) {
+                continue
             }
-            if ('0' <= c && c <= '9'){
-                result.add(Collections.singletonList(String.valueOf(c)));
-                continue;
+            if ('0' <= c && c <= '9') {
+                result.add(mutableListOf(c.toString()))
+                continue
             }
-            result.add(Collections.singletonList("0"));
+            result.add(mutableListOf("0"))
         }
 
-        if (LatterAndNumber.length() != 0) {
-            List<String> newlist = new ArrayList<>();
-            newlist.add(Letter2Number(LatterAndNumber.toString()));
-            result.add(newlist);
+        if (latterAndNumber.isNotEmpty()) {
+            val newList: MutableList<String> = ArrayList()
+            newList.add(letter2Number(latterAndNumber.toString()))
+            result.add(newList)
         }
-        return result;
+        return result
     }
 
     /**
@@ -134,38 +90,43 @@ public class Pinyin4jUtil {
      * @param searchText
      * @return 匹配度 匹配度为0时匹配失败
      */
-    public static float Search(AppInfo app, String searchText) {
-        List<List<String>> data = app.getSearchData();
-        for (int i = 0; i < data.size(); i++) {
-            int position = search(data, searchText, i, 0);
-            if (position > 0){
-                return (float)(position-i)/(float)data.size();
+    fun Search(app: AppInfo, searchText: String): Float {
+        val data = app.searchData
+        for (i in data.indices) {
+            val position = search(data, searchText, i, 0)
+            if (position > 0) {
+                return (position - i).toFloat() / data.size.toFloat()
             }
         }
-        return 0;
+        return 0f
     }
 
     // 递归搜索 返回0匹配失败, 否则返回匹配到了第几个字
-    private static int search(List<List<String>> data, String searchText, int i, int k) {
-        if (searchText.length() <= k) { // 全部匹配完成
-            return i; // 返回匹配到了第几个字
+    private fun search(
+        data: MutableList<MutableList<String>>,
+        searchText: String,
+        i: Int,
+        k: Int
+    ): Int {
+        if (searchText.length <= k) { // 全部匹配完成
+            return i // 返回匹配到了第几个字
         }
-        if (i >= data.size()) { // 没有下一个字了
-            return 0;
+        if (i >= data.size) { // 没有下一个字了
+            return 0
         }
 
-        for (int j = 0; j < data.get(i).size(); j++) {
-            if (match(searchText, data.get(i).get(j), k)) { // 当前字匹配, 匹配下一个字
-                int position = search(data, searchText, i + 1, k + data.get(i).get(j).length());
+        for (j in data[i].indices) {
+            if (match(searchText, data[i][j], k)) { // 当前字匹配, 匹配下一个字
+                val position = search(data, searchText, i + 1, k + data[i][j].length)
                 if (position != 0) {
-                    return position;
+                    return position
                 }
             }
         }
-        return 0;
+        return 0
     }
 
-    private static boolean match(String searchText, String chr, int k) {
-        return searchText.startsWith(chr, k) || chr.startsWith(searchText.substring(k));
+    private fun match(searchText: String, chr: String, k: Int): Boolean {
+        return searchText.startsWith(chr, k) || chr.startsWith(searchText.substring(k))
     }
 }
