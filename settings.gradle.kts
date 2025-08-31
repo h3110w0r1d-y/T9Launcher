@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "T9 Launcher"
-include ':app'
+include(":app")
