@@ -1,11 +1,7 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+<resources>
     <style name="Theme.T9Launcher" parent="Theme.AppCompat.DayNight">
 
     </style>
-<!--    <style name="Theme.T9Launcher.SettingsActivity" parent="Theme.AppCompat.DayNight">-->
-
-<!--    </style>-->
     <style name="Theme.T9Launcher.MainActivity" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -19,8 +15,5 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowBackground">@android:color/transparent</item>
 
-<!--        <item name="android:windowDisablePreview">true</item>-->
-<!--        <item name="android:windowContentOverlay">@null</item>-->
-<!--        <item name="android:backgroundDimEnabled">false</item>-->
     </style>
 </resources>

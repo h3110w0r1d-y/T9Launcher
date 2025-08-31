@@ -33,7 +33,7 @@ public class HideAppActivity extends AppCompatActivity {
 
     private HideAppListAdapter adapter;
 
-    private List<AppInfo> hideAppList = new ArrayList<>();
+    private final List<AppInfo> hideAppList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
