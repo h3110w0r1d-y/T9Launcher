@@ -3,6 +3,7 @@
     <string name="app_name">T9启动器</string>
     <string name="title_activity_settings">设置</string>
     <string name="clear">清除</string>
+    <string name="delete">删除</string>
     <string name="setting">设置</string>
     <string name="app_info">应用信息</string>
     <string name="copy_package_name">复制包名</string>
@@ -18,4 +19,8 @@
     <string name="version">版本</string>
     <string name="donate">捐赠</string>
     <string name="hide">隐藏</string>
+    <string name="repository">仓库</string>
+    <string name="appearance">外观</string>
+    <string name="keyboard_style">键盘样式</string>
+    <string name="app_list_style">APP列表样式</string>
 </resources>

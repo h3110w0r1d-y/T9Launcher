@@ -3,6 +3,7 @@
     <string name="title_activity_settings">Settings</string>
     <string name="hide_system_app">Hide System Apps</string>
     <string name="clear">Clear</string>
+    <string name="delete">Delete</string>
     <string name="setting">Setting</string>
     <string name="app_info">App Detail</string>
     <string name="copy_package_name">Copy Package Name</string>
@@ -17,5 +18,8 @@
     <string name="version">Version</string>
     <string name="donate">Donate</string>
     <string name="hide">Hiding</string>
-
+    <string name="repository">Repository</string>
+    <string name="appearance">Appearance</string>
+    <string name="keyboard_style">Keyboard Sryle</string>
+    <string name="app_list_style">App List Style</string>
 </resources>

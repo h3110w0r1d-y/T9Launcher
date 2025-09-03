@@ -1,54 +1,76 @@
 package com.h3110w0r1d.t9launcher.vo
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
+import android.provider.Settings
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.core.net.toUri
 
 class AppInfo(
+    val className: String,
     val packageName: String,
     var appName: String,
     var startCount: Int,
-    var appIcon: Drawable,
-    isSystemApp: Boolean,
-    searchData: MutableList<MutableList<String>>
+    var appIcon: ImageBitmap,
+    var isSystemApp: Boolean,
+    var searchData: ArrayList<ArrayList<String>>,
 ) {
-    var isSystemApp: Boolean
-
     var matchRate: Float = 0f
-    var searchData: MutableList<MutableList<String>>
 
     class SortByMatchRate : Comparator<AppInfo> {
-        override fun compare(p0: AppInfo, p1: AppInfo): Int {
+        override fun compare(
+            p0: AppInfo,
+            p1: AppInfo,
+        ): Int {
             if (p0.matchRate == p1.matchRate) {
                 return 0
             }
             return if (p0.matchRate > p1.matchRate) -1 else 1
         }
-
     }
 
     class SortByStartCount : Comparator<AppInfo> {
-        override fun compare(p0: AppInfo, p1: AppInfo): Int {
-            return p1.startCount - p0.startCount
-        }
-    }
-
-
-    init {
-        this.startCount = startCount
-        this.appIcon = appIcon
-        this.isSystemApp = isSystemApp
-        this.searchData = searchData
+        override fun compare(
+            p0: AppInfo,
+            p1: AppInfo,
+        ): Int = p1.startCount - p0.startCount
     }
 
     fun start(ctx: Context): Boolean {
-        val intent = ctx.packageManager.getLaunchIntentForPackage(this.packageName)
-        if (intent != null) {
-            this.startCount += 1
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val componentName = ComponentName(packageName, className)
+        val intent =
+            Intent(Intent.ACTION_MAIN).apply {
+                component = componentName
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        try {
             ctx.startActivity(intent)
             return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
         }
-        return false
+    }
+
+    fun detail(context: Context) {
+        val intent = Intent()
+        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+        intent.data = "package:$packageName".toUri()
+        context.startActivity(intent)
+    }
+
+    fun uninstall(context: Context) {
+        val intent = Intent(Intent.ACTION_DELETE)
+        intent.data = "package:$packageName".toUri()
+        context.startActivity(intent)
+    }
+
+    fun copyPackageName(context: Context) {
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("text", packageName)
+        clipboard.setPrimaryClip(clip)
     }
 }

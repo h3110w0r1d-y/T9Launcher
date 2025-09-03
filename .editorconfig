@@ -1,0 +1,2 @@
+[*.kt]
+ktlint_standard_function-naming = disabled

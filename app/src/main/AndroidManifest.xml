@@ -16,15 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.T9Launcher">
         <activity
-            android:name=".ui.HideAppActivity"
-            android:label="@string/hide_app_list"
-            android:exported="false" />
-        <activity
-            android:name=".ui.SettingsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_settings" />
-        <activity
-            android:name=".ui.MainActivity"
+            android:name=".activity.MainActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:launchMode="singleTask"
@@ -34,19 +26,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <receiver
-            android:name=".PackageReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <action android:name="android.intent.action.PACKAGE_REPLACED" />
-                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-
-                <data android:scheme="package" />
-            </intent-filter>
-        </receiver>
     </application>
-
 </manifest>
