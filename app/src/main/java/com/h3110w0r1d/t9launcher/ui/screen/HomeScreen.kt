@@ -30,7 +30,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -123,11 +122,6 @@ fun HomeScreen(
                         CircularProgressIndicator()
                     }
                 } else {
-                    val lazyGridState = rememberLazyGridState()
-                    val isAtTop =
-                        lazyGridState.firstVisibleItemIndex == 0 &&
-                            lazyGridState.firstVisibleItemScrollOffset == 0
-
                     PullToRefreshBox(
                         isRefreshing = isRefreshing,
                         onRefresh = {
@@ -231,13 +225,17 @@ fun HomeScreen(
                         }
                     },
                     onLongClick = { text ->
-                        if (text == deleteString) {
-                            searchText = ""
-                            viewModel.searchApp("")
-                        } else if (text == settingString) {
-                            navController.navigate("setting")
-                        } else {
-                            viewModel.showHideApp()
+                        when (text) {
+                            deleteString -> {
+                                searchText = ""
+                                viewModel.searchApp("")
+                            }
+                            settingString -> {
+                                navController.navigate("setting")
+                            }
+                            else -> {
+                                viewModel.showHideApp()
+                            }
                         }
                     },
                 )

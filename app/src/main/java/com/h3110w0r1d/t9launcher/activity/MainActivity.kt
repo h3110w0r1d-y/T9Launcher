@@ -1,22 +1,16 @@
 package com.h3110w0r1d.t9launcher.activity
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import com.h3110w0r1d.t9launcher.ui.AppNavigation
 import com.h3110w0r1d.t9launcher.ui.theme.T9LauncherTheme
@@ -24,11 +18,8 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-//    private var broadCastReceiver: BroadcastReceiver? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("MainActivityLifecycle", "onCreate")
         enableEdgeToEdge()
         initStatusBar()
         ignoreBatteryOptimization()
@@ -38,12 +29,6 @@ class MainActivity : ComponentActivity() {
                 AppNavigation()
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("MainActivityLifecycle", "onDestroy")
-//        unregisterReceiver(broadCastReceiver)
     }
 
     private fun initStatusBar() {

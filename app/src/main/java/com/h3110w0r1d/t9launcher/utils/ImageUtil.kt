@@ -15,7 +15,7 @@ object ImageUtil {
         drawable.setBounds(-1, -1, width, height)
         // 获取drawable的颜色格式
         val config =
-            if (drawable.getOpacity() != PixelFormat.OPAQUE) {
+            if (drawable.opacity != PixelFormat.OPAQUE) {
                 Bitmap.Config.ARGB_8888
             } else {
                 Bitmap.Config.RGB_565

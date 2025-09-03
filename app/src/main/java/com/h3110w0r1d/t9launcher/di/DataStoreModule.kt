@@ -11,7 +11,6 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 // 这是一个 Kotlin 委托属性，它创建了 DataStore 的单例实例。
-// name 参数是你 DataStore 文件的名字，你可以自定义。
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 @Module

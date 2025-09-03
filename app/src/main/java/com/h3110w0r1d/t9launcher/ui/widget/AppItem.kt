@@ -56,7 +56,7 @@ fun AppItem(
                             scaleTarget = 0.9f
                             try {
                                 awaitRelease()
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 // 长按成功，这里不做处理
                             }
                             scaleTarget = 1f
