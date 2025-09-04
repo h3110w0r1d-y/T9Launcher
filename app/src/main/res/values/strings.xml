@@ -22,4 +22,18 @@
     <string name="appearance">Appearance</string>
     <string name="keyboard_style">Keyboard Sryle</string>
     <string name="app_list_style">App List Style</string>
+    <string name="icon_size">Icon Size</string>
+    <string name="icon_horizon_padding">Icon Horizon Padding</string>
+    <string name="icon_vertical_padding">Icon Vertical Padding</string>
+    <string name="row_spacing">Row Spacing</string>
+    <string name="grid_columns">Grid Columns</string>
+    <string name="app_list_height">App List Height</string>
+    <string name="save_changes_message">The style has been modified. Do you want to save it?</string>
+    <string name="save">Save</string>
+    <string name="dont_save">Don\'t Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="save_changes_title">Save Changes</string>
+    <string name="keyboard_height">Keyboard Height</string>
+    <string name="keyboard_width">Keyboard Width</string>
+    <string name="keyboard_bottom_padding">Bottom Padding</string>
 </resources>

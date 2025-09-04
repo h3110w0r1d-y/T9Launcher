@@ -6,6 +6,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,6 +34,17 @@ import javax.inject.Inject
 data class AppConfig(
     val isHideSystemApp: Boolean = false,
     val hiddenClassNames: Set<String> = emptySet(),
+    // 应用列表样式配置
+    val iconSize: Float = 50f,
+    val iconHorizonPadding: Float = 10f,
+    val iconVerticalPadding: Float = 10f,
+    val rowSpacing: Float = 10f,
+    val gridColumns: Int = 5,
+    val appListHeight: Float = 210f,
+    // 键盘样式配置
+    val keyboardButtonHeight: Float = 60f,
+    val keyboardWidth: Float = .8f,
+    val keyboardBottomPadding: Float = 10f,
 )
 
 @HiltViewModel
@@ -48,12 +61,31 @@ class AppViewModel
 
         private val isHideSystemAppKey = booleanPreferencesKey("is_hide_system_app")
         private val hiddenClassNamesKey = stringSetPreferencesKey("hidden_class_names")
+        private val iconSizeKey = floatPreferencesKey("icon_size")
+        private val iconHorizonPaddingKey = floatPreferencesKey("icon_horizon_padding")
+        private val iconVerticalPaddingKey = floatPreferencesKey("icon_vertical_padding")
+        private val rowSpacingKey = floatPreferencesKey("row_spacing")
+        private val gridColumnsKey = intPreferencesKey("grid_columns")
+        private val appListHeightKey = floatPreferencesKey("app_list_height")
+        private val keyboardButtonHeightKey = floatPreferencesKey("keyboard_button_height")
+        private val keyboardWidthKey = floatPreferencesKey("keyboard_width")
+        private val keyboardBottomPaddingKey = floatPreferencesKey("keyboard_bottom_padding")
+
         val appConfig: StateFlow<AppConfig> =
             dataStore.data
                 .map { preferences ->
                     AppConfig(
                         isHideSystemApp = preferences[isHideSystemAppKey] ?: false,
                         hiddenClassNames = preferences[hiddenClassNamesKey] ?: emptySet(),
+                        iconSize = preferences[iconSizeKey] ?: 50f,
+                        iconHorizonPadding = preferences[iconHorizonPaddingKey] ?: 10f,
+                        iconVerticalPadding = preferences[iconVerticalPaddingKey] ?: 10f,
+                        rowSpacing = preferences[rowSpacingKey] ?: 10f,
+                        gridColumns = preferences[gridColumnsKey] ?: 5,
+                        appListHeight = preferences[appListHeightKey] ?: 210f,
+                        keyboardButtonHeight = preferences[keyboardButtonHeightKey] ?: 60f,
+                        keyboardWidth = preferences[keyboardWidthKey] ?: .8f,
+                        keyboardBottomPadding = preferences[keyboardBottomPaddingKey] ?: 10f,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -75,13 +107,6 @@ class AppViewModel
         init {
             Pinyin4jUtil.defaultFormat.caseType = HanyuPinyinCaseType.LOWERCASE
             Pinyin4jUtil.defaultFormat.toneType = HanyuPinyinToneType.WITHOUT_TONE
-            Log.d("ViewModelLifecycle", "ViewModel created")
-        }
-
-        override fun onCleared() {
-            super.onCleared()
-            // ViewModel 销毁时调用
-            Log.d("MyViewModelLifecycle", "ViewModel cleared")
         }
 
         fun switchAppHide(app: AppInfo) {
@@ -183,10 +208,6 @@ class AppViewModel
             } else {
                 searchText = key
             }
-//            if (isShowingHideApp) {
-//                showHideApp()
-//                return
-//            }
             if (TextUtils.isEmpty(key)) {
                 showDefaultAppList()
                 return
@@ -207,6 +228,29 @@ class AppViewModel
             }
             appInfo.sortWith(SortByMatchRate())
             _searchResultAppList.value = appInfo
+        }
+
+        fun updateAppListStyle(newAppConfig: AppConfig) {
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[iconSizeKey] = newAppConfig.iconSize
+                    preferences[iconHorizonPaddingKey] = newAppConfig.iconHorizonPadding
+                    preferences[iconVerticalPaddingKey] = newAppConfig.iconVerticalPadding
+                    preferences[rowSpacingKey] = newAppConfig.rowSpacing
+                    preferences[gridColumnsKey] = newAppConfig.gridColumns
+                    preferences[appListHeightKey] = newAppConfig.appListHeight
+                }
+            }
+        }
+
+        fun updateKeyboardStyle(newAppConfig: AppConfig) {
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[keyboardButtonHeightKey] = newAppConfig.keyboardButtonHeight
+                    preferences[keyboardWidthKey] = newAppConfig.keyboardWidth
+                    preferences[keyboardBottomPaddingKey] = newAppConfig.keyboardBottomPadding
+                }
+            }
         }
 
         fun searchHideApp(key: String) {
@@ -240,13 +284,7 @@ class AppViewModel
             appRepository.updateStartCount(app)
         }
 
-//    fun saveHideList() {
-//        spEditor.remove("hideAppList").commit()
-//        spEditor.putStringSet("hideAppList", hideAppList).commit()
-//    }
-
         fun showHideApp() {
-//            isShowingHideApp = true
             val appInfo = ArrayList<AppInfo>()
             for (app in appList) {
                 if (isAppHide(app) || (appConfig.value.isHideSystemApp && app.isSystemApp)) {

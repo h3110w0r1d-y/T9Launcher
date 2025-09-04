@@ -3,8 +3,10 @@ package com.h3110w0r1d.t9launcher.ui.screen
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -150,7 +152,7 @@ fun HideAppScreen(
                             contentDescription = hideAppList[i].appName,
                             modifier =
                                 Modifier
-                                    .width(42.dp)
+                                    .width(44.dp)
                                     .aspectRatio(1f)
                                     .clip(RoundedCornerShape(percent = 26)),
                         )
@@ -158,10 +160,12 @@ fun HideAppScreen(
                     headlineContent = { Text(hideAppList[i].appName) },
                     supportingContent = { Text(hideAppList[i].packageName) },
                     trailingContent = {
-                        Checkbox(
-                            checked = appConfig.hiddenClassNames.contains(hideAppList[i].className),
-                            onCheckedChange = null,
-                        )
+                        Box(modifier = Modifier.padding(vertical = 10.dp)) {
+                            Checkbox(
+                                checked = appConfig.hiddenClassNames.contains(hideAppList[i].className),
+                                onCheckedChange = null,
+                            )
+                        }
                     },
                     modifier =
                         Modifier

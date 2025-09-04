@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
@@ -26,14 +27,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.h3110w0r1d.t9launcher.model.AppConfig
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppItem(
     app: AppInfo,
-    onClick: () -> Unit,
-    onLongPress: (Offset) -> Unit,
+    onClick: () -> Unit = {},
+    onLongPress: (Offset) -> Unit = {},
+    appConfig: AppConfig = AppConfig(),
 ) {
     var scaleTarget by remember { mutableFloatStateOf(1f) }
     val scaleState by animateFloatAsState(
@@ -68,16 +71,23 @@ fun AppItem(
                 }.scale(scaleState)
                 .animateContentSize(),
     ) {
-        Image(
-            bitmap = app.appIcon,
-            contentDescription = app.appName,
+        Box(
             modifier =
-                Modifier
-                    .width(60.dp + 10.dp)
-                    .aspectRatio(1f)
-                    .padding(10.dp)
-                    .clip(RoundedCornerShape(percent = 26)),
-        )
+                Modifier.padding(
+                    vertical = appConfig.iconVerticalPadding.dp,
+                    horizontal = appConfig.iconHorizonPadding.dp,
+                ),
+        ) {
+            Image(
+                bitmap = app.appIcon,
+                contentDescription = app.appName,
+                modifier =
+                    Modifier
+                        .width(appConfig.iconSize.dp)
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(percent = 26)),
+            )
+        }
         Text(
             text = app.appName,
             textAlign = TextAlign.Center,
@@ -86,7 +96,7 @@ fun AppItem(
             style = MaterialTheme.typography.bodySmall,
             modifier =
                 Modifier
-                    .padding(bottom = 10.dp)
+                    .padding(bottom = appConfig.rowSpacing.dp)
                     .padding(horizontal = 4.dp),
         )
     }

@@ -39,7 +39,9 @@ object Pinyin4jUtil {
             if (latterAndNumber.isNotEmpty()) {
                 val newList: ArrayList<String> = ArrayList()
                 newList.add(letter2Number(latterAndNumber.toString()))
-                newList.add(letter2Number(latterAndNumber.substring(0, 1)))
+                if (latterAndNumber.length > 1) {
+                    newList.add(letter2Number(latterAndNumber.substring(0, 1)))
+                }
                 result.add(newList)
                 latterAndNumber = StringBuilder()
             }
@@ -47,9 +49,16 @@ object Pinyin4jUtil {
                 latterAndNumber.append(c.toString().lowercase(Locale.getDefault()))
                 continue
             }
+            if (" " == c.toString()) {
+                continue
+            }
+            if ('0' <= c && c <= '9') {
+                result.add(arrayListOf(c.toString()))
+                continue
+            }
 
             val pinyinArray = PinyinHelper.toHanyuPinyinStringArray(c, defaultFormat) // 获取拼音列表
-            if (pinyinArray != null) {
+            if (pinyinArray != null && pinyinArray.isNotEmpty()) {
                 val newList: ArrayList<String> = ArrayList()
                 val size = pinyinArray.size
 
@@ -63,13 +72,6 @@ object Pinyin4jUtil {
                     }
                 }
                 result.add(newList)
-                continue
-            }
-            if (" " == c.toString()) {
-                continue
-            }
-            if ('0' <= c && c <= '9') {
-                result.add(arrayListOf(c.toString()))
                 continue
             }
             result.add(arrayListOf("0"))

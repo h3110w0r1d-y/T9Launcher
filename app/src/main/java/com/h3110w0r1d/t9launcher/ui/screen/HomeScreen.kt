@@ -2,7 +2,6 @@ package com.h3110w0r1d.t9launcher.ui.screen
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,10 +27,12 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,16 +61,23 @@ fun HomeScreen(
     viewModel: AppViewModel,
 ) {
     val apps by viewModel.searchResultAppList.collectAsState()
+    val appConfig by viewModel.appConfig.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     var searchText by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val lazyGridState = rememberLazyGridState() // 1. 创建 LazyGridState
+
+    // 3. 使用 LaunchedEffect 监听 apps 的变化
+    LaunchedEffect(apps) {
+        if (apps.isNotEmpty()) { // 可选：仅在列表不为空时滚动
+            lazyGridState.scrollToItem(0)
+        }
+    }
 
     DisposableEffect(Unit) {
         viewModel.searchApp(searchText)
-        onDispose {
-            Log.d("HomeComposableLifecycle", "HomeComposable exited composition")
-        }
+        onDispose { }
     }
 
     Box(
@@ -130,11 +138,12 @@ fun HomeScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .height(210.dp)
+                                .height(appConfig.appListHeight.dp)
                                 .padding(10.dp),
                     ) {
                         LazyVerticalGrid(
-                            columns = GridCells.Fixed(5),
+                            state = lazyGridState, // 2. 将状态传递给 LazyVerticalGrid
+                            columns = GridCells.Fixed(appConfig.gridColumns),
                             modifier =
                                 Modifier
                                     .fillMaxSize(),
@@ -155,10 +164,13 @@ fun HomeScreen(
                                         onLongPress = {
                                             expanded = true
                                         },
+                                        appConfig = appConfig,
                                     )
                                     DropdownMenu(
                                         expanded = expanded,
                                         onDismissRequest = { expanded = false },
+                                        shape = RoundedCornerShape(10.dp),
+                                        containerColor = colorScheme.surfaceContainer,
                                     ) {
                                         DropdownMenuItem(
                                             leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) },
@@ -205,10 +217,10 @@ fun HomeScreen(
                     fontSize = 20.sp,
                 )
 
+                // T9键盘区域
                 val settingString = "⋮"
                 val deleteString = "⌫"
                 val enterSettingString = stringResource(id = R.string.long_press_open_settings)
-                // T9键盘区域
                 T9Keyboard(
                     onClick = { text ->
                         if (text.all { char -> char.isDigit() }) {
@@ -238,6 +250,7 @@ fun HomeScreen(
                             }
                         }
                     },
+                    appConfig = appConfig,
                 )
             }
         }

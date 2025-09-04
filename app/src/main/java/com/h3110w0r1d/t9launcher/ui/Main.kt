@@ -11,8 +11,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.ui.screen.AppListStyleScreen
 import com.h3110w0r1d.t9launcher.ui.screen.HideAppScreen
 import com.h3110w0r1d.t9launcher.ui.screen.HomeScreen
+import com.h3110w0r1d.t9launcher.ui.screen.KeyboardStyleScreen
 import com.h3110w0r1d.t9launcher.ui.screen.SettingScreen
 
 @Composable
@@ -54,18 +56,10 @@ fun AppNavigation(viewModel: AppViewModel = hiltViewModel()) {
             )
         },
     ) {
-        composable(
-            "home",
-        ) {
-            HomeScreen(navController, viewModel)
-        }
-
-        composable("setting") {
-            SettingScreen(navController, viewModel)
-        }
-
-        composable("hide_app") {
-            HideAppScreen(navController, viewModel)
-        }
+        composable("home") { HomeScreen(navController, viewModel) }
+        composable("setting") { SettingScreen(navController, viewModel) }
+        composable("hide_app") { HideAppScreen(navController, viewModel) }
+        composable("app_list_style") { AppListStyleScreen(navController, viewModel) }
+        composable("keyboard_style") { KeyboardStyleScreen(navController, viewModel) }
     }
 }

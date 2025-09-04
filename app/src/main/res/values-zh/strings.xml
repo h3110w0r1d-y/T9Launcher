@@ -22,5 +22,19 @@
     <string name="repository">仓库</string>
     <string name="appearance">外观</string>
     <string name="keyboard_style">键盘样式</string>
-    <string name="app_list_style">APP列表样式</string>
+    <string name="app_list_style">应用列表样式</string>
+    <string name="icon_size">图标大小</string>
+    <string name="icon_horizon_padding">图标水平边距</string>
+    <string name="icon_vertical_padding">图标垂直边距</string>
+    <string name="row_spacing">行间距</string>
+    <string name="grid_columns">每行图标数</string>
+    <string name="app_list_height">应用列表高度</string>
+    <string name="save_changes_message">样式已修改，是否保存？</string>
+    <string name="save">保存</string>
+    <string name="dont_save">不保存</string>
+    <string name="cancel">取消</string>
+    <string name="save_changes_title">保存修改</string>
+    <string name="keyboard_height">键盘高度</string>
+    <string name="keyboard_width">键盘宽度</string>
+    <string name="keyboard_bottom_padding">底部边距</string>
 </resources>

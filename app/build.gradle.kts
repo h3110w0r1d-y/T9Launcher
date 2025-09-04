@@ -14,8 +14,8 @@ android {
         applicationId = "com.h3110w0r1d.t9launcher"
         minSdk = 26
         targetSdk = 36
-        versionCode = 11
-        versionName = "1.5.0"
+        versionCode = 14
+        versionName = "1.6.2"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -24,7 +24,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-//            isShrinkResources = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

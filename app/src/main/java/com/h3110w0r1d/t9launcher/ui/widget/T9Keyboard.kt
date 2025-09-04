@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Backspace
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.h3110w0r1d.t9launcher.R
+import com.h3110w0r1d.t9launcher.model.AppConfig
 
 @Composable
 fun T9Keyboard(
@@ -35,12 +35,13 @@ fun T9Keyboard(
     onLongClick: (String) -> Unit = {},
     settingString: String = "⋮",
     deleteString: String = "⌫",
+    appConfig: AppConfig = AppConfig(),
 ) {
     Column(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp)
+                .padding(top = 10.dp, bottom = appConfig.keyboardBottomPadding.dp)
                 .wrapContentHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -49,12 +50,14 @@ fun T9Keyboard(
                 btnTexts = Array(3) { j -> "${i + j}" },
                 onClick = onClick,
                 onLongClick = onLongClick,
+                appConfig = appConfig,
             )
         }
         T9ButtonRow(
             btnTexts = arrayOf(settingString, "0", deleteString),
             onClick = onClick,
             onLongClick = onLongClick,
+            appConfig = appConfig,
         )
     }
 }
@@ -64,12 +67,10 @@ fun T9ButtonRow(
     btnTexts: Array<String>,
     onClick: (String) -> Unit = {},
     onLongClick: (String) -> Unit = {},
+    appConfig: AppConfig,
 ) {
     Row(
-        modifier =
-            Modifier
-                .widthIn(max = 280.dp)
-                .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(appConfig.keyboardWidth),
         horizontalArrangement = Arrangement.Center,
     ) {
         for (btnText in btnTexts) {
@@ -80,6 +81,7 @@ fun T9ButtonRow(
                         .weight(1f),
                 onClick = { onClick(btnText) },
                 onLongClick = { onLongClick(btnText) },
+                appConfig = appConfig,
             )
         }
     }
@@ -91,6 +93,7 @@ fun T9Button(
     modifier: Modifier,
     onClick: () -> Unit,
     onLongClick: () -> Unit = {},
+    appConfig: AppConfig,
 ) {
     val letterMap =
         mapOf(
@@ -110,7 +113,7 @@ fun T9Button(
         onClick = {},
         modifier =
             modifier
-                .height(60.dp)
+                .height(appConfig.keyboardButtonHeight.dp)
                 .pointerInput(Unit) {
                     awaitEachGesture {
                         val down = awaitFirstDown(false)

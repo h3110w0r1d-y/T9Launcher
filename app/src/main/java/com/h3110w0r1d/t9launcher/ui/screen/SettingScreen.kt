@@ -5,10 +5,12 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.AppRegistration
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Keyboard
@@ -104,9 +106,10 @@ fun SettingScreen(
                 SettingItemGroup(stringResource(R.string.appearance))
 
                 SettingItem(
-                    imageVector = Icons.Outlined.Apps,
+                    imageVector = Icons.Outlined.AppRegistration,
                     title = stringResource(R.string.app_list_style),
                     onClick = {
+                        navController.navigate("app_list_style")
                     },
                 )
 
@@ -114,6 +117,7 @@ fun SettingScreen(
                     imageVector = Icons.Outlined.Keyboard,
                     title = stringResource(R.string.keyboard_style),
                     onClick = {
+                        navController.navigate("keyboard_style")
                     },
                 )
 
@@ -201,6 +205,7 @@ fun SettingItem(
             Icon(
                 imageVector = imageVector,
                 contentDescription = null,
+                modifier = if (description != null)Modifier.height(42.dp) else Modifier,
             )
         },
         headlineContent = { Text(title) },
