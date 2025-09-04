@@ -1,10 +1,14 @@
-# T9启动器
+<div align="center">
+  <img src="./image/icon.png" alt="T9启动器" width="128" height="128">
+  <h1>T9启动器</h1>
 
-<p align="center">
-<img src="./image/icon.png" alt="T9启动器" width="150" height="150">
-</p>
-
-简洁高效的九键应用搜索启动器，基于 **Jetpack Compose UI** 和 **Kotlin** 开发，支持 Android 8.0（API 26）及以上。
+[![GitHub release](https://img.shields.io/github/release/h3110w0r1d-y/T9Launcher.svg)](https://github.com/h3110w0r1d-y/T9Launcher/releases/latest)
+[![main](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/release.yml)
+![Android](https://img.shields.io/badge/Android-8.0%2B-blue)
+![API](https://img.shields.io/badge/API-26%2B-green)
+![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-yellow.svg)
+![GitHub stars](https://img.shields.io/github/stars/h3110w0r1d-y/T9Launcher?style=social)
+</div>
 
 ---
 
@@ -15,7 +19,7 @@
 
 ## 项目背景
 
-习惯了氢OS的上划九键搜索，换到 ColorOS 后没有类似体验。其他替代品大多不支持全拼，搜索速度慢且内容冗余。所以自己动手造轮子。
+习惯了氢OS的上划九键搜索，换到 ColorOS 后虽然可以下划搜索，但是不带九键键盘、内容冗杂、体验很差。其他替代品大多不支持全拼，搜索速度慢，所以自己造一个。
 
 ## 主要功能
 
@@ -45,21 +49,5 @@
 
 ## 许可证
 本项目使用 CC BY-NC-SA 4.0 许可证。
-
-### 你可以自由地：
-
-- 分享：在任何媒介或格式下复制和重新分发本作品。
-
-- 改编：修改、转换和基于本作品创建新作品。
-
-### 但必须遵守以下条件：
-
-- 署名：你必须给出适当的署名，提供指向本许可证的链接，并指明是否作了修改。你可以用任何合理的方式来做这些，但不得以任何方式暗示许可人认可你或你的使用。
-
-- 非商业性使用：你不得将本作品用于商业目的。
-
-- 相同方式共享：如果你改编、转换或基于本作品创建新作品，你必须在同一许可证或与本许可证相兼容的许可证下分发你的贡献。
-
-- 详细信息请参阅 [LICENSE](LICENSE.md) 文件或 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en) 官方页面。
 
 如有建议或问题欢迎提交 Issue 反馈。
