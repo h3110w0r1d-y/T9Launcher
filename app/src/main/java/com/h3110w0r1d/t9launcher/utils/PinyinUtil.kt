@@ -94,7 +94,7 @@ class PinyinUtil
                     result.add(newList)
                     continue
                 } else if (c.code == 0x3007) {
-                    result.add(arrayListOf("5", "5464"))
+                    result.add(arrayListOf("5", "5464")) // 〇 ling
                     continue
                 }
                 result.add(arrayListOf("0"))

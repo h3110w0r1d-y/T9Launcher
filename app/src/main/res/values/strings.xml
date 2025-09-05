@@ -36,4 +36,5 @@
     <string name="keyboard_height">Keyboard Height</string>
     <string name="keyboard_width">Keyboard Width</string>
     <string name="keyboard_bottom_padding">Bottom Padding</string>
+    <string name="not_found_apps">No results found.</string>
 </resources>

@@ -1,6 +1,5 @@
 package com.h3110w0r1d.t9launcher.model
 
-import android.text.TextUtils
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -194,16 +193,15 @@ class AppViewModel
             _searchResultAppList.value = appInfo
         }
 
-        fun searchApp(key: String?) {
+        fun searchApp(key: String?): Boolean {
             var key = key
             if (key == null) {
                 key = searchText
-            } else {
-                searchText = key
             }
-            if (TextUtils.isEmpty(key)) {
+            if (key.isEmpty()) {
                 showDefaultAppList()
-                return
+                searchText = key
+                return true
             }
             val appInfo = ArrayList<AppInfo>()
             for (app in appList) {
@@ -219,8 +217,13 @@ class AppViewModel
                     appInfo.add(app)
                 }
             }
+            if (appInfo.isEmpty()) {
+                return false
+            }
             appInfo.sortWith(SortByMatchRate())
             _searchResultAppList.value = appInfo
+            searchText = key
+            return true
         }
 
         fun updateAppListStyle(newAppConfig: AppConfig) {

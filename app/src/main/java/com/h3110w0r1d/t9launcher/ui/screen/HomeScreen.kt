@@ -52,8 +52,9 @@ import com.h3110w0r1d.t9launcher.R
 import com.h3110w0r1d.t9launcher.model.AppViewModel
 import com.h3110w0r1d.t9launcher.ui.widget.AppItem
 import com.h3110w0r1d.t9launcher.ui.widget.T9Keyboard
+import java.lang.Thread.sleep
 
-@SuppressLint("RestrictedApi", "FrequentlyChangingValue")
+@SuppressLint("RestrictedApi", "FrequentlyChangingValue", "ShowToast")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -64,11 +65,13 @@ fun HomeScreen(
     val appConfig by viewModel.appConfig.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
     var searchText by remember { mutableStateOf("") }
     val context = LocalContext.current
     val lazyGridState = rememberLazyGridState() // 1. 创建 LazyGridState
+    val lastToastTime = remember { mutableStateOf(0L) }
 
-    // 3. 使用 LaunchedEffect 监听 apps 的变化
+    // 监听 apps 的变化
     LaunchedEffect(apps) {
         if (apps.isNotEmpty()) { // 可选：仅在列表不为空时滚动
             lazyGridState.scrollToItem(0)
@@ -224,8 +227,20 @@ fun HomeScreen(
                 T9Keyboard(
                     onClick = { text ->
                         if (text.all { char -> char.isDigit() }) {
-                            searchText += text
-                            viewModel.searchApp(searchText)
+                            if (viewModel.searchApp(searchText + text)) {
+                                searchText += text
+                            } else {
+                                if (System.currentTimeMillis() - lastToastTime.value < 2000) {
+                                    return@T9Keyboard
+                                }
+                                Toast
+                                    .makeText(
+                                        context,
+                                        context.getString(R.string.not_found_apps),
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                lastToastTime.value = System.currentTimeMillis()
+                            }
                         }
                         if (text == deleteString) {
                             if (searchText.isNotEmpty()) {

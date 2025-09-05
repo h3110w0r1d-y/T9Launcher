@@ -37,4 +37,5 @@
     <string name="keyboard_height">键盘高度</string>
     <string name="keyboard_width">键盘宽度</string>
     <string name="keyboard_bottom_padding">底部边距</string>
+    <string name="not_found_apps">再点就没有啦！</string>
 </resources>
