@@ -19,6 +19,10 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -33,6 +37,7 @@ import com.h3110w0r1d.t9launcher.model.AppConfig
 fun T9Keyboard(
     onClick: (String) -> Unit = {},
     onLongClick: (String) -> Unit = {},
+    onCancel: (() -> Unit)? = null,
     settingString: String = "⋮",
     deleteString: String = "⌫",
     appConfig: AppConfig = AppConfig(),
@@ -57,6 +62,7 @@ fun T9Keyboard(
             btnTexts = arrayOf(settingString, "0", deleteString),
             onClick = onClick,
             onLongClick = onLongClick,
+            onCancel = onCancel,
             appConfig = appConfig,
         )
     }
@@ -67,6 +73,7 @@ fun T9ButtonRow(
     btnTexts: Array<String>,
     onClick: (String) -> Unit = {},
     onLongClick: (String) -> Unit = {},
+    onCancel: (() -> Unit)? = null,
     appConfig: AppConfig,
 ) {
     Row(
@@ -81,6 +88,7 @@ fun T9ButtonRow(
                         .weight(1f),
                 onClick = { onClick(btnText) },
                 onLongClick = { onLongClick(btnText) },
+                onCancel = onCancel,
                 appConfig = appConfig,
             )
         }
@@ -93,6 +101,7 @@ fun T9Button(
     modifier: Modifier,
     onClick: () -> Unit,
     onLongClick: () -> Unit = {},
+    onCancel: (() -> Unit)? = null,
     appConfig: AppConfig,
 ) {
     val letterMap =
@@ -109,19 +118,27 @@ fun T9Button(
             "0" to "*",
         )
 
+    var isCancle by remember { mutableStateOf(true) }
     TextButton(
-        onClick = {},
+        onClick = {
+            isCancle = false
+        },
         modifier =
             modifier
                 .height(appConfig.keyboardButtonHeight.dp)
                 .pointerInput(Unit) {
                     awaitEachGesture {
+                        isCancle = true
                         val down = awaitFirstDown(false)
                         val longPress = awaitLongPressOrCancellation(down.id)
                         if (longPress != null) {
                             onLongClick()
                         } else {
-                            onClick()
+                            if (text == "⌫" && isCancle) {
+                                onCancel?.invoke()
+                            } else {
+                                onClick()
+                            }
                         }
                     }
                 },

@@ -250,6 +250,10 @@ fun HomeScreen(
                             }
                         }
                     },
+                    onCancel = {
+                        searchText = ""
+                        viewModel.searchApp("")
+                    },
                     appConfig = appConfig,
                 )
             }
