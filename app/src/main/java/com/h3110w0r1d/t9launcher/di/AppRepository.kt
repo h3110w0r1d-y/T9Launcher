@@ -14,7 +14,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.h3110w0r1d.t9launcher.utils.DBHelper
 import com.h3110w0r1d.t9launcher.utils.ImageUtil
-import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil
+import com.h3110w0r1d.t9launcher.utils.PinyinUtil
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -26,6 +26,7 @@ class AppRepository
     @Inject
     constructor(
         private val dbHelper: DBHelper,
+        private val pinyinUtil: PinyinUtil,
         @ApplicationContext private val context: Context,
     ) {
         private val table = "T_AppInfo"
@@ -185,7 +186,7 @@ class AppRepository
                 val appIconFile = File(context.dataDir, "$className.bitmap")
                 iconBitmap.compress(Bitmap.CompressFormat.PNG, 100, appIconFile.outputStream())
 
-                val searchData = Pinyin4jUtil.getPinYin(appName)
+                val searchData = pinyinUtil.getPinYin(appName)
                 val applicationInfo = packageInfo.applicationInfo
                 val isSystemApp = (applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM) != 0
                 val searchDataJson = Gson().toJson(searchData)

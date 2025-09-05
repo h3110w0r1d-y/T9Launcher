@@ -1,10 +1,8 @@
 package com.h3110w0r1d.t9launcher.ui
 
-import android.util.Log
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -24,14 +22,6 @@ fun AppNavigation(viewModel: AppViewModel = hiltViewModel()) {
     LaunchedEffect(Unit) {
         viewModel.loadAppList()
     }
-    DisposableEffect(Unit) {
-        Log.d("MainComposableLifecycle", "MainComposable entered composition")
-
-        onDispose {
-            Log.d("MainComposableLifecycle", "MainComposable exited composition")
-        }
-    }
-
     NavHost(
         navController = navController,
         startDestination = "home",

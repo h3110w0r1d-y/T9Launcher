@@ -1,7 +1,6 @@
 package com.h3110w0r1d.t9launcher.model
 
 import android.text.TextUtils
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -12,7 +11,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.h3110w0r1d.t9launcher.di.AppRepository
-import com.h3110w0r1d.t9launcher.utils.Pinyin4jUtil
+import com.h3110w0r1d.t9launcher.utils.PinyinUtil
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 import com.h3110w0r1d.t9launcher.vo.AppInfo.SortByMatchRate
 import com.h3110w0r1d.t9launcher.vo.AppInfo.SortByStartCount
@@ -25,8 +24,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType
-import net.sourceforge.pinyin4j.format.HanyuPinyinToneType
 import java.text.Collator
 import java.util.Locale
 import javax.inject.Inject
@@ -53,6 +50,7 @@ class AppViewModel
     constructor(
         private val appRepository: AppRepository,
         private val dataStore: DataStore<Preferences>,
+        private val pinyinUtil: PinyinUtil,
     ) : ViewModel() {
         private val collator: Collator = Collator.getInstance(Locale.CHINA)
         private var appList: ArrayList<AppInfo> = arrayListOf()
@@ -103,11 +101,6 @@ class AppViewModel
         private val _hideAppList: MutableStateFlow<ArrayList<AppInfo>> =
             MutableStateFlow(ArrayList())
         val hideAppList: StateFlow<ArrayList<AppInfo>> = _hideAppList
-
-        init {
-            Pinyin4jUtil.defaultFormat.caseType = HanyuPinyinCaseType.LOWERCASE
-            Pinyin4jUtil.defaultFormat.toneType = HanyuPinyinToneType.WITHOUT_TONE
-        }
 
         fun switchAppHide(app: AppInfo) {
             if (isAppHide(app)) {
@@ -220,7 +213,7 @@ class AppViewModel
                 if (appConfig.value.hiddenClassNames.contains(app.className)) {
                     continue
                 }
-                val matchRate = Pinyin4jUtil.Search(app, key) // 匹配度
+                val matchRate = pinyinUtil.Search(app, key) // 匹配度
                 if (matchRate > 0) {
                     app.matchRate = matchRate
                     appInfo.add(app)

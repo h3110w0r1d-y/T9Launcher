@@ -14,8 +14,8 @@ android {
         applicationId = "com.h3110w0r1d.t9launcher"
         minSdk = 26
         targetSdk = 36
-        versionCode = 14
-        versionName = "1.6.2"
+        versionCode = 15
+        versionName = "1.6.3"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -25,10 +25,27 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            vcsInfo.include = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            splits {
+                abi {
+                    isEnable = true
+                    isUniversalApk = true
+                }
+            }
+            packaging {
+                resources {
+                    excludes += "META-INF/androidx/**"
+                    excludes += "META-INF/*.version"
+                    excludes += "META-INF/*.md"
+                    excludes += "DebugProbesKt.bin"
+                    excludes += "kotlin-tooling-metadata.json"
+                    excludes += "kotlin/**"
+                }
+            }
         }
     }
 
@@ -38,7 +55,7 @@ android {
             variant.outputs
                 .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
                 .forEach { output ->
-                    val abi = output.getFilter(com.android.build.OutputFile.ABI) ?: "universal"
+                    val abi = output.getFilter("ABI") ?: "universal"
                     val apkName = "T9Launcher-${defaultConfig.versionName}-$abi-${variant.buildType.name}.apk"
                     output.outputFileName = apkName
                 }
@@ -57,48 +74,28 @@ android {
     buildFeatures {
         compose = true
     }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
-    }
-    kotlinOptions {
-        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        compilerOptions {
+            freeCompilerArgs.add("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+        }
     }
 }
 
 dependencies {
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation("androidx.databinding:databinding-runtime:8.13.0")
-    implementation("androidx.preference:preference-ktx:1.2.1")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("com.google.code.gson:gson:2.13.1")
-    implementation("com.belerweb:pinyin4j:2.5.1")
-    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.core:core-ktx:1.17.0")
-    implementation("androidx.compose.material3:material3:1.3.2")
-    implementation("androidx.compose.foundation:foundation:1.9.0")
-
-    // Jetpack Compose BOM
-    val composeBomVersion = "2025.08.01"
-    implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
-
-    // Jetpack Compose dependencies
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("androidx.navigation:navigation-compose:2.9.3")
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.3")
 
+    implementation(platform("androidx.compose:compose-bom:2025.08.01"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.material:material-icons-extended")
+
+    implementation("com.google.code.gson:gson:2.13.1")
     implementation("com.google.dagger:hilt-android:2.57.1")
     kapt("com.google.dagger:hilt-compiler:2.57.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
-
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.3")
 }
