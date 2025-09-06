@@ -1,7 +1,6 @@
 package com.h3110w0r1d.t9launcher.utils
 
 import android.content.Context
-import android.util.Log
 import com.h3110w0r1d.t9launcher.R
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -15,23 +14,27 @@ class PinyinUtil
     constructor(
         @ApplicationContext context: Context,
     ) {
-        var pinYinList: Array<Array<String>>
+        private val charPinyinMapping: ArrayList<ArrayList<String>> = ArrayList()
 
         init {
-            val pinyinStream = context.resources.openRawResource(R.raw.pinyin)
-            val pinyinReader = pinyinStream.bufferedReader()
-            val pinins = pinyinReader.readLines()
-
-            val inputStream = context.resources.openRawResource(R.raw.pinyin_index)
-            val reader = inputStream.bufferedReader()
-            val lines = reader.readLines()
-            pinYinList =
-                Array(0x9FA5 - 0x4E00 + 1) { i ->
-                    lines[i]
-                        .split(",")
-                        .map { pinins[it.toInt(32)] }
-                        .toTypedArray()
+            val pinyinList =
+                context.resources.openRawResource(R.raw.pinyin).use { inputStream ->
+                    inputStream.bufferedReader().readLines()
                 }
+            context.resources.openRawResource(R.raw.pinyin_index).use { inputStream ->
+                var charPinyin: ArrayList<String> = ArrayList()
+                var byte: Int
+                while (inputStream.read().also { byte = it } != -1) {
+                    if (byte == 0xff) {
+                        if (charPinyin.isNotEmpty()) {
+                            charPinyinMapping.add(charPinyin)
+                            charPinyin = ArrayList()
+                        }
+                    } else {
+                        charPinyin.add(pinyinList[byte])
+                    }
+                }
+            }
         }
 
         fun letter2Number(letters: String): String {
@@ -83,7 +86,7 @@ class PinyinUtil
                     continue
                 }
                 if (0x4E00 <= c.code && c.code <= 0x9FA5) {
-                    val pinyinArray = pinYinList[c.code - 0x4E00]
+                    val pinyinArray = charPinyinMapping[c.code - 0x4E00]
                     val newList: ArrayList<String> = ArrayList()
                     pinyinArray.forEach { pinyin ->
                         if (newList.indexOf(pinyin.substring(0, 1)) == -1) {
