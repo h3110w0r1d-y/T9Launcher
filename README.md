@@ -6,7 +6,7 @@
 [![main](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/release.yml)
 ![Android](https://img.shields.io/badge/Android-8.0%2B-blue)
 ![API](https://img.shields.io/badge/API-26%2B-green)
-![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-yellow.svg)
+![License](https://img.shields.io/github/license/h3110w0r1d-y/T9Launcher)
 ![GitHub stars](https://img.shields.io/github/stars/h3110w0r1d-y/T9Launcher?style=social)
 </div>
 
