@@ -127,7 +127,7 @@ fun HomeScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .height(210.dp),
+                                .height(appConfig.appListHeight.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator()
@@ -145,7 +145,7 @@ fun HomeScreen(
                                 .padding(10.dp),
                     ) {
                         LazyVerticalGrid(
-                            state = lazyGridState, // 2. 将状态传递给 LazyVerticalGrid
+                            state = lazyGridState,
                             columns = GridCells.Fixed(appConfig.gridColumns),
                             modifier =
                                 Modifier
@@ -161,7 +161,7 @@ fun HomeScreen(
                                                 viewModel.updateStartCount(apps[i])
                                                 searchText = ""
                                                 viewModel.searchApp("")
-//                                            (context as? Activity)?.moveTaskToBack(true)
+                                                (context as? Activity)?.moveTaskToBack(true)
                                             }
                                         },
                                         onLongPress = {
@@ -227,7 +227,7 @@ fun HomeScreen(
                 T9Keyboard(
                     onClick = { text ->
                         if (text.all { char -> char.isDigit() }) {
-                            if (viewModel.searchApp(searchText + text)) {
+                            if (viewModel.searchApp(searchText + text) || isLoading) {
                                 searchText += text
                             } else {
                                 if (System.currentTimeMillis() - lastToastTime.value < 2000) {

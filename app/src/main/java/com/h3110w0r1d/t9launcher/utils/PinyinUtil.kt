@@ -17,24 +17,26 @@ class PinyinUtil
         private val charPinyinMapping: ArrayList<ArrayList<String>> = ArrayList()
 
         init {
-            val pinyinList =
-                context.resources.openRawResource(R.raw.pinyin).use { inputStream ->
-                    inputStream.bufferedReader().readLines()
-                }
-            context.resources.openRawResource(R.raw.pinyin_index).use { inputStream ->
-                var charPinyin: ArrayList<String> = ArrayList()
-                var byte: Int
-                while (inputStream.read().also { byte = it } != -1) {
-                    if (byte == 0xff) {
-                        if (charPinyin.isNotEmpty()) {
-                            charPinyinMapping.add(charPinyin)
-                            charPinyin = ArrayList()
-                        }
-                    } else {
-                        charPinyin.add(pinyinList[byte])
+            val pinyinFile = context.resources.openRawResource(R.raw.pinyin)
+            val pinyinBufferReader = pinyinFile.bufferedReader()
+            val pinyinList = pinyinBufferReader.readLines()
+            pinyinBufferReader.close()
+            pinyinFile.close()
+
+            val pinyinIndexFile = context.resources.openRawResource(R.raw.pinyin_index)
+            var charPinyin: ArrayList<String> = ArrayList()
+            var byte: Int
+            while (pinyinIndexFile.read().also { byte = it } != -1) {
+                if (byte.toUShort().toInt() == 0xff) {
+                    if (charPinyin.isNotEmpty()) {
+                        charPinyinMapping.add(charPinyin)
+                        charPinyin = ArrayList()
                     }
+                } else {
+                    charPinyin.add(pinyinList[byte])
                 }
             }
+            pinyinIndexFile.close()
         }
 
         fun letter2Number(letters: String): String {
