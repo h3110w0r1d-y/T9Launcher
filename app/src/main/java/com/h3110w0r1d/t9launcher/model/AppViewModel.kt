@@ -14,7 +14,10 @@ import com.h3110w0r1d.t9launcher.utils.PinyinUtil
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 import com.h3110w0r1d.t9launcher.vo.AppInfo.SortByMatchRate
 import com.h3110w0r1d.t9launcher.vo.AppInfo.SortByStartCount
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +29,7 @@ import kotlinx.coroutines.withContext
 import java.text.Collator
 import java.util.Locale
 import javax.inject.Inject
+import javax.inject.Singleton
 
 data class AppConfig(
     val isHideSystemApp: Boolean = false,
@@ -43,7 +47,23 @@ data class AppConfig(
     val keyboardBottomPadding: Float = 10f,
 )
 
-@HiltViewModel
+@Module
+@InstallIn(SingletonComponent::class)
+class SharedViewModelModule {
+    @Provides
+    @Singleton
+    fun provideAppViewModel(
+        appRepository: AppRepository,
+        dataStore: DataStore<Preferences>,
+        pinyinUtil: PinyinUtil,
+    ): AppViewModel =
+        AppViewModel(
+            appRepository,
+            dataStore,
+            pinyinUtil,
+        )
+}
+
 class AppViewModel
     @Inject
     constructor(
@@ -139,7 +159,7 @@ class AppViewModel
          * 加载并更新应用列表
          */
         fun loadAppList() {
-            if (isLoadingAppList) {
+            if (isLoadingAppList || !isLoading.value) {
                 return
             }
             viewModelScope.launch {
@@ -155,7 +175,7 @@ class AppViewModel
                 }
 
                 withContext(Dispatchers.IO) {
-                    appList = appRepository.updateAppInfo()
+                    appList = appRepository.updateAppInfo(false)
                     appList.sortWith(compareBy(collator) { it.appName })
                     appList.sortWith(SortByStartCount())
                 }
@@ -169,7 +189,7 @@ class AppViewModel
             viewModelScope.launch {
                 _isRefreshing.value = true
                 withContext(Dispatchers.IO) {
-                    appList = appRepository.updateAppInfo()
+                    appList = appRepository.updateAppInfo(true)
                     appList.sortWith(compareBy(collator) { it.appName })
                     appList.sortWith(SortByStartCount())
                 }

@@ -6,18 +6,16 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.database.sqlite.transaction
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.h3110w0r1d.t9launcher.utils.DBHelper
+import com.h3110w0r1d.t9launcher.utils.IconManager
 import com.h3110w0r1d.t9launcher.utils.ImageUtil
 import com.h3110w0r1d.t9launcher.utils.PinyinUtil
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,9 +23,10 @@ import javax.inject.Singleton
 class AppRepository
     @Inject
     constructor(
+        @ApplicationContext private val context: Context,
         private val dbHelper: DBHelper,
         private val pinyinUtil: PinyinUtil,
-        @ApplicationContext private val context: Context,
+        private val iconManager: IconManager,
     ) {
         private val table = "T_AppInfo"
 
@@ -52,13 +51,14 @@ class AppRepository
             )
         }
 
-        private fun deleteApp(packageName: String) {
+        private fun deleteApp(className: String) {
             val db = dbHelper.writableDatabase
             db.delete(
                 table,
                 "className = ?",
-                arrayOf(packageName),
+                arrayOf(className),
             )
+            iconManager.deleteIcon(className)
         }
 
         private fun insertOrUpdate(insertOrUpdateList: ArrayList<Array<Any>>) {
@@ -96,9 +96,9 @@ class AppRepository
         }
 
         fun getAllApps(): ArrayList<AppInfo> {
+            iconManager.loadAllIcons()
             val result = ArrayList<AppInfo>()
             val cursor = queryAllApps()
-            val dataDir = context.dataDir
 
             while (cursor.moveToNext()) {
                 val className = cursor.getString(0)
@@ -107,8 +107,7 @@ class AppRepository
                 val startCount = cursor.getInt(3)
                 val isSystemApp = cursor.getInt(4) == 1
                 val searchDataJson = cursor.getString(5)
-                val appIconFile = File(dataDir, "$className.bitmap")
-                val iconBitmap = BitmapFactory.decodeFile(appIconFile.absolutePath)
+                val iconBitmap = iconManager.getIcon(className)
                 if (iconBitmap == null) {
                     continue
                 }
@@ -136,7 +135,7 @@ class AppRepository
             return result
         }
 
-        fun updateAppInfo(): ArrayList<AppInfo> {
+        fun updateAppInfo(updateIcon: Boolean): ArrayList<AppInfo> {
             val classNames: ArrayList<String> = ArrayList()
             val packageManager = context.packageManager
             val resolveInfoList =
@@ -163,8 +162,8 @@ class AppRepository
             cursor.close()
 
             // 删除已卸载的包
-            for (packageName in needRemove) {
-                deleteApp(packageName)
+            for (className in needRemove) {
+                deleteApp(className)
             }
 
             val result = ArrayList<AppInfo>()
@@ -180,11 +179,13 @@ class AppRepository
                     continue
                 }
                 val appName = resolveInfo.loadLabel(packageManager).toString()
-                val iconDrawable = resolveInfo.loadIcon(packageManager)
-                val iconBitmap = ImageUtil.drawable2IconBitmap(iconDrawable)
-                val appIcon = iconBitmap.asImageBitmap()
-                val appIconFile = File(context.dataDir, "$className.bitmap")
-                iconBitmap.compress(Bitmap.CompressFormat.PNG, 100, appIconFile.outputStream())
+                var appIcon = iconManager.getIcon(className)?.asImageBitmap()
+                if (updateIcon || appIcon == null) {
+                    val iconDrawable = resolveInfo.loadIcon(packageManager)
+                    val iconBitmap = ImageUtil.drawable2IconBitmap(iconDrawable)
+                    iconManager.addIcon(className, iconBitmap)
+                    appIcon = iconBitmap.asImageBitmap()
+                }
 
                 val searchData = pinyinUtil.getPinYin(appName)
                 val applicationInfo = packageInfo.applicationInfo
@@ -213,6 +214,7 @@ class AppRepository
                 )
             }
             insertOrUpdate(insertOrUpdateList)
+            iconManager.saveIconsToFile()
             return result
         }
 

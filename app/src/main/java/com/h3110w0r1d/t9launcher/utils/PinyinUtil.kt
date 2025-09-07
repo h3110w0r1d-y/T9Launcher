@@ -24,19 +24,23 @@ class PinyinUtil
             pinyinFile.close()
 
             val pinyinIndexFile = context.resources.openRawResource(R.raw.pinyin_index)
-            var charPinyin: ArrayList<String> = ArrayList()
             var byte: Int
+            var cursor = 0
+            var index = 0
             while (pinyinIndexFile.read().also { byte = it } != -1) {
-                if (byte.toUShort().toInt() == 0xff) {
-                    if (charPinyin.isNotEmpty()) {
-                        charPinyinMapping.add(charPinyin)
-                        charPinyin = ArrayList()
-                    }
+                if (cursor < 20902) {
+                    charPinyinMapping.add(arrayListOf(pinyinList[byte]))
                 } else {
-                    charPinyin.add(pinyinList[byte])
+                    if ((cursor - 20902) % 3 == 0) {
+                        index = byte * 256
+                    } else if ((cursor - 20902) % 3 == 1) {
+                        index += byte
+                    } else {
+                        charPinyinMapping[index].add(pinyinList[byte])
+                    }
                 }
+                cursor += 1
             }
-            pinyinIndexFile.close()
         }
 
         fun letter2Number(letters: String): String {

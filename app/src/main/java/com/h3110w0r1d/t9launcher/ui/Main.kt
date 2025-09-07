@@ -4,7 +4,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -16,7 +15,7 @@ import com.h3110w0r1d.t9launcher.ui.screen.KeyboardStyleScreen
 import com.h3110w0r1d.t9launcher.ui.screen.SettingScreen
 
 @Composable
-fun AppNavigation(viewModel: AppViewModel = hiltViewModel()) {
+fun AppNavigation(viewModel: AppViewModel) {
     val navController = rememberNavController()
 
     LaunchedEffect(Unit) {
