@@ -1,0 +1,30 @@
+name: Auto Merge main to xposed
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge main into xposed
+        run: |
+          git fetch origin xposed
+          git checkout xposed
+          git pull origin xposed
+          git merge main -m "Auto merge from main"
+          git push origin xposed
