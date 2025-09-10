@@ -19,6 +19,9 @@
 -keep class com.google.gson.reflect.TypeToken { *; }
 -keep class * extends com.google.gson.reflect.TypeToken
 
+-keep class com.h3110w0r1d.t9launcher.Hook { *; }
+-keep class com.h3110w0r1d.t9launcher.utils.XposedUtil { *; }
+
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
