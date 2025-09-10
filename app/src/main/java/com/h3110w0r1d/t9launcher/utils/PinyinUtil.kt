@@ -43,7 +43,7 @@ class PinyinUtil
             }
         }
 
-        fun letter2Number(letters: String): String {
+        private fun letter2Number(letters: String): String {
             val number = StringBuilder()
             for (i in 0..<letters.length) {
                 val c = letters[i]

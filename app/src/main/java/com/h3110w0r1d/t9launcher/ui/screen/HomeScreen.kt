@@ -229,17 +229,6 @@ fun HomeScreen(
                         if (text.all { char -> char.isDigit() }) {
                             if (viewModel.searchApp(searchText + text) || isLoading) {
                                 searchText += text
-                            } else {
-                                if (System.currentTimeMillis() - lastToastTime.value < 2000) {
-                                    return@T9Keyboard
-                                }
-                                Toast
-                                    .makeText(
-                                        context,
-                                        context.getString(R.string.not_found_apps),
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
-                                lastToastTime.value = System.currentTimeMillis()
                             }
                         }
                         if (text == deleteString) {
@@ -248,7 +237,10 @@ fun HomeScreen(
                             }
                             viewModel.searchApp(searchText)
                         } else if (text == settingString) {
-                            Toast.makeText(context, enterSettingString, Toast.LENGTH_SHORT).show()
+                            if (System.currentTimeMillis() - lastToastTime.value > 2000) {
+                                Toast.makeText(context, enterSettingString, Toast.LENGTH_SHORT).show()
+                                lastToastTime.value = System.currentTimeMillis()
+                            }
                         }
                     },
                     onLongClick = { text ->
