@@ -14,10 +14,7 @@ import com.h3110w0r1d.t9launcher.utils.PinyinUtil
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 import com.h3110w0r1d.t9launcher.vo.AppInfo.SortByMatchRate
 import com.h3110w0r1d.t9launcher.vo.AppInfo.SortByStartCount
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,7 +26,6 @@ import kotlinx.coroutines.withContext
 import java.text.Collator
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Singleton
 
 data class AppConfig(
     val isHideSystemApp: Boolean = false,
@@ -47,23 +43,7 @@ data class AppConfig(
     val keyboardBottomPadding: Float = 10f,
 )
 
-@Module
-@InstallIn(SingletonComponent::class)
-class SharedViewModelModule {
-    @Provides
-    @Singleton
-    fun provideAppViewModel(
-        appRepository: AppRepository,
-        dataStore: DataStore<Preferences>,
-        pinyinUtil: PinyinUtil,
-    ): AppViewModel =
-        AppViewModel(
-            appRepository,
-            dataStore,
-            pinyinUtil,
-        )
-}
-
+@HiltViewModel
 class AppViewModel
     @Inject
     constructor(
@@ -165,7 +145,7 @@ class AppViewModel
             viewModelScope.launch {
                 isLoadingAppList = true
                 withContext(Dispatchers.IO) {
-                    appList = appRepository.getAllApps()
+                    appList = appRepository.loadAllApps()
                     appList.sortWith(compareBy(collator) { it.appName })
                     appList.sortWith(SortByStartCount())
                 }

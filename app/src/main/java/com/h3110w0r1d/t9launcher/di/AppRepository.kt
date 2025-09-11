@@ -29,6 +29,8 @@ class AppRepository
         private val iconManager: IconManager,
     ) {
         private val table = "T_AppInfo"
+        private val gson = Gson()
+        private var appList = ArrayList<AppInfo>()
 
         private fun queryAllApps(): Cursor {
             val db = dbHelper.readableDatabase
@@ -95,7 +97,10 @@ class AppRepository
             statement.close()
         }
 
-        fun getAllApps(): ArrayList<AppInfo> {
+        fun loadAllApps(): ArrayList<AppInfo> {
+            if (appList.isNotEmpty()) {
+                return appList
+            }
             iconManager.loadAllIcons()
             val result = ArrayList<AppInfo>()
             val cursor = queryAllApps()
@@ -113,7 +118,6 @@ class AppRepository
                 }
                 val appIcon = iconBitmap.asImageBitmap()
 
-                val gson = Gson()
                 val searchData =
                     gson.fromJson<ArrayList<ArrayList<String>>>(
                         searchDataJson,
@@ -132,6 +136,7 @@ class AppRepository
                 )
             }
             cursor.close()
+            appList = result
             return result
         }
 
@@ -190,7 +195,7 @@ class AppRepository
                 val searchData = pinyinUtil.getPinYin(appName)
                 val applicationInfo = packageInfo.applicationInfo
                 val isSystemApp = (applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                val searchDataJson = Gson().toJson(searchData)
+                val searchDataJson = gson.toJson(searchData)
                 insertOrUpdateList.add(
                     arrayOf(
                         className,
@@ -215,6 +220,7 @@ class AppRepository
             }
             insertOrUpdate(insertOrUpdateList)
             iconManager.saveIconsToFile()
+            appList = result
             return result
         }
 

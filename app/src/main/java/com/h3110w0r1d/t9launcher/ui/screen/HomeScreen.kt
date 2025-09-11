@@ -35,6 +35,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -69,7 +70,7 @@ fun HomeScreen(
     var searchText by remember { mutableStateOf("") }
     val context = LocalContext.current
     val lazyGridState = rememberLazyGridState() // 1. 创建 LazyGridState
-    val lastToastTime = remember { mutableStateOf(0L) }
+    val lastToastTime = remember { mutableLongStateOf(0L) }
 
     // 监听 apps 的变化
     LaunchedEffect(apps) {
