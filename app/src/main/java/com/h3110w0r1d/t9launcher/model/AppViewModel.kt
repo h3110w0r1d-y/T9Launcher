@@ -37,6 +37,7 @@ data class AppConfig(
     val rowSpacing: Float = 10f,
     val gridColumns: Int = 5,
     val appListHeight: Float = 210f,
+    val appNameSize: Float = 12f,
     // 键盘样式配置
     val keyboardButtonHeight: Float = 60f,
     val keyboardWidth: Float = .8f,
@@ -67,6 +68,7 @@ class AppViewModel
         private val keyboardButtonHeightKey = floatPreferencesKey("keyboard_button_height")
         private val keyboardWidthKey = floatPreferencesKey("keyboard_width")
         private val keyboardBottomPaddingKey = floatPreferencesKey("keyboard_bottom_padding")
+        private val appNameSizeKey = floatPreferencesKey("app_name_size")
 
         val appConfig: StateFlow<AppConfig> =
             dataStore.data
@@ -83,6 +85,7 @@ class AppViewModel
                         keyboardButtonHeight = preferences[keyboardButtonHeightKey] ?: 60f,
                         keyboardWidth = preferences[keyboardWidthKey] ?: .8f,
                         keyboardBottomPadding = preferences[keyboardBottomPaddingKey] ?: 10f,
+                        appNameSize = preferences[appNameSizeKey] ?: 12f,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -235,6 +238,7 @@ class AppViewModel
                     preferences[rowSpacingKey] = newAppConfig.rowSpacing
                     preferences[gridColumnsKey] = newAppConfig.gridColumns
                     preferences[appListHeightKey] = newAppConfig.appListHeight
+                    preferences[appNameSizeKey] = newAppConfig.appNameSize
                 }
             }
         }

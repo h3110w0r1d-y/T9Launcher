@@ -155,6 +155,17 @@ fun AppListStyleScreen(
                             modifier = Modifier.height(20.dp),
                         )
                     }
+                    StyleSettingCard(title = stringResource(R.string.app_name_size)) {
+                        Slider(
+                            value = previewAppConfig.appNameSize,
+                            onValueChange = {
+                                previewAppConfig = previewAppConfig.copy(appNameSize = it)
+                                isChanged = true
+                            },
+                            valueRange = 8f..16f,
+                            modifier = Modifier.height(20.dp),
+                        )
+                    }
                     StyleSettingCard(title = stringResource(R.string.icon_horizon_padding)) {
                         Slider(
                             value = previewAppConfig.iconHorizonPadding,
