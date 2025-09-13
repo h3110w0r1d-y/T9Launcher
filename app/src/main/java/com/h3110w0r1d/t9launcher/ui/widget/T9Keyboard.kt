@@ -35,6 +35,7 @@ import com.h3110w0r1d.t9launcher.model.AppConfig
 
 @Composable
 fun T9Keyboard(
+    modifier: Modifier = Modifier,
     onClick: (String) -> Unit = {},
     onLongClick: (String) -> Unit = {},
     onCancel: (() -> Unit)? = null,
@@ -44,7 +45,7 @@ fun T9Keyboard(
 ) {
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp, bottom = appConfig.keyboardBottomPadding.dp)
                 .wrapContentHeight(),
@@ -118,23 +119,23 @@ fun T9Button(
             "0" to "*",
         )
 
-    var isCancle by remember { mutableStateOf(true) }
+    var isCancel by remember { mutableStateOf(true) }
     TextButton(
         onClick = {
-            isCancle = false
+            isCancel = false
         },
         modifier =
             modifier
                 .height(appConfig.keyboardButtonHeight.dp)
                 .pointerInput(Unit) {
                     awaitEachGesture {
-                        isCancle = true
+                        isCancel = true
                         val down = awaitFirstDown(false)
                         val longPress = awaitLongPressOrCancellation(down.id)
                         if (longPress != null) {
                             onLongClick()
                         } else {
-                            if (text == "⌫" && isCancle) {
+                            if (text == "⌫" && isCancel) {
                                 onCancel?.invoke()
                             } else {
                                 onClick()

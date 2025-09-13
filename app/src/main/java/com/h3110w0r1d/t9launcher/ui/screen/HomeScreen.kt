@@ -7,7 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,17 +16,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.DeleteForever
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -48,12 +39,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.h3110w0r1d.t9launcher.R
 import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.ui.widget.AppDropdownMenu
 import com.h3110w0r1d.t9launcher.ui.widget.AppItem
 import com.h3110w0r1d.t9launcher.ui.widget.T9Keyboard
-import java.lang.Thread.sleep
 
 @SuppressLint("RestrictedApi", "FrequentlyChangingValue", "ShowToast")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,20 +107,23 @@ fun HomeScreen(
                     topEnd = 20.dp,
                 ),
         ) {
-            Column(
+            ConstraintLayout(
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                val (listRef, inputRef, keyboardRef) = createRefs()
                 if (isLoading) {
                     // 加载进度条
                     Box(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .height(appConfig.appListHeight.dp),
+                                .height(appConfig.appListHeight.dp)
+                                .constrainAs(listRef) {
+                                    bottom.linkTo(inputRef.top)
+                                },
                         contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator()
@@ -141,9 +136,11 @@ fun HomeScreen(
                         },
                         modifier =
                             Modifier
-                                .fillMaxWidth()
                                 .height(appConfig.appListHeight.dp)
-                                .padding(10.dp),
+                                .padding(10.dp)
+                                .constrainAs(listRef) {
+                                    bottom.linkTo(inputRef.top)
+                                },
                     ) {
                         LazyVerticalGrid(
                             state = lazyGridState,
@@ -170,42 +167,15 @@ fun HomeScreen(
                                         },
                                         appConfig = appConfig,
                                     )
-                                    DropdownMenu(
-                                        expanded = expanded,
-                                        onDismissRequest = { expanded = false },
-                                        shape = RoundedCornerShape(10.dp),
-                                        containerColor = colorScheme.surfaceContainer,
-                                    ) {
-                                        DropdownMenuItem(
-                                            leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) },
-                                            text = { Text(stringResource(id = R.string.app_info)) },
-                                            onClick = {
-                                                apps[i].detail(context)
-                                                expanded = false
-                                            },
-                                        )
-                                        DropdownMenuItem(
-                                            leadingIcon = { Icon(Icons.Outlined.ContentCopy, contentDescription = null) },
-                                            text = { Text(stringResource(id = R.string.copy_package_name)) },
-                                            onClick = {
-                                                apps[i].copyPackageName(context)
-                                                expanded = false
-                                            },
-                                        )
-                                        DropdownMenuItem(
-                                            leadingIcon = { Icon(Icons.Outlined.DeleteForever, contentDescription = null) },
-                                            text = { Text(stringResource(id = R.string.uninstall_app)) },
-                                            onClick = {
-                                                apps[i].uninstall(context)
-                                                expanded = false
-                                            },
-                                        )
-                                    }
+                                    AppDropdownMenu(apps[i], expanded, {
+                                        expanded = it
+                                    })
                                 }
                             }
                         }
                     }
                 }
+
                 // 搜索文本框
                 Text(
                     text = searchText.ifEmpty { " " },
@@ -216,7 +186,11 @@ fun HomeScreen(
                                 Color(0x60808080),
                                 shape = RoundedCornerShape(100.dp),
                             ).fillMaxWidth(.7f)
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 8.dp)
+                            .constrainAs(inputRef) {
+                                bottom.linkTo(keyboardRef.top)
+                                centerHorizontallyTo(parent)
+                            },
                     textAlign = TextAlign.Center,
                     fontSize = 20.sp,
                 )
@@ -226,6 +200,11 @@ fun HomeScreen(
                 val deleteString = "⌫"
                 val enterSettingString = stringResource(id = R.string.long_press_open_settings)
                 T9Keyboard(
+                    modifier =
+                        Modifier
+                            .constrainAs(keyboardRef) {
+                                bottom.linkTo(parent.bottom)
+                            },
                     onClick = { text ->
                         if (text.all { char -> char.isDigit() }) {
                             if (viewModel.searchApp(searchText + text) || isLoading) {
@@ -238,9 +217,9 @@ fun HomeScreen(
                             }
                             viewModel.searchApp(searchText)
                         } else if (text == settingString) {
-                            if (System.currentTimeMillis() - lastToastTime.value > 2000) {
+                            if (System.currentTimeMillis() - lastToastTime.longValue > 2000) {
                                 Toast.makeText(context, enterSettingString, Toast.LENGTH_SHORT).show()
-                                lastToastTime.value = System.currentTimeMillis()
+                                lastToastTime.longValue = System.currentTimeMillis()
                             }
                         }
                     },
