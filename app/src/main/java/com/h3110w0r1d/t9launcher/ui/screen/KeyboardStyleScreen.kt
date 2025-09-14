@@ -124,7 +124,7 @@ fun KeyboardStyleScreen(
                                 previewAppConfig = previewAppConfig.copy(keyboardButtonHeight = it)
                                 isChanged = true
                             },
-                            valueRange = 20f..100f,
+                            valueRange = 30f..90f,
                             modifier = Modifier.height(20.dp),
                         )
                     }

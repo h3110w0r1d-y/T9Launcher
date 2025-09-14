@@ -85,7 +85,7 @@ fun AppItem(
                     Modifier
                         .width(appConfig.iconSize.dp)
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(percent = 26)),
+                        .clip(RoundedCornerShape(percent = appConfig.iconCornerRadius)),
             )
         }
         Text(

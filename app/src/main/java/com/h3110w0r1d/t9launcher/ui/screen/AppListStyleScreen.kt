@@ -155,6 +155,17 @@ fun AppListStyleScreen(
                             modifier = Modifier.height(20.dp),
                         )
                     }
+                    StyleSettingCard(title = stringResource(R.string.icon_corner_radius)) {
+                        Slider(
+                            value = previewAppConfig.iconCornerRadius.toFloat(),
+                            onValueChange = {
+                                previewAppConfig = previewAppConfig.copy(iconCornerRadius = it.toInt())
+                                isChanged = true
+                            },
+                            valueRange = 0f..50f,
+                            modifier = Modifier.height(20.dp),
+                        )
+                    }
                     StyleSettingCard(title = stringResource(R.string.app_name_size)) {
                         Slider(
                             value = previewAppConfig.appNameSize,
