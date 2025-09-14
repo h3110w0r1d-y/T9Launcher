@@ -38,4 +38,5 @@
     <string name="keyboard_bottom_padding">Bottom Padding</string>
     <string name="not_found_apps">No results found.</string>
     <string name="app_name_size">App Name Size</string>
+    <string name="icon_corner_radius">Icon Corner Radius</string>
 </resources>

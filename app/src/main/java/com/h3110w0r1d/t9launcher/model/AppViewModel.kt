@@ -34,6 +34,7 @@ data class AppConfig(
     val iconSize: Float = 50f,
     val iconHorizonPadding: Float = 10f,
     val iconVerticalPadding: Float = 10f,
+    val iconCornerRadius: Int = 26,
     val rowSpacing: Float = 10f,
     val gridColumns: Int = 5,
     val appListHeight: Float = 210f,
@@ -62,6 +63,7 @@ class AppViewModel
         private val iconSizeKey = floatPreferencesKey("icon_size")
         private val iconHorizonPaddingKey = floatPreferencesKey("icon_horizon_padding")
         private val iconVerticalPaddingKey = floatPreferencesKey("icon_vertical_padding")
+        private val iconCornerRadiusKey = intPreferencesKey("icon_corner_radius")
         private val rowSpacingKey = floatPreferencesKey("row_spacing")
         private val gridColumnsKey = intPreferencesKey("grid_columns")
         private val appListHeightKey = floatPreferencesKey("app_list_height")
@@ -86,6 +88,7 @@ class AppViewModel
                         keyboardWidth = preferences[keyboardWidthKey] ?: .8f,
                         keyboardBottomPadding = preferences[keyboardBottomPaddingKey] ?: 10f,
                         appNameSize = preferences[appNameSizeKey] ?: 12f,
+                        iconCornerRadius = preferences[iconCornerRadiusKey] ?: 26,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -239,6 +242,7 @@ class AppViewModel
                     preferences[gridColumnsKey] = newAppConfig.gridColumns
                     preferences[appListHeightKey] = newAppConfig.appListHeight
                     preferences[appNameSizeKey] = newAppConfig.appNameSize
+                    preferences[iconCornerRadiusKey] = newAppConfig.iconCornerRadius
                 }
             }
         }
