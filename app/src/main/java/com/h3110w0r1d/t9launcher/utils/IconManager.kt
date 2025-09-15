@@ -13,7 +13,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 data class IconMetadata(
-    val className: String,
+    val componentId: String,
     val offset: Long, // 在文件中的起始偏移量
     val length: Int, // 数据长度
 )
@@ -58,7 +58,7 @@ class IconManager
                             val parts = entry.split(":")
                             if (parts.size == 3) {
                                 IconMetadata(
-                                    className = parts[0],
+                                    componentId = parts[0],
                                     offset = parts[1].toLong(),
                                     length = parts[2].toInt(),
                                 )
@@ -74,7 +74,7 @@ class IconManager
 
                         val bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, metadata.length)
                         if (bitmap != null) {
-                            icons[metadata.className] = bitmap
+                            icons[metadata.componentId] = bitmap
                         }
                     }
                 }
@@ -85,10 +85,10 @@ class IconManager
         }
 
         fun addIcon(
-            className: String,
+            componentId: String,
             bitmap: Bitmap,
         ) {
-            icons[className] = bitmap
+            icons[componentId] = bitmap
             changed = true
         }
 
@@ -105,12 +105,12 @@ class IconManager
                     randomAccessFile.write(indexPlaceholder.array())
                     currentOffset += indexPlaceholder.array().size.toLong()
 
-                    for ((className, bitmap) in icons) {
+                    for ((componentId, bitmap) in icons) {
                         val byteArrayOutputStream = ByteArrayOutputStream()
                         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
                         val bitmapBytes = byteArrayOutputStream.toByteArray()
 
-                        val metadata = IconMetadata(className, currentOffset, bitmapBytes.size)
+                        val metadata = IconMetadata(componentId, currentOffset, bitmapBytes.size)
                         metadataList.add(metadata)
 
                         randomAccessFile.seek(currentOffset)
@@ -121,7 +121,7 @@ class IconManager
                     val metadataJson =
                         metadataList
                             .joinToString(",") {
-                                "${it.className}:${it.offset}:${it.length}"
+                                "${it.componentId}:${it.offset}:${it.length}"
                             }.toByteArray(Charsets.UTF_8)
 
                     randomAccessFile.seek(currentOffset)
@@ -138,10 +138,13 @@ class IconManager
             }
         }
 
-        fun getIcon(className: String): Bitmap? = icons[className]
+        fun getIcon(componentId: String): Bitmap? = icons[componentId]
 
-        fun deleteIcon(className: String) {
-            icons.remove(className)
+        fun deleteIcon(
+            packageName: String,
+            className: String,
+        ) {
+            icons.remove("$packageName/$className")
             changed = true
         }
     }

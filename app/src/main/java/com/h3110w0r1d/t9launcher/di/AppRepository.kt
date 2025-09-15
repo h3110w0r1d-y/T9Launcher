@@ -53,14 +53,17 @@ class AppRepository
             )
         }
 
-        private fun deleteApp(className: String) {
+        private fun deleteApp(
+            packageName: String,
+            className: String,
+        ) {
             val db = dbHelper.writableDatabase
             db.delete(
                 table,
-                "className = ?",
-                arrayOf(className),
+                "packageName = ? AND className = ?",
+                arrayOf(packageName, className),
             )
-            iconManager.deleteIcon(className)
+            iconManager.deleteIcon(packageName, className)
         }
 
         private fun insertOrUpdate(insertOrUpdateList: ArrayList<Array<Any>>) {
@@ -73,7 +76,7 @@ class AppRepository
                     "isSystemApp," +
                     "searchData" +
                     ") VALUES (?,?,?,?,?) " +
-                    "ON CONFLICT(className) DO UPDATE SET " +
+                    "ON CONFLICT(className, packageName) DO UPDATE SET " +
                     "packageName=EXCLUDED.packageName," +
                     "appName=EXCLUDED.appName," +
                     "isSystemApp=EXCLUDED.isSystemApp," +
@@ -108,11 +111,12 @@ class AppRepository
             while (cursor.moveToNext()) {
                 val className = cursor.getString(0)
                 val packageName = cursor.getString(1)
+                val componentId = "$packageName/$className"
                 val appName = cursor.getString(2)
                 val startCount = cursor.getInt(3)
                 val isSystemApp = cursor.getInt(4) == 1
                 val searchDataJson = cursor.getString(5)
-                val iconBitmap = iconManager.getIcon(className)
+                val iconBitmap = iconManager.getIcon(componentId)
                 if (iconBitmap == null) {
                     continue
                 }
@@ -141,7 +145,7 @@ class AppRepository
         }
 
         fun updateAppInfo(updateIcon: Boolean): ArrayList<AppInfo> {
-            val classNames: ArrayList<String> = ArrayList()
+            val componentIds: ArrayList<String> = ArrayList()
             val packageManager = context.packageManager
             val resolveInfoList =
                 packageManager.queryIntentActivities(
@@ -152,23 +156,28 @@ class AppRepository
                     0,
                 )
             for (resolveInfo in resolveInfoList) {
-                classNames.add(resolveInfo.activityInfo.name)
+                val activityInfo = resolveInfo.activityInfo
+                val componentId = "${activityInfo.packageName}/${activityInfo.name}"
+                componentIds.add(componentId)
             }
             val cursor = queryAllApps()
-            val needRemove: ArrayList<String> = ArrayList()
+            val needRemove: ArrayList<Array<String>> = ArrayList()
             val startCounts: HashMap<String, Int> = HashMap()
             while (cursor.moveToNext()) {
                 val className = cursor.getString(0)
-                startCounts[className] = cursor.getInt(3)
-                if (!classNames.contains(className)) {
-                    needRemove.add(className)
+                val packageName = cursor.getString(1)
+                val componentId = "$packageName/$className"
+                startCounts[componentId] = cursor.getInt(3)
+                if (!componentIds.contains(componentId)) {
+                    needRemove.add(arrayOf(packageName, className))
+                    continue
                 }
             }
             cursor.close()
 
             // 删除已卸载的包
-            for (className in needRemove) {
-                deleteApp(className)
+            for (name in needRemove) {
+                deleteApp(name[0], name[1])
             }
 
             val result = ArrayList<AppInfo>()
@@ -176,6 +185,8 @@ class AppRepository
             for (resolveInfo in resolveInfoList) {
                 val packageName = resolveInfo.activityInfo.packageName
                 val className = resolveInfo.activityInfo.name
+                val componentId = "$packageName/$className"
+
                 val packageInfo: PackageInfo
                 try {
                     packageInfo = packageManager.getPackageInfo(packageName, 0)
@@ -184,11 +195,11 @@ class AppRepository
                     continue
                 }
                 val appName = resolveInfo.loadLabel(packageManager).toString()
-                var appIcon = iconManager.getIcon(className)?.asImageBitmap()
+                var appIcon = iconManager.getIcon(componentId)?.asImageBitmap()
                 if (updateIcon || appIcon == null) {
                     val iconDrawable = resolveInfo.loadIcon(packageManager)
                     val iconBitmap = ImageUtil.drawable2IconBitmap(iconDrawable)
-                    iconManager.addIcon(className, iconBitmap)
+                    iconManager.addIcon(componentId, iconBitmap)
                     appIcon = iconBitmap.asImageBitmap()
                 }
 
@@ -211,7 +222,7 @@ class AppRepository
                         className,
                         packageName,
                         appName,
-                        startCounts[className] ?: 0,
+                        startCounts[componentId] ?: 0,
                         appIcon,
                         isSystemApp,
                         searchData,
@@ -225,14 +236,16 @@ class AppRepository
         }
 
         fun updateStartCount(app: AppInfo) {
+            val packageName = app.packageName
             val className = app.className
             val startCount = app.startCount
             val db = dbHelper.writableDatabase
             try {
                 db.execSQL(
-                    "UPDATE $table SET startCount = ? WHERE className = ?",
+                    "UPDATE $table SET startCount = ? WHERE packageName = ? AND className = ?",
                     arrayOf<Any>(
                         startCount,
+                        packageName,
                         className,
                     ),
                 )

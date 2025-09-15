@@ -161,7 +161,7 @@ fun HideAppScreen(
                     trailingContent = {
                         Box(modifier = Modifier.padding(vertical = 10.dp)) {
                             Checkbox(
-                                checked = appConfig.hiddenClassNames.contains(hideAppList[i].className),
+                                checked = appConfig.hiddenComponentIds.contains(hideAppList[i].componentId()),
                                 onCheckedChange = null,
                             )
                         }
