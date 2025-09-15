@@ -29,7 +29,7 @@ import javax.inject.Inject
 
 data class AppConfig(
     val isHideSystemApp: Boolean = false,
-    val hiddenClassNames: Set<String> = emptySet(),
+    val hiddenComponentIds: Set<String> = emptySet(),
     // 应用列表样式配置
     val iconSize: Float = 50f,
     val iconHorizonPadding: Float = 10f,
@@ -59,7 +59,7 @@ class AppViewModel
         private var isLoadingAppList: Boolean = false
 
         private val isHideSystemAppKey = booleanPreferencesKey("is_hide_system_app")
-        private val hiddenClassNamesKey = stringSetPreferencesKey("hidden_class_names")
+        private val hiddenComponentIdKey = stringSetPreferencesKey("hidden_class_names")
         private val iconSizeKey = floatPreferencesKey("icon_size")
         private val iconHorizonPaddingKey = floatPreferencesKey("icon_horizon_padding")
         private val iconVerticalPaddingKey = floatPreferencesKey("icon_vertical_padding")
@@ -77,7 +77,7 @@ class AppViewModel
                 .map { preferences ->
                     AppConfig(
                         isHideSystemApp = preferences[isHideSystemAppKey] ?: false,
-                        hiddenClassNames = preferences[hiddenClassNamesKey] ?: emptySet(),
+                        hiddenComponentIds = preferences[hiddenComponentIdKey] ?: emptySet(),
                         iconSize = preferences[iconSizeKey] ?: 50f,
                         iconHorizonPadding = preferences[iconHorizonPaddingKey] ?: 10f,
                         iconVerticalPadding = preferences[iconVerticalPaddingKey] ?: 10f,
@@ -109,20 +109,20 @@ class AppViewModel
 
         fun switchAppHide(app: AppInfo) {
             if (isAppHide(app)) {
-                appConfig.value.hiddenClassNames.toMutableSet().apply {
-                    remove(app.className)
+                appConfig.value.hiddenComponentIds.toMutableSet().apply {
+                    remove(app.componentId())
                     viewModelScope.launch {
                         dataStore.edit { preferences ->
-                            preferences[hiddenClassNamesKey] = this@apply
+                            preferences[hiddenComponentIdKey] = this@apply
                         }
                     }
                 }
             } else {
-                appConfig.value.hiddenClassNames.toMutableSet().apply {
-                    add(app.className)
+                appConfig.value.hiddenComponentIds.toMutableSet().apply {
+                    add(app.componentId())
                     viewModelScope.launch {
                         dataStore.edit { preferences ->
-                            preferences[hiddenClassNamesKey] = this@apply
+                            preferences[hiddenComponentIdKey] = this@apply
                         }
                     }
                 }
@@ -214,7 +214,7 @@ class AppViewModel
                 if (appConfig.value.isHideSystemApp && app.isSystemApp) {
                     continue
                 }
-                if (appConfig.value.hiddenClassNames.contains(app.className)) {
+                if (appConfig.value.hiddenComponentIds.contains(app.componentId())) {
                     continue
                 }
                 val matchRate = pinyinUtil.Search(app, key) // 匹配度
@@ -281,7 +281,7 @@ class AppViewModel
             _hideAppList.value = appInfo
         }
 
-        private fun isAppHide(app: AppInfo): Boolean = appConfig.value.hiddenClassNames.contains(app.className)
+        private fun isAppHide(app: AppInfo): Boolean = appConfig.value.hiddenComponentIds.contains(app.componentId())
 
         fun updateStartCount(app: AppInfo) {
             app.startCount += 1

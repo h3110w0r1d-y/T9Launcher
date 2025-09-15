@@ -10,16 +10,17 @@ class DBHelper
     @Inject
     constructor(
         @ApplicationContext context: Context,
-    ) : SQLiteOpenHelper(context, "AppList3.db", null, 1) {
+    ) : SQLiteOpenHelper(context, "AppList4.db", null, 1) {
         companion object {
             private const val T_APP_INFO =
                 "create table T_AppInfo(" +
-                    "className VARCHAR(256) NOT NULL UNIQUE," +
+                    "className VARCHAR(256) NOT NULL," +
                     "packageName VARCHAR(256) NOT NULL," +
                     "appName TEXT NOT NULL," +
                     "startCount INTEGER NOT NULL DEFAULT 0," +
                     "isSystemApp BOOLEAN NOT NULL DEFAULT 0," +
-                    "searchData TEXT NOT NULL)"
+                    "searchData TEXT NOT NULL," +
+                    "UNIQUE(className, packageName))"
         }
 
         override fun onCreate(db: SQLiteDatabase) {

@@ -73,4 +73,6 @@ class AppInfo(
         val clip = ClipData.newPlainText("text", packageName)
         clipboard.setPrimaryClip(clip)
     }
+
+    fun componentId(): String = "$packageName/$className"
 }
