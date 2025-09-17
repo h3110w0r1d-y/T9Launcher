@@ -39,4 +39,12 @@
     <string name="not_found_apps">No results found.</string>
     <string name="app_name_size">App Name Size</string>
     <string name="icon_corner_radius">Icon Corner Radius</string>
+    <string name="long_click_menu">Long-press the app icon to open the menu.</string>
+    <string name="slide_delete">Slide the backspace key to delete all.</string>
+    <string name="long_click_show_hide">Long-press any number key to show hidden apps.</string>
+    <string name="long_click_delete">Long-press backspace to delete all.</string>
+    <string name="get_started">Get Started</string>
+    <string name="next">Next</string>
+    <string name="back">Back</string>
+    <string name="user_guide">User Guide</string>
 </resources>

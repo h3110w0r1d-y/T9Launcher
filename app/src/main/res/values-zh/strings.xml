@@ -40,4 +40,12 @@
     <string name="not_found_apps">再点就没有啦！</string>
     <string name="app_name_size">应用名称大小</string>
     <string name="icon_corner_radius">图标圆角大小</string>
+    <string name="long_click_menu">长按应用图标打开菜单。</string>
+    <string name="slide_delete">滑动删除键清空输入。</string>
+    <string name="long_click_show_hide">长按任意数字键显示隐藏应用。</string>
+    <string name="long_click_delete">长按删除键清空输入。</string>
+    <string name="get_started">立即体验</string>
+    <string name="next">下一个</string>
+    <string name="back">上一个</string>
+    <string name="user_guide">使用说明</string>
 </resources>

@@ -43,6 +43,8 @@ data class AppConfig(
     val keyboardButtonHeight: Float = 60f,
     val keyboardWidth: Float = .8f,
     val keyboardBottomPadding: Float = 10f,
+    // 引导界面是否展示过
+    val isShowedOnboarding: Boolean = false,
 )
 
 @HiltViewModel
@@ -71,6 +73,7 @@ class AppViewModel
         private val keyboardWidthKey = floatPreferencesKey("keyboard_width")
         private val keyboardBottomPaddingKey = floatPreferencesKey("keyboard_bottom_padding")
         private val appNameSizeKey = floatPreferencesKey("app_name_size")
+        private val isShowedOnboardingKey = booleanPreferencesKey("is_showed_onboarding")
 
         val appConfig: StateFlow<AppConfig> =
             dataStore.data
@@ -89,6 +92,7 @@ class AppViewModel
                         keyboardBottomPadding = preferences[keyboardBottomPaddingKey] ?: 10f,
                         appNameSize = preferences[appNameSizeKey] ?: 12f,
                         iconCornerRadius = preferences[iconCornerRadiusKey] ?: 26,
+                        isShowedOnboarding = preferences[isShowedOnboardingKey] ?: false,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -253,6 +257,14 @@ class AppViewModel
                     preferences[keyboardButtonHeightKey] = newAppConfig.keyboardButtonHeight
                     preferences[keyboardWidthKey] = newAppConfig.keyboardWidth
                     preferences[keyboardBottomPaddingKey] = newAppConfig.keyboardBottomPadding
+                }
+            }
+        }
+
+        fun setShowedOnboarding() {
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[isShowedOnboardingKey] = true
                 }
             }
         }

@@ -14,8 +14,8 @@ android {
         applicationId = "com.h3110w0r1d.t9launcher"
         minSdk = 26
         targetSdk = 36
-        versionCode = 23
-        versionName = "1.6.11"
+        versionCode = 24
+        versionName = "1.6.12"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -97,6 +97,7 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.13.2")
     implementation("com.google.dagger:hilt-android:2.57.1")
+    implementation("androidx.compose.animation:animation-graphics:1.9.1")
     kapt("com.google.dagger:hilt-compiler:2.57.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
 

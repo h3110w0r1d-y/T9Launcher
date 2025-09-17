@@ -11,7 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.AppRegistration
-import androidx.compose.material.icons.outlined.Apps
+import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material.icons.outlined.LayersClear
@@ -122,6 +122,14 @@ fun SettingScreen(
                 )
 
                 SettingItemGroup(stringResource(R.string.about))
+
+                SettingItem(
+                    imageVector = Icons.Outlined.Book,
+                    title = stringResource(R.string.user_guide),
+                    onClick = {
+                        navController.navigate("onboarding")
+                    },
+                )
 
                 SettingItem(
                     imageVector = Icons.Outlined.Person,
