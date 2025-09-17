@@ -12,9 +12,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.net.toUri
 import com.h3110w0r1d.t9launcher.model.AppViewModel
 import com.h3110w0r1d.t9launcher.ui.AppNavigation
+import com.h3110w0r1d.t9launcher.ui.screen.OnboardingScreen
 import com.h3110w0r1d.t9launcher.ui.theme.T9LauncherTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -30,7 +33,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             T9LauncherTheme {
-                AppNavigation(appViewModel)
+                val appConfig by appViewModel.appConfig.collectAsState()
+                if (!appConfig.isShowedOnboarding) {
+                    OnboardingScreen(appViewModel, null)
+                } else {
+                    AppNavigation(appViewModel)
+                }
             }
         }
     }
