@@ -16,8 +16,8 @@
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
 
--keep class com.google.gson.reflect.TypeToken { *; }
--keep class * extends com.google.gson.reflect.TypeToken
+#-keep class com.google.gson.reflect.TypeToken { *; }
+#-keep class * extends com.google.gson.reflect.TypeToken
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.

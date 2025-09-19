@@ -167,9 +167,7 @@ fun HomeScreen(
                                         },
                                         appConfig = appConfig,
                                     )
-                                    AppDropdownMenu(apps[i], expanded, {
-                                        expanded = it
-                                    })
+                                    AppDropdownMenu(apps[i], expanded) { expanded = it }
                                 }
                             }
                         }
@@ -196,8 +194,6 @@ fun HomeScreen(
                 )
 
                 // T9键盘区域
-                val settingString = "⋮"
-                val deleteString = "⌫"
                 val enterSettingString = stringResource(id = R.string.long_press_open_settings)
                 T9Keyboard(
                     modifier =
@@ -211,12 +207,12 @@ fun HomeScreen(
                                 searchText += text
                             }
                         }
-                        if (text == deleteString) {
+                        if (text == "delete") {
                             if (searchText.isNotEmpty()) {
                                 searchText = searchText.dropLast(1)
                             }
                             viewModel.searchApp(searchText)
-                        } else if (text == settingString) {
+                        } else if (text == "setting") {
                             if (System.currentTimeMillis() - lastToastTime.longValue > 2000) {
                                 Toast.makeText(context, enterSettingString, Toast.LENGTH_SHORT).show()
                                 lastToastTime.longValue = System.currentTimeMillis()
@@ -225,11 +221,11 @@ fun HomeScreen(
                     },
                     onLongClick = { text ->
                         when (text) {
-                            deleteString -> {
+                            "delete" -> {
                                 searchText = ""
                                 viewModel.searchApp("")
                             }
-                            settingString -> {
+                            "setting" -> {
                                 navController.navigate("setting")
                             }
                             else -> {

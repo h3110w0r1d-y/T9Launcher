@@ -39,8 +39,6 @@ fun T9Keyboard(
     onClick: (String) -> Unit = {},
     onLongClick: (String) -> Unit = {},
     onCancel: (() -> Unit)? = null,
-    settingString: String = "⋮",
-    deleteString: String = "⌫",
     appConfig: AppConfig = AppConfig(),
 ) {
     Column(
@@ -60,7 +58,7 @@ fun T9Keyboard(
             )
         }
         T9ButtonRow(
-            btnTexts = arrayOf(settingString, "0", deleteString),
+            btnTexts = arrayOf("setting", "0", "delete"),
             onClick = onClick,
             onLongClick = onLongClick,
             onCancel = onCancel,
@@ -135,7 +133,7 @@ fun T9Button(
                         if (longPress != null) {
                             onLongClick()
                         } else {
-                            if (text == "⌫" && isCancel) {
+                            if (text == "delete" && isCancel) {
                                 onCancel?.invoke()
                             } else {
                                 onClick()
@@ -166,7 +164,7 @@ fun T9Button(
                 modifier =
                     Modifier
                         .size(20.dp),
-                imageVector = if (text == "⌫") Icons.AutoMirrored.Outlined.Backspace else Icons.Outlined.Settings,
+                imageVector = if (text == "delete") Icons.AutoMirrored.Outlined.Backspace else Icons.Outlined.Settings,
                 contentDescription = stringResource(R.string.setting),
                 tint = colorScheme.onSurface,
             )

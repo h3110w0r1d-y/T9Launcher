@@ -8,14 +8,13 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.database.sqlite.transaction
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.h3110w0r1d.t9launcher.utils.DBHelper
 import com.h3110w0r1d.t9launcher.utils.IconManager
 import com.h3110w0r1d.t9launcher.utils.ImageUtil
 import com.h3110w0r1d.t9launcher.utils.PinyinUtil
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,7 +28,6 @@ class AppRepository
         private val iconManager: IconManager,
     ) {
         private val table = "T_AppInfo"
-        private val gson = Gson()
         private var appList = ArrayList<AppInfo>()
 
         private fun queryAllApps(): Cursor {
@@ -123,10 +121,7 @@ class AppRepository
                 val appIcon = iconBitmap.asImageBitmap()
 
                 val searchData =
-                    gson.fromJson<ArrayList<ArrayList<String>>>(
-                        searchDataJson,
-                        object : TypeToken<ArrayList<ArrayList<String>>>() {}.type,
-                    )
+                    Json.decodeFromString<ArrayList<ArrayList<String>>>(searchDataJson)
                 result.add(
                     AppInfo(
                         className,
@@ -206,7 +201,7 @@ class AppRepository
                 val searchData = pinyinUtil.getPinYin(appName)
                 val applicationInfo = packageInfo.applicationInfo
                 val isSystemApp = (applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                val searchDataJson = gson.toJson(searchData)
+                val searchDataJson = Json.encodeToString<ArrayList<ArrayList<String>>>(searchData)
                 insertOrUpdateList.add(
                     arrayOf(
                         className,

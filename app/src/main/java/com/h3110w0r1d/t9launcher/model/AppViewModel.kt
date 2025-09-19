@@ -221,7 +221,7 @@ class AppViewModel
                 if (appConfig.value.hiddenComponentIds.contains(app.componentId())) {
                     continue
                 }
-                val matchRate = pinyinUtil.Search(app, key) // 匹配度
+                val matchRate = pinyinUtil.search(app, key) // 匹配度
                 if (matchRate > 0) {
                     app.matchRate = matchRate
                     appInfo.add(app)
