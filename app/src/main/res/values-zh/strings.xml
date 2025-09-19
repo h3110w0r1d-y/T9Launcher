@@ -1,24 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">T9启动器</string>
-    <string name="title_activity_settings">设置</string>
-    <string name="clear">清除</string>
-    <string name="delete">删除</string>
     <string name="setting">设置</string>
     <string name="app_info">应用信息</string>
     <string name="copy_package_name">复制包名</string>
     <string name="long_press_open_settings">长按进入设置界面</string>
     <string name="uninstall_app">卸载</string>
     <string name="hide_app_list">隐藏自定义应用</string>
-    <string name="failed_init_database">初始化失败，请清空应用数据后重试</string>
     <string name="hide_system_app">隐藏系统应用</string>
-    <string name="search">搜索</string>
     <string name="about">关于</string>
     <string name="author">作者</string>
-    <string name="github">Github</string>
     <string name="version">版本</string>
-    <string name="donate">捐赠</string>
-    <string name="hide">隐藏</string>
+    <string name="hide">功能</string>
     <string name="repository">仓库</string>
     <string name="appearance">外观</string>
     <string name="keyboard_style">键盘样式</string>
@@ -37,7 +30,6 @@
     <string name="keyboard_height">键盘高度</string>
     <string name="keyboard_width">键盘宽度</string>
     <string name="keyboard_bottom_padding">底部边距</string>
-    <string name="not_found_apps">再点就没有啦！</string>
     <string name="app_name_size">应用名称大小</string>
     <string name="icon_corner_radius">图标圆角大小</string>
     <string name="long_click_menu">长按应用图标打开菜单。</string>
@@ -48,4 +40,9 @@
     <string name="next">下一个</string>
     <string name="back">上一个</string>
     <string name="user_guide">使用说明</string>
+    <string name="shortcut_setting">快捷启动设置</string>
+    <string name="shortcut_icon_size">快捷启动图标大小</string>
+    <string name="shortcut_icon_opacity">快捷启动图标透明度</string>
+    <string name="select_shortcut_app">选择快捷启动应用</string>
+    <string name="not_set">未设置</string>
 </resources>

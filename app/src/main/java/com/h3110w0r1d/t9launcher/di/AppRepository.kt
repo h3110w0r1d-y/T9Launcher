@@ -8,14 +8,13 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.database.sqlite.transaction
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.h3110w0r1d.t9launcher.utils.DBHelper
 import com.h3110w0r1d.t9launcher.utils.IconManager
 import com.h3110w0r1d.t9launcher.utils.ImageUtil
 import com.h3110w0r1d.t9launcher.utils.PinyinUtil
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,8 +28,9 @@ class AppRepository
         private val iconManager: IconManager,
     ) {
         private val table = "T_AppInfo"
-        private val gson = Gson()
         private var appList = ArrayList<AppInfo>()
+
+        private var appMap = HashMap<String, AppInfo>()
 
         private fun queryAllApps(): Cursor {
             val db = dbHelper.readableDatabase
@@ -100,9 +100,9 @@ class AppRepository
             statement.close()
         }
 
-        fun loadAllApps(): ArrayList<AppInfo> {
+        fun loadAllApps(): Pair<ArrayList<AppInfo>, HashMap<String, AppInfo>> {
             if (appList.isNotEmpty()) {
-                return appList
+                return Pair(appList, appMap)
             }
             iconManager.loadAllIcons()
             val result = ArrayList<AppInfo>()
@@ -123,11 +123,8 @@ class AppRepository
                 val appIcon = iconBitmap.asImageBitmap()
 
                 val searchData =
-                    gson.fromJson<ArrayList<ArrayList<String>>>(
-                        searchDataJson,
-                        object : TypeToken<ArrayList<ArrayList<String>>>() {}.type,
-                    )
-                result.add(
+                    Json.decodeFromString<ArrayList<ArrayList<String>>>(searchDataJson)
+                val appInfo =
                     AppInfo(
                         className,
                         packageName,
@@ -136,15 +133,16 @@ class AppRepository
                         appIcon,
                         isSystemApp,
                         searchData,
-                    ),
-                )
+                    )
+                appMap[componentId] = appInfo
+                result.add(appInfo)
             }
             cursor.close()
             appList = result
-            return result
+            return Pair(result, appMap)
         }
 
-        fun updateAppInfo(updateIcon: Boolean): ArrayList<AppInfo> {
+        fun updateAppInfo(updateIcon: Boolean): Pair<ArrayList<AppInfo>, HashMap<String, AppInfo>> {
             val componentIds: ArrayList<String> = ArrayList()
             val packageManager = context.packageManager
             val resolveInfoList =
@@ -206,7 +204,7 @@ class AppRepository
                 val searchData = pinyinUtil.getPinYin(appName)
                 val applicationInfo = packageInfo.applicationInfo
                 val isSystemApp = (applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                val searchDataJson = gson.toJson(searchData)
+                val searchDataJson = Json.encodeToString<ArrayList<ArrayList<String>>>(searchData)
                 insertOrUpdateList.add(
                     arrayOf(
                         className,
@@ -216,8 +214,7 @@ class AppRepository
                         searchDataJson,
                     ),
                 )
-
-                result.add(
+                val appInfo =
                     AppInfo(
                         className,
                         packageName,
@@ -226,13 +223,15 @@ class AppRepository
                         appIcon,
                         isSystemApp,
                         searchData,
-                    ),
-                )
+                    )
+                appMap[componentId] = appInfo
+
+                result.add(appInfo)
             }
             insertOrUpdate(insertOrUpdateList)
             iconManager.saveIconsToFile()
             appList = result
-            return result
+            return Pair(result, appMap)
         }
 
         fun updateStartCount(app: AppInfo) {

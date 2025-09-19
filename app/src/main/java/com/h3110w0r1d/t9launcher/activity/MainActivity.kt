@@ -34,10 +34,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             T9LauncherTheme {
                 val appConfig by appViewModel.appConfig.collectAsState()
-                if (!appConfig.isShowedOnboarding) {
-                    OnboardingScreen(appViewModel, null)
-                } else {
-                    AppNavigation(appViewModel)
+                // 只有在配置初始化完成后才显示主界面，防止配置未加载完成时闪现引导界面
+                if (appConfig.isConfigInitialized) {
+                    if (!appConfig.isShowedOnboarding) {
+                        OnboardingScreen(appViewModel, null)
+                    } else {
+                        AppNavigation(appViewModel)
+                    }
                 }
             }
         }

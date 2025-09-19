@@ -16,8 +16,8 @@
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
 
--keep class com.google.gson.reflect.TypeToken { *; }
--keep class * extends com.google.gson.reflect.TypeToken
+#-keep class com.google.gson.reflect.TypeToken { *; }
+#-keep class * extends com.google.gson.reflect.TypeToken
 
 -keep class com.h3110w0r1d.t9launcher.Hook { *; }
 -keep class com.h3110w0r1d.t9launcher.utils.XposedUtil { *; }

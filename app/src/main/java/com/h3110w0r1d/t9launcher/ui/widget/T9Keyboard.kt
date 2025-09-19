@@ -1,16 +1,21 @@
 package com.h3110w0r1d.t9launcher.ui.widget
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Backspace
 import androidx.compose.material.icons.outlined.Settings
@@ -25,6 +30,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.h3110w0r1d.t9launcher.R
 import com.h3110w0r1d.t9launcher.model.AppConfig
+import com.h3110w0r1d.t9launcher.vo.AppInfo
 
 @Composable
 fun T9Keyboard(
@@ -39,9 +47,8 @@ fun T9Keyboard(
     onClick: (String) -> Unit = {},
     onLongClick: (String) -> Unit = {},
     onCancel: (() -> Unit)? = null,
-    settingString: String = "⋮",
-    deleteString: String = "⌫",
     appConfig: AppConfig = AppConfig(),
+    appMap: Map<String, AppInfo> = mapOf(),
 ) {
     Column(
         modifier =
@@ -57,10 +64,11 @@ fun T9Keyboard(
                 onClick = onClick,
                 onLongClick = onLongClick,
                 appConfig = appConfig,
+                appMap = appMap,
             )
         }
         T9ButtonRow(
-            btnTexts = arrayOf(settingString, "0", deleteString),
+            btnTexts = arrayOf("setting", "0", "delete"),
             onClick = onClick,
             onLongClick = onLongClick,
             onCancel = onCancel,
@@ -76,6 +84,7 @@ fun T9ButtonRow(
     onLongClick: (String) -> Unit = {},
     onCancel: (() -> Unit)? = null,
     appConfig: AppConfig,
+    appMap: Map<String, AppInfo> = mapOf(),
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(appConfig.keyboardWidth),
@@ -91,6 +100,7 @@ fun T9ButtonRow(
                 onLongClick = { onLongClick(btnText) },
                 onCancel = onCancel,
                 appConfig = appConfig,
+                appMap = appMap,
             )
         }
     }
@@ -104,6 +114,7 @@ fun T9Button(
     onLongClick: () -> Unit = {},
     onCancel: (() -> Unit)? = null,
     appConfig: AppConfig,
+    appMap: Map<String, AppInfo>,
 ) {
     val letterMap =
         mapOf(
@@ -124,6 +135,7 @@ fun T9Button(
         onClick = {
             isCancel = false
         },
+        shape = RoundedCornerShape(12.dp),
         modifier =
             modifier
                 .height(appConfig.keyboardButtonHeight.dp)
@@ -135,7 +147,7 @@ fun T9Button(
                         if (longPress != null) {
                             onLongClick()
                         } else {
-                            if (text == "⌫" && isCancel) {
+                            if (text == "delete" && isCancel) {
                                 onCancel?.invoke()
                             } else {
                                 onClick()
@@ -145,28 +157,47 @@ fun T9Button(
                 },
     ) {
         if (letterMap[text] != null) {
-            Column {
-                Text(
-                    text = text,
-                    fontSize = 20.sp,
-                    color = colorScheme.onSurface,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                )
-                Text(
-                    text = letterMap[text] ?: "",
-                    fontSize = 12.sp,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    color = colorScheme.outline,
-                )
+            Box {
+                if (text.toInt() > 0 && !appConfig.shortcutConfig[text.toInt() - 1].isEmpty()) {
+                    val componentId = appConfig.shortcutConfig[text.toInt() - 1]
+                    val appInfo = appMap[componentId]
+                    if (appInfo != null) {
+                        Image(
+                            bitmap = appInfo.appIcon,
+                            contentDescription = appInfo.appName,
+                            modifier =
+                                Modifier
+                                    .width(appConfig.keyboardQSIconSize.dp)
+                                    .aspectRatio(1f)
+                                    .alpha(appConfig.keyboardQSIconAlpha)
+                                    .clip(RoundedCornerShape(percent = appConfig.iconCornerRadius))
+                                    .align(Alignment.Center),
+                        )
+                    }
+                }
+                Column {
+                    Text(
+                        text = text,
+                        fontSize = 20.sp,
+                        color = colorScheme.onSurface,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        text = letterMap[text] ?: "",
+                        fontSize = 12.sp,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        color = colorScheme.outline,
+                    )
+                }
             }
         } else {
             Icon(
                 modifier =
                     Modifier
                         .size(20.dp),
-                imageVector = if (text == "⌫") Icons.AutoMirrored.Outlined.Backspace else Icons.Outlined.Settings,
+                imageVector = if (text == "delete") Icons.AutoMirrored.Outlined.Backspace else Icons.Outlined.Settings,
                 contentDescription = stringResource(R.string.setting),
                 tint = colorScheme.onSurface,
             )

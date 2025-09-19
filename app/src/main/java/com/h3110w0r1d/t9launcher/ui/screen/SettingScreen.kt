@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.AppRegistration
+import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Keyboard
@@ -93,6 +94,13 @@ fun SettingScreen(
                     },
                     onClick = {
                         viewModel.setIsHideSystemApp(!appConfig.isHideSystemApp)
+                    },
+                )
+                SettingItem(
+                    imageVector = Icons.Outlined.Bolt,
+                    title = stringResource(R.string.shortcut_setting),
+                    onClick = {
+                        navController.navigate("shortcut")
                     },
                 )
                 SettingItem(

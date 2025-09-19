@@ -13,7 +13,9 @@ import com.h3110w0r1d.t9launcher.ui.screen.HideAppScreen
 import com.h3110w0r1d.t9launcher.ui.screen.HomeScreen
 import com.h3110w0r1d.t9launcher.ui.screen.KeyboardStyleScreen
 import com.h3110w0r1d.t9launcher.ui.screen.OnboardingScreen
+import com.h3110w0r1d.t9launcher.ui.screen.SelectShortcutScreen
 import com.h3110w0r1d.t9launcher.ui.screen.SettingScreen
+import com.h3110w0r1d.t9launcher.ui.screen.ShortcutScreen
 
 @Composable
 fun AppNavigation(viewModel: AppViewModel) {
@@ -52,5 +54,10 @@ fun AppNavigation(viewModel: AppViewModel) {
         composable("app_list_style") { AppListStyleScreen(navController, viewModel) }
         composable("keyboard_style") { KeyboardStyleScreen(navController, viewModel) }
         composable("onboarding") { OnboardingScreen(viewModel, navController) }
+        composable("shortcut") { ShortcutScreen(navController, viewModel) }
+        composable("select_shortcut/{index}") { backStackEntry ->
+            val index = backStackEntry.arguments?.getString("index")?.toIntOrNull() ?: 0
+            SelectShortcutScreen(navController, viewModel, index)
+        }
     }
 }

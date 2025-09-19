@@ -25,15 +25,15 @@
 
 1. 加入Google群组/Join the Google group
 
-https://groups.google.com/u/1/g/t9launcher-test
+    https://groups.google.com/u/1/g/t9launcher-test
 
 2. 加入封闭测试/Join the closed beta
 
-https://play.google.com/apps/testing/com.h3110w0r1d.t9launcher
+    https://play.google.com/apps/testing/com.h3110w0r1d.t9launcher
 
 3. 安装应用/Install the app
 
-https://play.google.com/store/apps/details?id=com.h3110w0r1d.t9launcher
+    https://play.google.com/store/apps/details?id=com.h3110w0r1d.t9launcher
 
 ## 主要功能
 

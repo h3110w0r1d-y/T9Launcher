@@ -123,13 +123,13 @@ class PinyinUtil
          * @param searchText
          * @return 匹配度 匹配度为0时匹配失败
          */
-        fun Search(
+        fun search(
             app: AppInfo,
             searchText: String,
         ): Float {
             val data = app.searchData
             for (i in data.indices) {
-                val position = search(data, searchText, i, 0)
+                val position = searchPosition(data, searchText, i, 0)
                 if (position > 0) {
                     return (position - i).toFloat() / data.size.toFloat()
                 }
@@ -138,7 +138,7 @@ class PinyinUtil
         }
 
         // 递归搜索 返回0匹配失败, 否则返回匹配到了第几个字
-        private fun search(
+        private fun searchPosition(
             data: ArrayList<ArrayList<String>>,
             searchText: String,
             i: Int,
@@ -153,7 +153,7 @@ class PinyinUtil
 
             for (j in data[i].indices) {
                 if (match(searchText, data[i][j], k)) { // 当前字匹配, 匹配下一个字
-                    val position = search(data, searchText, i + 1, k + data[i][j].length)
+                    val position = searchPosition(data, searchText, i + 1, k + data[i][j].length)
                     if (position != 0) {
                         return position
                     }
