@@ -55,6 +55,7 @@ fun HomeScreen(
     viewModel: AppViewModel,
 ) {
     val apps by viewModel.searchResultAppList.collectAsState()
+    val appMap by viewModel.appMap.collectAsState()
     val appConfig by viewModel.appConfig.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -229,6 +230,18 @@ fun HomeScreen(
                                 navController.navigate("setting")
                             }
                             else -> {
+                                if (text.toInt() > 0) {
+                                    val appInfo = appMap[appConfig.shortcutConfig[text.toInt() - 1]]
+                                    if (appInfo != null) {
+                                        if (appInfo.start(context)) {
+                                            viewModel.updateStartCount(appInfo)
+                                            searchText = ""
+                                            viewModel.searchApp("")
+                                            (context as? Activity)?.moveTaskToBack(true)
+                                            return@T9Keyboard
+                                        }
+                                    }
+                                }
                                 viewModel.showHideApp()
                             }
                         }
@@ -238,6 +251,7 @@ fun HomeScreen(
                         viewModel.searchApp("")
                     },
                     appConfig = appConfig,
+                    appMap = appMap,
                 )
             }
         }

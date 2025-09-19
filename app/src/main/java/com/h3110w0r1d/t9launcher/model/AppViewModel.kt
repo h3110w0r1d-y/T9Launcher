@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import java.text.Collator
 import java.util.Locale
 import javax.inject.Inject
@@ -43,8 +45,14 @@ data class AppConfig(
     val keyboardButtonHeight: Float = 60f,
     val keyboardWidth: Float = .8f,
     val keyboardBottomPadding: Float = 10f,
+    val keyboardQSIconSize: Float = 48f,
+    val keyboardQSIconAlpha: Float = 0.5f,
     // 引导界面是否展示过
     val isShowedOnboarding: Boolean = false,
+    val shortcutConfig: ArrayList<String> = arrayListOf("", "", "", "", "", "", "", "", ""),
+    // 配置是否初始化完成
+    // 只有读取配置后，isConfigInitialized才会是true
+    val isConfigInitialized: Boolean = false,
 )
 
 @HiltViewModel
@@ -55,11 +63,11 @@ class AppViewModel
         private val dataStore: DataStore<Preferences>,
         private val pinyinUtil: PinyinUtil,
     ) : ViewModel() {
-        private val collator: Collator = Collator.getInstance(Locale.CHINA)
         private var appList: ArrayList<AppInfo> = arrayListOf()
         private var searchText: String = ""
         private var isLoadingAppList: Boolean = false
 
+        private val collator: Collator = Collator.getInstance(Locale.CHINA)
         private val isHideSystemAppKey = booleanPreferencesKey("is_hide_system_app")
         private val hiddenComponentIdKey = stringSetPreferencesKey("hidden_class_names")
         private val iconSizeKey = floatPreferencesKey("icon_size")
@@ -72,8 +80,12 @@ class AppViewModel
         private val keyboardButtonHeightKey = floatPreferencesKey("keyboard_button_height")
         private val keyboardWidthKey = floatPreferencesKey("keyboard_width")
         private val keyboardBottomPaddingKey = floatPreferencesKey("keyboard_bottom_padding")
+        private val keyboardQSIconSizeKey = floatPreferencesKey("keyboard_qs_icon_size")
+        private val keyboardQSIconAlphaKey = floatPreferencesKey("keyboard_qs_icon_alpha")
         private val appNameSizeKey = floatPreferencesKey("app_name_size")
         private val isShowedOnboardingKey = booleanPreferencesKey("is_showed_onboarding")
+        private val shortcutConfigKey = stringPreferencesKey("shortcut_config")
+        private val isConfigInitializedKey = booleanPreferencesKey("is_config_initialized")
 
         val appConfig: StateFlow<AppConfig> =
             dataStore.data
@@ -90,9 +102,17 @@ class AppViewModel
                         keyboardButtonHeight = preferences[keyboardButtonHeightKey] ?: 60f,
                         keyboardWidth = preferences[keyboardWidthKey] ?: .8f,
                         keyboardBottomPadding = preferences[keyboardBottomPaddingKey] ?: 10f,
+                        keyboardQSIconSize = preferences[keyboardQSIconSizeKey] ?: 48f,
+                        keyboardQSIconAlpha = preferences[keyboardQSIconAlphaKey] ?: 0.5f,
                         appNameSize = preferences[appNameSizeKey] ?: 12f,
                         iconCornerRadius = preferences[iconCornerRadiusKey] ?: 26,
                         isShowedOnboarding = preferences[isShowedOnboardingKey] ?: false,
+                        shortcutConfig =
+                            Json.decodeFromString<ArrayList<String>>(
+                                preferences[shortcutConfigKey]
+                                    ?: "[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]",
+                            ),
+                        isConfigInitialized = preferences[isConfigInitializedKey] ?: true,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -100,6 +120,8 @@ class AppViewModel
                     initialValue = AppConfig(),
                 )
 
+        private var _appMap = MutableStateFlow(HashMap<String, AppInfo>())
+        val appMap: StateFlow<HashMap<String, AppInfo>> = _appMap
         private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(true)
         val isLoading: StateFlow<Boolean> = _isLoading
         private val _isRefreshing: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -145,6 +167,19 @@ class AppViewModel
             }
         }
 
+        fun setQuickStartApp(
+            index: Int,
+            componentId: String,
+        ) {
+            val newQuickStartConfig = appConfig.value.shortcutConfig.toMutableList()
+            newQuickStartConfig[index] = componentId
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[shortcutConfigKey] = Json.encodeToString(newQuickStartConfig)
+                }
+            }
+        }
+
         /**
          * 加载并更新应用列表
          */
@@ -155,7 +190,9 @@ class AppViewModel
             viewModelScope.launch {
                 isLoadingAppList = true
                 withContext(Dispatchers.IO) {
-                    appList = appRepository.loadAllApps()
+                    val appPair = appRepository.loadAllApps()
+                    appList = appPair.first
+                    _appMap.value = appPair.second
                     appList.sortWith(compareBy(collator) { it.appName })
                     appList.sortWith(SortByStartCount())
                 }
@@ -165,7 +202,9 @@ class AppViewModel
                 }
 
                 withContext(Dispatchers.IO) {
-                    appList = appRepository.updateAppInfo(false)
+                    val appPair = appRepository.updateAppInfo(false)
+                    appList = appPair.first
+                    _appMap.value = appPair.second
                     appList.sortWith(compareBy(collator) { it.appName })
                     appList.sortWith(SortByStartCount())
                 }
@@ -179,7 +218,9 @@ class AppViewModel
             viewModelScope.launch {
                 _isRefreshing.value = true
                 withContext(Dispatchers.IO) {
-                    appList = appRepository.updateAppInfo(true)
+                    val appPair = appRepository.updateAppInfo(true)
+                    appList = appPair.first
+                    _appMap.value = appPair.second
                     appList.sortWith(compareBy(collator) { it.appName })
                     appList.sortWith(SortByStartCount())
                 }
@@ -257,6 +298,8 @@ class AppViewModel
                     preferences[keyboardButtonHeightKey] = newAppConfig.keyboardButtonHeight
                     preferences[keyboardWidthKey] = newAppConfig.keyboardWidth
                     preferences[keyboardBottomPaddingKey] = newAppConfig.keyboardBottomPadding
+                    preferences[keyboardQSIconSizeKey] = newAppConfig.keyboardQSIconSize
+                    preferences[keyboardQSIconAlphaKey] = newAppConfig.keyboardQSIconAlpha
                 }
             }
         }

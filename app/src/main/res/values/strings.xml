@@ -10,7 +10,7 @@
     <string name="about">About</string>
     <string name="author">Author</string>
     <string name="version">Version</string>
-    <string name="hide">Hiding</string>
+    <string name="hide">Features</string>
     <string name="repository">Repository</string>
     <string name="appearance">Appearance</string>
     <string name="keyboard_style">Keyboard Style</string>
@@ -39,4 +39,9 @@
     <string name="next">Next</string>
     <string name="back">Back</string>
     <string name="user_guide">User Guide</string>
+    <string name="shortcut_setting">Shortcut Setting</string>
+    <string name="shortcut_icon_size">Shortcut Icon Size</string>
+    <string name="shortcut_icon_opacity">Shortcut Icon Opacity</string>
+    <string name="select_shortcut_app">Choose a Shortcut App</string>
+    <string name="not_set">Not set</string>
 </resources>

@@ -14,8 +14,8 @@ android {
         applicationId = "com.h3110w0r1d.t9launcher"
         minSdk = 26
         targetSdk = 36
-        versionCode = 24
-        versionName = "1.6.12"
+        versionCode = 25
+        versionName = "1.7.0"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -90,7 +90,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
 
     implementation(platform("androidx.compose:compose-bom:2025.09.00"))
+    implementation("androidx.compose.animation:animation-graphics")
     implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-text")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material:material-icons-extended")
@@ -98,7 +100,6 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("com.google.dagger:hilt-android:2.57.1")
-    implementation("androidx.compose.animation:animation-graphics:1.9.1")
     kapt("com.google.dagger:hilt-compiler:2.57.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
 }

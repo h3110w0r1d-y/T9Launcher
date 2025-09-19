@@ -47,6 +47,7 @@ fun KeyboardStyleScreen(
     viewModel: AppViewModel,
 ) {
     val appConfig by viewModel.appConfig.collectAsState()
+    val appMap by viewModel.appMap.collectAsState()
     var isChanged by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var previewAppConfig by remember { mutableStateOf(appConfig) }
@@ -150,6 +151,28 @@ fun KeyboardStyleScreen(
                             modifier = Modifier.height(20.dp),
                         )
                     }
+                    StyleSettingCard(title = stringResource(R.string.shortcut_icon_size)) {
+                        Slider(
+                            value = previewAppConfig.keyboardQSIconSize,
+                            onValueChange = {
+                                previewAppConfig = previewAppConfig.copy(keyboardQSIconSize = it)
+                                isChanged = true
+                            },
+                            valueRange = 20f..80f,
+                            modifier = Modifier.height(20.dp),
+                        )
+                    }
+                    StyleSettingCard(title = stringResource(R.string.shortcut_icon_opacity)) {
+                        Slider(
+                            value = previewAppConfig.keyboardQSIconAlpha,
+                            onValueChange = {
+                                previewAppConfig = previewAppConfig.copy(keyboardQSIconAlpha = it)
+                                isChanged = true
+                            },
+                            valueRange = 0f..1f,
+                            modifier = Modifier.height(20.dp),
+                        )
+                    }
                 }
             }
             Card(
@@ -163,7 +186,7 @@ fun KeyboardStyleScreen(
                         defaultElevation = 10.dp,
                     ),
             ) {
-                T9Keyboard(appConfig = previewAppConfig)
+                T9Keyboard(appConfig = previewAppConfig, appMap = appMap)
             }
         }
     }

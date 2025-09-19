@@ -11,7 +11,7 @@
     <string name="about">关于</string>
     <string name="author">作者</string>
     <string name="version">版本</string>
-    <string name="hide">隐藏</string>
+    <string name="hide">功能</string>
     <string name="repository">仓库</string>
     <string name="appearance">外观</string>
     <string name="keyboard_style">键盘样式</string>
@@ -40,4 +40,9 @@
     <string name="next">下一个</string>
     <string name="back">上一个</string>
     <string name="user_guide">使用说明</string>
+    <string name="shortcut_setting">快捷启动设置</string>
+    <string name="shortcut_icon_size">快捷启动图标大小</string>
+    <string name="shortcut_icon_opacity">快捷启动图标透明度</string>
+    <string name="select_shortcut_app">选择快捷启动应用</string>
+    <string name="not_set">未设置</string>
 </resources>

@@ -30,6 +30,8 @@ class AppRepository
         private val table = "T_AppInfo"
         private var appList = ArrayList<AppInfo>()
 
+        private var appMap = HashMap<String, AppInfo>()
+
         private fun queryAllApps(): Cursor {
             val db = dbHelper.readableDatabase
 
@@ -98,9 +100,9 @@ class AppRepository
             statement.close()
         }
 
-        fun loadAllApps(): ArrayList<AppInfo> {
+        fun loadAllApps(): Pair<ArrayList<AppInfo>, HashMap<String, AppInfo>> {
             if (appList.isNotEmpty()) {
-                return appList
+                return Pair(appList, appMap)
             }
             iconManager.loadAllIcons()
             val result = ArrayList<AppInfo>()
@@ -122,7 +124,7 @@ class AppRepository
 
                 val searchData =
                     Json.decodeFromString<ArrayList<ArrayList<String>>>(searchDataJson)
-                result.add(
+                val appInfo =
                     AppInfo(
                         className,
                         packageName,
@@ -131,15 +133,16 @@ class AppRepository
                         appIcon,
                         isSystemApp,
                         searchData,
-                    ),
-                )
+                    )
+                appMap[componentId] = appInfo
+                result.add(appInfo)
             }
             cursor.close()
             appList = result
-            return result
+            return Pair(result, appMap)
         }
 
-        fun updateAppInfo(updateIcon: Boolean): ArrayList<AppInfo> {
+        fun updateAppInfo(updateIcon: Boolean): Pair<ArrayList<AppInfo>, HashMap<String, AppInfo>> {
             val componentIds: ArrayList<String> = ArrayList()
             val packageManager = context.packageManager
             val resolveInfoList =
@@ -211,8 +214,7 @@ class AppRepository
                         searchDataJson,
                     ),
                 )
-
-                result.add(
+                val appInfo =
                     AppInfo(
                         className,
                         packageName,
@@ -221,13 +223,15 @@ class AppRepository
                         appIcon,
                         isSystemApp,
                         searchData,
-                    ),
-                )
+                    )
+                appMap[componentId] = appInfo
+
+                result.add(appInfo)
             }
             insertOrUpdate(insertOrUpdateList)
             iconManager.saveIconsToFile()
             appList = result
-            return result
+            return Pair(result, appMap)
         }
 
         fun updateStartCount(app: AppInfo) {
