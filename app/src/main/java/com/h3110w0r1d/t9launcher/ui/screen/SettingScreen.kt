@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.AppRegistration
-import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Keyboard
@@ -42,6 +40,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -97,24 +96,38 @@ fun SettingScreen(
                     },
                 )
                 SettingItem(
-                    imageVector = Icons.Outlined.Bolt,
-                    title = stringResource(R.string.shortcut_setting),
-                    onClick = {
-                        navController.navigate("shortcut")
-                    },
-                )
-                SettingItem(
                     imageVector = Icons.Outlined.VisibilityOff,
                     title = stringResource(R.string.hide_app_list),
                     onClick = {
                         navController.navigate("hide_app")
                     },
                 )
+                SettingItem(
+                    imageVector = ImageVector.vectorResource(R.drawable.flash_on_24px),
+                    title = stringResource(R.string.shortcut_setting),
+                    onClick = {
+                        navController.navigate("shortcut")
+                    },
+                )
+                SettingItem(
+                    imageVector = ImageVector.vectorResource(R.drawable.match_word_24px),
+                    title = stringResource(R.string.english_fuzzy_match),
+                    description = "udio -> Audio",
+                    trailingContent = {
+                        Switch(
+                            checked = appConfig.englishFuzzyMatch,
+                            onCheckedChange = null,
+                        )
+                    },
+                    onClick = {
+                        viewModel.setEnglishFuzzyMatch(!appConfig.englishFuzzyMatch)
+                    },
+                )
 
                 SettingItemGroup(stringResource(R.string.appearance))
 
                 SettingItem(
-                    imageVector = Icons.Outlined.AppRegistration,
+                    imageVector = ImageVector.vectorResource(R.drawable.app_registration_24px),
                     title = stringResource(R.string.app_list_style),
                     onClick = {
                         navController.navigate("app_list_style")

@@ -53,6 +53,7 @@ data class AppConfig(
     // 配置是否初始化完成
     // 只有读取配置后，isConfigInitialized才会是true
     val isConfigInitialized: Boolean = false,
+    val englishFuzzyMatch: Boolean = false,
 )
 
 @HiltViewModel
@@ -86,6 +87,7 @@ class AppViewModel
         private val isShowedOnboardingKey = booleanPreferencesKey("is_showed_onboarding")
         private val shortcutConfigKey = stringPreferencesKey("shortcut_config")
         private val isConfigInitializedKey = booleanPreferencesKey("is_config_initialized")
+        private val englishFuzzyMatchKey = booleanPreferencesKey("english_fuzzy_match")
 
         val appConfig: StateFlow<AppConfig> =
             dataStore.data
@@ -113,6 +115,7 @@ class AppViewModel
                                     ?: "[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]",
                             ),
                         isConfigInitialized = preferences[isConfigInitializedKey] ?: true,
+                        englishFuzzyMatch = preferences[englishFuzzyMatchKey] ?: false,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -163,6 +166,14 @@ class AppViewModel
             viewModelScope.launch {
                 dataStore.edit { preferences ->
                     preferences[isHideSystemAppKey] = isHide
+                }
+            }
+        }
+
+        fun setEnglishFuzzyMatch(englishFuzzyMatch: Boolean) {
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[englishFuzzyMatchKey] = englishFuzzyMatch
                 }
             }
         }
@@ -262,7 +273,7 @@ class AppViewModel
                 if (appConfig.value.hiddenComponentIds.contains(app.componentId())) {
                     continue
                 }
-                val matchRate = pinyinUtil.search(app, key) // 匹配度
+                val matchRate = pinyinUtil.search(app, key, appConfig.value.englishFuzzyMatch) // 匹配度
                 if (matchRate > 0) {
                     app.matchRate = matchRate
                     appInfo.add(app)

@@ -62,6 +62,18 @@ class PinyinUtil
             return number.toString()
         }
 
+        private fun isAllLetters(sb: StringBuilder): Boolean {
+            if (sb.isEmpty()) {
+                return false
+            }
+            for (char in sb) {
+                if (!char.isLetter()) {
+                    return false
+                }
+            }
+            return true
+        }
+
         fun getPinYin(str: String): ArrayList<ArrayList<String>> {
             val result: ArrayList<ArrayList<String>> = ArrayList()
             var latterAndNumber = StringBuilder()
@@ -73,7 +85,8 @@ class PinyinUtil
                 }
                 if (latterAndNumber.isNotEmpty()) {
                     val newList: ArrayList<String> = ArrayList()
-                    newList.add(letter2Number(latterAndNumber.toString()))
+                    val allLetters = isAllLetters(latterAndNumber)
+                    newList.add((if (allLetters) "e" else "") + letter2Number(latterAndNumber.toString()))
                     if (latterAndNumber.length > 1) {
                         newList.add(letter2Number(latterAndNumber.substring(0, 1)))
                     }
@@ -111,7 +124,12 @@ class PinyinUtil
 
             if (latterAndNumber.isNotEmpty()) {
                 val newList: ArrayList<String> = ArrayList()
-                newList.add(letter2Number(latterAndNumber.toString()))
+                val allLetters = isAllLetters(latterAndNumber)
+                newList.add((if (allLetters) "e" else "") + letter2Number(latterAndNumber.toString()))
+                // 最后一个字/词不需要单独加首字母
+                // if (latterAndNumber.length > 1) {
+                //     newList.add(letter2Number(latterAndNumber.substring(0, 1)))
+                // }
                 result.add(newList)
             }
             return result
@@ -126,10 +144,11 @@ class PinyinUtil
         fun search(
             app: AppInfo,
             searchText: String,
+            englishFuzzyMatch: Boolean = false,
         ): Float {
             val data = app.searchData
             for (i in data.indices) {
-                val position = searchPosition(data, searchText, i, 0)
+                val position = searchPosition(data, searchText, i, 0, englishFuzzyMatch)
                 if (position > 0) {
                     return (position - i).toFloat() / data.size.toFloat()
                 }
@@ -143,6 +162,7 @@ class PinyinUtil
             searchText: String,
             i: Int,
             k: Int,
+            englishFuzzyMatch: Boolean,
         ): Int {
             if (searchText.length <= k) { // 全部匹配完成
                 return i // 返回匹配到了第几个字
@@ -152,8 +172,9 @@ class PinyinUtil
             }
 
             for (j in data[i].indices) {
-                if (match(searchText, data[i][j], k)) { // 当前字匹配, 匹配下一个字
-                    val position = searchPosition(data, searchText, i + 1, k + data[i][j].length)
+                val matchLength = match(searchText, data[i][j], k, englishFuzzyMatch)
+                if (matchLength > 0) { // 当前字匹配, 匹配下一个字
+                    val position = searchPosition(data, searchText, i + 1, k + matchLength, englishFuzzyMatch)
                     if (position != 0) {
                         return position
                     }
@@ -166,5 +187,25 @@ class PinyinUtil
             searchText: String,
             chr: String,
             k: Int,
-        ): Boolean = searchText.startsWith(chr, k) || chr.startsWith(searchText.substring(k))
+            englishFuzzyMatch: Boolean,
+        ): Int {
+            if (searchText.startsWith(chr, k) ||
+                chr.startsWith(searchText.substring(k))
+            ) {
+                return chr.length
+            }
+            if (chr.startsWith("e")) {
+                for (i in 1..<chr.length) {
+                    if (searchText.startsWith(chr.substring(i), k) ||
+                        chr.substring(i).startsWith(searchText.substring(k))
+                    ) {
+                        return chr.length - i
+                    }
+                    if (!englishFuzzyMatch) {
+                        break
+                    }
+                }
+            }
+            return 0
+        }
     }

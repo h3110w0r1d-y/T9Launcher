@@ -44,4 +44,5 @@
     <string name="shortcut_icon_opacity">Shortcut Icon Opacity</string>
     <string name="select_shortcut_app">Choose a Shortcut App</string>
     <string name="not_set">Not set</string>
+    <string name="english_fuzzy_match">Fuzzy Match Word</string>
 </resources>

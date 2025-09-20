@@ -234,7 +234,6 @@ fun HomeScreen(
                                     val appInfo = appMap[appConfig.shortcutConfig[text.toInt() - 1]]
                                     if (appInfo != null) {
                                         if (appInfo.start(context)) {
-                                            viewModel.updateStartCount(appInfo)
                                             searchText = ""
                                             viewModel.searchApp("")
                                             (context as? Activity)?.moveTaskToBack(true)
