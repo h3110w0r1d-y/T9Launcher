@@ -45,4 +45,5 @@
     <string name="shortcut_icon_opacity">快捷启动图标透明度</string>
     <string name="select_shortcut_app">选择快捷启动应用</string>
     <string name="not_set">未设置</string>
+    <string name="english_fuzzy_match">英文模糊匹配</string>
 </resources>
