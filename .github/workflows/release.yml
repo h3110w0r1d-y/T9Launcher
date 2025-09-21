@@ -16,11 +16,11 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew assembleDefaultRelease
+      - run: ./gradlew assembleXposedRelease
       - uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
-          releaseDirectory: app/build/outputs/apk/default/release
+          releaseDirectory: app/build/outputs/apk/xposed/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -29,6 +29,6 @@ jobs:
           BUILD_TOOLS_VERSION: "34.0.0"
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "app/build/outputs/apk/default/release/*-signed.apk"
+          artifacts: "app/build/outputs/apk/xposed/release/*-signed.apk"
           token: ${{ github.token }}
           generateReleaseNotes: true
