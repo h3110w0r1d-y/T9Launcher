@@ -29,6 +29,6 @@ jobs:
           BUILD_TOOLS_VERSION: "34.0.0"
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "app/build/outputs/apk/release/*-signed.apk"
+          artifacts: "app/build/outputs/apk/default/release/*-signed.apk"
           token: ${{ github.token }}
           generateReleaseNotes: true
