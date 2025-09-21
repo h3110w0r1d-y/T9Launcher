@@ -21,6 +21,12 @@ android {
         }
     }
 
+    flavorDimensions += "version"
+    productFlavors {
+        create("default") {}
+        create("xposed") {}
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -35,6 +41,8 @@ android {
                 abi {
                     isEnable = true
                     isUniversalApk = true
+                    reset()
+                    include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
                 }
             }
             packaging {
@@ -49,20 +57,26 @@ android {
             }
         }
     }
-
-    applicationVariants.all {
-        val variant = this
-        if (variant.buildType.name == "release") {
-            variant.outputs
-                .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
-                .forEach { output ->
-                    val abi = output.getFilter("ABI") ?: "universal"
-                    val apkName = "T9Launcher-${defaultConfig.versionName}-$abi-${variant.buildType.name}.apk"
-                    output.outputFileName = apkName
+    androidComponents {
+        onVariants { variant ->
+            var currentVersionName = defaultConfig.versionName
+            if (variant.name.contains("xposed", true)) {
+                currentVersionName += "-xposed"
+            }
+            variant.outputs.forEach { output ->
+                output.versionName.set(currentVersionName)
+                if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
+                    val abi =
+                        output
+                            .getFilter(
+                                com.android.build.api.variant.FilterConfiguration.FilterType.ABI,
+                            )?.identifier ?: "universal"
+                    val apkName = "T9Launcher-$currentVersionName-$abi-${variant.buildType}.apk"
+                    output.outputFileName.set(apkName)
                 }
+            }
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
