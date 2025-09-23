@@ -2,7 +2,9 @@ package com.h3110w0r1d.t9launcher.ui.screen
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.res.Configuration
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -34,6 +36,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -62,8 +69,10 @@ fun HomeScreen(
 
     var searchText by remember { mutableStateOf("") }
     val context = LocalContext.current
-    val lazyGridState = rememberLazyGridState() // 1. 创建 LazyGridState
+    val lazyGridState = rememberLazyGridState()
     val lastToastTime = remember { mutableLongStateOf(0L) }
+
+    val is12Key: Boolean = LocalConfiguration.current.keyboard == Configuration.KEYBOARD_12KEY
 
     // 监听 apps 的变化
     LaunchedEffect(apps) {
@@ -75,6 +84,14 @@ fun HomeScreen(
     DisposableEffect(Unit) {
         viewModel.searchApp(searchText)
         onDispose { }
+    }
+
+    BackHandler(enabled = true) {
+        if (searchText.isNotEmpty()) {
+            searchText = ""
+            viewModel.searchApp("")
+        }
+        (context as? Activity)?.moveTaskToBack(true)
     }
 
     Box(
@@ -89,7 +106,35 @@ fun HomeScreen(
                         viewModel.searchApp("")
                         (context as? Activity)?.moveTaskToBack(true)
                     },
-                ),
+                ).onKeyEvent { keyEvent: KeyEvent ->
+                    when (keyEvent.key) {
+                        // 实体键盘上的数字键，其 keyCode 通常与 Key.Zero 到 Key.Nine 对应
+                        Key.Zero, Key.One, Key.Two, Key.Three, Key.Four,
+                        Key.Five, Key.Six, Key.Seven, Key.Eight, Key.Nine,
+                        -> {
+                            val number = keyEvent.nativeKeyEvent.keyCode - Key.Zero.keyCode
+                            if (number in 0..9) {
+                                if (viewModel.searchApp(searchText + number) || isLoading) {
+                                    searchText += number.toString()
+                                }
+                            }
+                            return@onKeyEvent true
+                        }
+
+                        Key.Multiply -> {
+                            navController.navigate("setting")
+                            return@onKeyEvent true
+                        }
+                        Key.Pound -> {
+                            if (searchText.isNotEmpty()) {
+                                searchText = searchText.dropLast(1)
+                            }
+                            viewModel.searchApp(searchText)
+                            return@onKeyEvent true
+                        }
+                        else -> false
+                    }
+                },
         contentAlignment = Alignment.BottomCenter,
     ) {
         val interactionSource = remember { MutableInteractionSource() }
@@ -193,7 +238,7 @@ fun HomeScreen(
                     textAlign = TextAlign.Center,
                     fontSize = 20.sp,
                 )
-
+                if (is12Key) return@ConstraintLayout
                 // T9键盘区域
                 val enterSettingString = stringResource(id = R.string.long_press_open_settings)
                 T9Keyboard(
