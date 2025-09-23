@@ -28,9 +28,12 @@ class IconManager
         private val packedIconsFile: File
             get() = File(context.filesDir, "packed_icons.bin")
 
+        private val tmpPackedIconsFile: File
+            get() = File(context.filesDir, "packed_icons.tmp")
+
         private val icons = ConcurrentHashMap<String, Bitmap>()
 
-        private var changed = false
+        private var isChanged = false
 
         fun loadAllIcons(): Boolean {
             if (!packedIconsFile.exists()) {
@@ -39,7 +42,6 @@ class IconManager
             if (!icons.isEmpty()) {
                 return false
             }
-            icons.clear()
             try {
                 RandomAccessFile(packedIconsFile, "r").use { randomAccessFile ->
                     val indexSizeBuffer = ByteBuffer.allocate(4)
@@ -89,16 +91,17 @@ class IconManager
             bitmap: Bitmap,
         ) {
             icons[componentId] = bitmap
-            changed = true
+            isChanged = true
         }
 
         fun saveIconsToFile(): Boolean {
-            if (!changed) {
+            if (!isChanged) {
                 return false
             }
             try {
-                RandomAccessFile(packedIconsFile, "rw").use { randomAccessFile ->
+                RandomAccessFile(tmpPackedIconsFile, "rw").use { randomAccessFile ->
                     var currentOffset = 0L
+                    randomAccessFile.setLength(0)
 
                     val metadataList = mutableListOf<IconMetadata>()
                     val indexPlaceholder = ByteBuffer.allocate(4)
@@ -131,9 +134,19 @@ class IconManager
                     randomAccessFile.seek(0)
                     val indexSizeByteBuffer = ByteBuffer.allocate(4).putInt(indexSize)
                     randomAccessFile.write(indexSizeByteBuffer.array())
+                    randomAccessFile.fd.sync()
                 }
+                if (packedIconsFile.exists()) {
+                    packedIconsFile.delete()
+                }
+                tmpPackedIconsFile.renameTo(packedIconsFile)
+                isChanged = false
                 return true
             } catch (_: Exception) {
+                if (tmpPackedIconsFile.exists()) {
+                    tmpPackedIconsFile.delete()
+                }
+                isChanged = false
                 return false
             }
         }
@@ -145,6 +158,6 @@ class IconManager
             className: String,
         ) {
             icons.remove("$packageName/$className")
-            changed = true
+            isChanged = true
         }
     }
