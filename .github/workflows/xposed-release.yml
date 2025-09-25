@@ -38,11 +38,13 @@ jobs:
           VERSION_TAG=${{ env.TAG_NAME }}
           if [[ $VERSION_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             XPOSED_TAG="$VERSION_TAG-xposed"
+            echo "XPOSED_TAG=$XPOSED_TAG" >> $GITHUB_ENV
             echo "Creating and pushing new tag: $XPOSED_TAG"
             git tag $XPOSED_TAG
             git push origin $XPOSED_TAG
           else
             echo "Tag does not match pattern vX.X.X. Skipping xposed tag creation."
+            echo "XPOSED_TAG=VERSION_TAG" >> $GITHUB_ENV
           fi
 
       - name: Set up Java
@@ -75,4 +77,4 @@ jobs:
           artifacts: "app/build/outputs/apk/xposed/release/*-signed.apk"
           token: ${{ github.token }}
           generateReleaseNotes: true
-          tag: ${{ env.TAG_NAME }}-xposed
+          tag: ${{ env.XPOSED_TAG }}
