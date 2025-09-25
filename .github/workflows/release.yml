@@ -50,8 +50,13 @@ jobs:
           whatsNewDirectory: distribution/whatsnew
           mappingFile: app/build/outputs/mapping/defaultRelease/mapping.txt
 
-      - name: Build APK
+      - name: Build Default APK
+        if: !contains(github.ref, '-xposed')
         run: ./gradlew assembleDefaultRelease
+
+      - name: Build Xposed APK
+        if: contains(github.ref, '-xposed')
+        run: ./gradlew assembleXposedRelease
 
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
