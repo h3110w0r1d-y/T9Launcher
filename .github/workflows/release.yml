@@ -21,13 +21,12 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-
       - name: Build AAB
-        if: !contains(github.ref, '-xposed')
+        if: "!contains(github.ref, '-xposed')"
         run: ./gradlew bundleDefaultRelease
 
       - name: Sign AAB
-        if: !contains(github.ref, '-xposed')
+        if: "!contains(github.ref, '-xposed')"
         uses: r0adkll/sign-android-release@v1
         id: sign_aab
         with:
@@ -40,7 +39,7 @@ jobs:
           BUILD_TOOLS_VERSION: "36.0.0"
 
       - name: Upload AAB to Google Play
-        if: !contains(github.ref, '-xposed')
+        if: "!contains(github.ref, '-xposed')"
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ SERVICE_ACCOUNT_JSON }}
@@ -51,11 +50,11 @@ jobs:
           mappingFile: app/build/outputs/mapping/defaultRelease/mapping.txt
 
       - name: Build Default APK
-        if: !contains(github.ref, '-xposed')
+        if: "!contains(github.ref, '-xposed')"
         run: ./gradlew assembleDefaultRelease
 
       - name: Build Xposed APK
-        if: contains(github.ref, '-xposed')
+        if: "contains(github.ref, '-xposed')"
         run: ./gradlew assembleXposedRelease
 
       - name: Sign APK
