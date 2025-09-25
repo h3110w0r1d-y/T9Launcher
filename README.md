@@ -2,10 +2,10 @@
   <img src="./image/icon.png" alt="T9启动器" width="128" height="128">
   <h1>T9启动器</h1>
 
-[![GitHub release](https://img.shields.io/github/release/h3110w0r1d-y/T9Launcher.svg)](https://github.com/h3110w0r1d-y/T9Launcher/releases/latest)
+[![GitHub release](https://img.shields.io/github/v/release/h3110w0r1d-y/T9Launcher?filter=!*xposed)](https://github.com/h3110w0r1d-y/T9Launcher/releases)
 [![Default Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/default-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/default-release.yml)
-[![Default Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/xposed-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/xposed-release.yml)
-[![Default Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/play-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/play-release.yml)
+[![Xposed Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/xposed-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/xposed-release.yml)
+[![Play Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/play-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/play-release.yml)
 ![Android](https://img.shields.io/badge/Android-8.0%2B-blue)
 ![License](https://img.shields.io/github/license/h3110w0r1d-y/T9Launcher)
 ![GitHub stars](https://img.shields.io/github/stars/h3110w0r1d-y/T9Launcher?style=social)
@@ -28,13 +28,9 @@
 
     https://groups.google.com/u/1/g/t9launcher-test
 
-2. 加入封闭测试/Join the closed beta
+2. 安装应用/Install the app
 
-    https://play.google.com/apps/testing/com.h3110w0r1d.t9launcher
-
-3. 安装应用/Install the app
-
-    https://play.google.com/store/apps/details?id=com.h3110w0r1d.t9launcher
+   [![Get it on Play Store](image/google-play-badges.svg)](https://play.google.com/store/apps/details?id=com.h3110w0r1d.t9launcher)
 
 ## 主要功能
 
