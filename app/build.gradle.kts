@@ -6,6 +6,13 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
 }
 
+var isBundleTask = false
+gradle.startParameter.taskNames.forEach { taskName ->
+    if (taskName.contains("bundle")) {
+        isBundleTask = true
+    }
+}
+
 android {
     namespace = "com.h3110w0r1d.t9launcher"
     compileSdk = 36
@@ -14,10 +21,18 @@ android {
         applicationId = "com.h3110w0r1d.t9launcher"
         minSdk = 26
         targetSdk = 36
-        versionCode = 27
-        versionName = "1.7.2"
+        versionCode = 28
+        versionName = "1.7.3"
         vectorDrawables {
             useSupportLibrary = true
+        }
+    }
+    splits {
+        abi {
+            isEnable = !isBundleTask
+            isUniversalApk = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
     }
 
@@ -37,14 +52,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            splits {
-                abi {
-                    isEnable = true
-                    isUniversalApk = true
-                    reset()
-                    include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-                }
-            }
             packaging {
                 resources {
                     excludes += "META-INF/androidx/**"
@@ -59,6 +66,8 @@ android {
     }
     androidComponents {
         onVariants { variant ->
+            if (variant.name.contains("play", true)) return@onVariants
+
             var currentVersionName = defaultConfig.versionName
             if (variant.name.contains("xposed", true)) {
                 currentVersionName += "-xposed"
@@ -99,11 +108,11 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
-    implementation("androidx.navigation:navigation-compose:2.9.4")
+    implementation("androidx.navigation:navigation-compose:2.9.5")
     implementation("androidx.activity:activity-compose:1.11.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
 
-    implementation(platform("androidx.compose:compose-bom:2025.09.00"))
+    implementation(platform("androidx.compose:compose-bom:2025.09.01"))
     implementation("androidx.compose.animation:animation-graphics")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-text")
