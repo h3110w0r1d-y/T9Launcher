@@ -1,1 +1,1 @@
-Update dependency versions
+Added application package receiver to handle application installation, update, and uninstallation events

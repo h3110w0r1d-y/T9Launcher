@@ -14,7 +14,6 @@ import com.h3110w0r1d.t9launcher.di.AppRepository
 import com.h3110w0r1d.t9launcher.utils.PinyinUtil
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 import com.h3110w0r1d.t9launcher.vo.AppInfo.SortByMatchRate
-import com.h3110w0r1d.t9launcher.vo.AppInfo.SortByStartCount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +24,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import java.text.Collator
 import java.util.Locale
 import javax.inject.Inject
 
@@ -64,11 +62,9 @@ class AppViewModel
         private val dataStore: DataStore<Preferences>,
         private val pinyinUtil: PinyinUtil,
     ) : ViewModel() {
-        private var appList: ArrayList<AppInfo> = arrayListOf()
         private var searchText: String = ""
         private var isLoadingAppList: Boolean = false
-
-        private val collator: Collator = Collator.getInstance(Locale.CHINA)
+        private var isAppListListenerStarted: Boolean = false
         private val isHideSystemAppKey = booleanPreferencesKey("is_hide_system_app")
         private val hiddenComponentIdKey = stringSetPreferencesKey("hidden_class_names")
         private val iconSizeKey = floatPreferencesKey("icon_size")
@@ -123,8 +119,7 @@ class AppViewModel
                     initialValue = AppConfig(),
                 )
 
-        private var _appMap = MutableStateFlow(HashMap<String, AppInfo>())
-        val appMap: StateFlow<HashMap<String, AppInfo>> = _appMap
+        val appMap: StateFlow<HashMap<String, AppInfo>> = appRepository.appMap
         private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(true)
         val isLoading: StateFlow<Boolean> = _isLoading
         private val _isRefreshing: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -137,8 +132,9 @@ class AppViewModel
         val hideAppList: StateFlow<ArrayList<AppInfo>> = _hideAppList
 
         fun switchAppHide(app: AppInfo) {
+            val config = appConfig.value
             if (isAppHide(app)) {
-                appConfig.value.hiddenComponentIds.toMutableSet().apply {
+                config.hiddenComponentIds.toMutableSet().apply {
                     remove(app.componentId())
                     viewModelScope.launch {
                         dataStore.edit { preferences ->
@@ -147,7 +143,7 @@ class AppViewModel
                     }
                 }
             } else {
-                appConfig.value.hiddenComponentIds.toMutableSet().apply {
+                config.hiddenComponentIds.toMutableSet().apply {
                     add(app.componentId())
                     viewModelScope.launch {
                         dataStore.edit { preferences ->
@@ -160,6 +156,22 @@ class AppViewModel
 
         fun setLoadingStatus(loading: Boolean) {
             _isLoading.value = loading
+        }
+
+        /**
+         * 启动应用列表监听器，当应用列表更新时自动刷新搜索结果
+         */
+        private fun startAppListListener() {
+            if (isAppListListenerStarted) return
+
+            isAppListListenerStarted = true
+            viewModelScope.launch {
+                appRepository.appList.collect { appList ->
+                    if (appList.isNotEmpty()) {
+                        searchApp(null)
+                    }
+                }
+            }
         }
 
         fun setIsHideSystemApp(isHide: Boolean) {
@@ -182,7 +194,8 @@ class AppViewModel
             index: Int,
             componentId: String,
         ) {
-            val newQuickStartConfig = appConfig.value.shortcutConfig.toMutableList()
+            val config = appConfig.value
+            val newQuickStartConfig = config.shortcutConfig.toMutableList()
             newQuickStartConfig[index] = componentId
             viewModelScope.launch {
                 dataStore.edit { preferences ->
@@ -198,27 +211,22 @@ class AppViewModel
             if (isLoadingAppList || !isLoading.value) {
                 return
             }
+
+            // 启动应用列表监听器
+            startAppListListener()
+
             viewModelScope.launch {
                 isLoadingAppList = true
-                withContext(Dispatchers.IO) {
-                    val appPair = appRepository.loadAllApps()
-                    appList = appPair.first
-                    _appMap.value = appPair.second
-                    appList.sortWith(compareBy(collator) { it.appName })
-                    appList.sortWith(SortByStartCount())
-                }
-                if (!appList.isEmpty()) {
+                appRepository.loadAllApps()
+
+                // 检查是否有数据
+                val currentAppList = appRepository.appList.value
+                if (currentAppList.isNotEmpty()) {
                     setLoadingStatus(false)
                     searchApp(null)
                 }
 
-                withContext(Dispatchers.IO) {
-                    val appPair = appRepository.updateAppInfo(false)
-                    appList = appPair.first
-                    _appMap.value = appPair.second
-                    appList.sortWith(compareBy(collator) { it.appName })
-                    appList.sortWith(SortByStartCount())
-                }
+                appRepository.updateAppInfo(false)
                 setLoadingStatus(false)
                 searchApp(null)
                 isLoadingAppList = false
@@ -229,11 +237,7 @@ class AppViewModel
             viewModelScope.launch {
                 _isRefreshing.value = true
                 withContext(Dispatchers.IO) {
-                    val appPair = appRepository.updateAppInfo(true)
-                    appList = appPair.first
-                    _appMap.value = appPair.second
-                    appList.sortWith(compareBy(collator) { it.appName })
-                    appList.sortWith(SortByStartCount())
+                    appRepository.updateAppInfo(true)
                 }
                 searchApp(null)
                 _isRefreshing.value = false
@@ -242,8 +246,11 @@ class AppViewModel
 
         fun showDefaultAppList() {
             val appInfo = ArrayList<AppInfo>()
-            for (app in appList) {
-                if (appConfig.value.isHideSystemApp && app.isSystemApp) {
+            val currentAppList = appRepository.appList.value
+            val config = appConfig.value
+
+            for (app in currentAppList) {
+                if (config.isHideSystemApp && app.isSystemApp) {
                     continue
                 }
                 if (isAppHide(app)) {
@@ -251,7 +258,6 @@ class AppViewModel
                 }
                 appInfo.add(app)
             }
-            appList.sortWith(SortByStartCount())
             _searchResultAppList.value = appInfo
         }
 
@@ -266,14 +272,17 @@ class AppViewModel
                 return true
             }
             val appInfo = ArrayList<AppInfo>()
-            for (app in appList) {
-                if (appConfig.value.isHideSystemApp && app.isSystemApp) {
+            val currentAppList = appRepository.appList.value
+            val config = appConfig.value
+
+            for (app in currentAppList) {
+                if (config.isHideSystemApp && app.isSystemApp) {
                     continue
                 }
-                if (appConfig.value.hiddenComponentIds.contains(app.componentId())) {
+                if (config.hiddenComponentIds.contains(app.componentId())) {
                     continue
                 }
-                val matchRate = pinyinUtil.search(app, key, appConfig.value.englishFuzzyMatch) // 匹配度
+                val matchRate = pinyinUtil.search(app, key, config.englishFuzzyMatch) // 匹配度
                 if (matchRate > 0) {
                     app.matchRate = matchRate
                     appInfo.add(app)
@@ -327,8 +336,11 @@ class AppViewModel
             var key = key
             key = key.lowercase(Locale.getDefault())
             val appInfo = ArrayList<AppInfo>()
-            for (app in appList) {
-                if (appConfig.value.isHideSystemApp && app.isSystemApp) {
+            val currentAppList = appRepository.appList.value
+            val config = appConfig.value
+
+            for (app in currentAppList) {
+                if (config.isHideSystemApp && app.isSystemApp) {
                     continue
                 }
                 if (app.packageName
@@ -347,7 +359,10 @@ class AppViewModel
             _hideAppList.value = appInfo
         }
 
-        private fun isAppHide(app: AppInfo): Boolean = appConfig.value.hiddenComponentIds.contains(app.componentId())
+        private fun isAppHide(app: AppInfo): Boolean {
+            val config = appConfig.value
+            return config.hiddenComponentIds.contains(app.componentId())
+        }
 
         fun updateStartCount(app: AppInfo) {
             app.startCount += 1
@@ -356,8 +371,11 @@ class AppViewModel
 
         fun showHideApp() {
             val appInfo = ArrayList<AppInfo>()
-            for (app in appList) {
-                if (isAppHide(app) || (appConfig.value.isHideSystemApp && app.isSystemApp)) {
+            val currentAppList = appRepository.appList.value
+            val config = appConfig.value
+
+            for (app in currentAppList) {
+                if (isAppHide(app) || (config.isHideSystemApp && app.isSystemApp)) {
                     appInfo.add(app)
                 }
             }
