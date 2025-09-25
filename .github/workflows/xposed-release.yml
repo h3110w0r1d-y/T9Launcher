@@ -1,11 +1,12 @@
-name: Auto Merge and Tag
+name: Release Xposed
 on:
   push:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-xposed"
 
 jobs:
-  auto-merge:
+  merge-build-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -43,3 +44,33 @@ jobs:
           else
             echo "Tag does not match pattern vX.X.X. Skipping xposed tag creation."
           fi
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build APK (Xposed)
+        run: ./gradlew assembleXposedRelease
+
+      - name: Sign APK (Xposed)
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/xposed/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload Signed APK to Release (Xposed)
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "app/build/outputs/apk/xposed/release/*-signed.apk"
+          token: ${{ github.token }}
+          generateReleaseNotes: true
+          tag: ${{ env.TAG_NAME }}-xposed
