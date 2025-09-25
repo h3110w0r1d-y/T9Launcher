@@ -3,9 +3,10 @@
   <h1>T9启动器</h1>
 
 [![GitHub release](https://img.shields.io/github/release/h3110w0r1d-y/T9Launcher.svg)](https://github.com/h3110w0r1d-y/T9Launcher/releases/latest)
-[![main](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/release.yml)
+[![Default Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/default-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/default-release.yml)
+[![Default Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/xposed-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/xposed-release.yml)
+[![Default Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/play-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/play-release.yml)
 ![Android](https://img.shields.io/badge/Android-8.0%2B-blue)
-![API](https://img.shields.io/badge/API-26%2B-green)
 ![License](https://img.shields.io/github/license/h3110w0r1d-y/T9Launcher)
 ![GitHub stars](https://img.shields.io/github/stars/h3110w0r1d-y/T9Launcher?style=social)
 </div>
