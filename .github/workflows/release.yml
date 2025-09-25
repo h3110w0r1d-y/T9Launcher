@@ -21,12 +21,11 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+
       - name: Build AAB
-        if: "!contains(github.ref, '-xposed')"
         run: ./gradlew bundleDefaultRelease
 
       - name: Sign AAB
-        if: "!contains(github.ref, '-xposed')"
         uses: r0adkll/sign-android-release@v1
         id: sign_aab
         with:
@@ -35,29 +34,21 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "36.0.0"
 
       - name: Upload AAB to Google Play
-        if: "!contains(github.ref, '-xposed')"
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: com.h3110w0r1d.t9launcher
-          releaseFiles: app/build/outputs/bundle/defaultRelease/*-signed.aab
+          releaseFiles: app/build/outputs/bundle/defaultRelease/*.aab
           track: alpha
           whatsNewDirectory: distribution/whatsnew
           mappingFile: app/build/outputs/mapping/defaultRelease/mapping.txt
 
-      - name: Build Default APK
-        if: "!contains(github.ref, '-xposed')"
+      - name: Build APK (Default)
         run: ./gradlew assembleDefaultRelease
 
-      - name: Build Xposed APK
-        if: "contains(github.ref, '-xposed')"
-        run: ./gradlew assembleXposedRelease
-
-      - name: Sign APK
+      - name: Sign APK (Default)
         uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
@@ -66,10 +57,8 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "36.0.0"
 
-      - name: Upload Signed APK to Release
+      - name: Upload Signed APK to Release (Default)
         uses: ncipollo/release-action@v1
         with:
           artifacts: "app/build/outputs/apk/default/release/*-signed.apk"
