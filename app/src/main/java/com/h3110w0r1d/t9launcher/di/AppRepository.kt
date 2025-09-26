@@ -319,15 +319,15 @@ class AppRepository
                         result.add(processResult.appInfo)
                     }
                 }
-                insertOrUpdate(insertOrUpdateList)
-                iconManager.saveIconsToFile()
-
                 // 对应用列表进行排序
                 val sortedResult = sortAppList(result)
 
                 // 更新StateFlow
                 _appList.value = sortedResult
                 _appMap.value = resultMap
+
+                insertOrUpdate(insertOrUpdateList)
+                iconManager.saveIconsToFile()
             }
 
         fun updateStartCount(app: AppInfo) {
@@ -391,9 +391,6 @@ class AppRepository
                     }
 
                     if (insertOrUpdateList.isNotEmpty()) {
-                        insertOrUpdate(insertOrUpdateList)
-                        iconManager.saveIconsToFile()
-
                         // 更新应用列表
                         val currentAppList = _appList.value.toMutableList()
                         currentAppList.addAll(newApps)
@@ -401,6 +398,9 @@ class AppRepository
 
                         _appList.value = sortedResult
                         _appMap.value = HashMap(currentAppMap)
+
+                        insertOrUpdate(insertOrUpdateList)
+                        iconManager.saveIconsToFile()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

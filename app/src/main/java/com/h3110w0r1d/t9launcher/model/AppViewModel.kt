@@ -168,6 +168,7 @@ class AppViewModel
             viewModelScope.launch {
                 appRepository.appList.collect { appList ->
                     if (appList.isNotEmpty()) {
+                        setLoadingStatus(false)
                         searchApp(null)
                     }
                 }
