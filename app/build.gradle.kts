@@ -1,3 +1,6 @@
+import com.android.build.api.variant.FilterConfiguration
+import com.android.build.api.variant.impl.VariantOutputImpl
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -21,8 +24,8 @@ android {
         applicationId = "com.h3110w0r1d.t9launcher"
         minSdk = 26
         targetSdk = 36
-        versionCode = 29
-        versionName = "1.7.4"
+        versionCode = 30
+        versionName = "1.7.5"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -39,7 +42,9 @@ android {
     flavorDimensions += "version"
     productFlavors {
         create("default") {}
-        create("xposed") {}
+        create("xposed") {
+            proguardFile("proguard-xposed-rules.pro")
+        }
     }
 
     buildTypes {
@@ -48,10 +53,7 @@ android {
             isShrinkResources = true
             @Suppress("UnstableApiUsage")
             vcsInfo.include = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
             packaging {
                 resources {
                     excludes += "META-INF/androidx/**"
@@ -64,43 +66,40 @@ android {
             }
         }
     }
-    androidComponents {
-        onVariants { variant ->
-            if (variant.name.contains("play", true)) return@onVariants
 
-            var currentVersionName = defaultConfig.versionName
-            if (variant.name.contains("xposed", true)) {
-                currentVersionName += "-xposed"
-            }
-            variant.outputs.forEach { output ->
-                output.versionName.set(currentVersionName)
-                if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
-                    val abi =
-                        output
-                            .getFilter(
-                                com.android.build.api.variant.FilterConfiguration.FilterType.ABI,
-                            )?.identifier ?: "universal"
-                    val apkName = "T9Launcher-$currentVersionName-$abi-${variant.buildType}.apk"
-                    output.outputFileName.set(apkName)
-                }
+    androidComponents.onVariants { variant ->
+        var currentVersionName = defaultConfig.versionName
+        if (variant.flavorName == "xposed") {
+            currentVersionName += "-xposed"
+        }
+        variant.outputs.forEach { output ->
+            output.versionName.set(currentVersionName)
+            if (output is VariantOutputImpl) {
+                val abi =
+                    output
+                        .getFilter(FilterConfiguration.FilterType.ABI)
+                        ?.identifier ?: "universal"
+                val apkName = "T9Launcher-$currentVersionName-$abi-${variant.buildType}.apk"
+                output.outputFileName.set(apkName)
             }
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
         }
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         compilerOptions {
-            freeCompilerArgs.add("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+            freeCompilerArgs.add("-Xannotation-default-target=param-property")
         }
     }
 }
@@ -122,7 +121,8 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-    implementation("com.google.dagger:hilt-android:2.57.1")
-    kapt("com.google.dagger:hilt-compiler:2.57.1")
+    implementation("com.google.dagger:hilt-android:2.57.2")
+    kapt("com.google.dagger:hilt-compiler:2.57.2")
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
+    compileOnly(files("libs/api-82.jar"))
 }

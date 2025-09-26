@@ -2,10 +2,8 @@
   <img src="./image/icon.png" alt="T9启动器" width="128" height="128">
   <h1>T9启动器</h1>
 
-[![GitHub release](https://img.shields.io/github/v/release/h3110w0r1d-y/T9Launcher?filter=!*xposed)](https://github.com/h3110w0r1d-y/T9Launcher/releases)
-[![Default Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/default-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/default-release.yml)
-[![Xposed Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/xposed-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/xposed-release.yml)
-[![Play Release](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/play-release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/play-release.yml)
+[![GitHub release](https://img.shields.io/github/v/release/h3110w0r1d-y/T9Launcher)](https://github.com/h3110w0r1d-y/T9Launcher/releases)
+[![CI/CD](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/release.yml/badge.svg)](https://github.com/h3110w0r1d-y/T9Launcher/actions/workflows/release.yml)
 ![Android](https://img.shields.io/badge/Android-8.0%2B-blue)
 ![License](https://img.shields.io/github/license/h3110w0r1d-y/T9Launcher)
 ![GitHub stars](https://img.shields.io/github/stars/h3110w0r1d-y/T9Launcher?style=social)
