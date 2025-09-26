@@ -1,11 +1,7 @@
-package com.h3110w0r1d.t9launcher.utils;
+package com.h3110w0r1d.t9launcher.utils
 
-public class XposedUtil {
-    static public boolean isModuleEnabled() {
-        return false;
-    }
+class XposedUtil {
+    fun isModuleEnabled(): Boolean = false
 
-    static public int getModuleVersion() {
-        return -1;
-    }
+    fun getModuleVersion(): Int = -1
 }

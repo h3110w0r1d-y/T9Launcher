@@ -12,12 +12,6 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class IconMetadata(
-    val componentId: String,
-    val offset: Long, // 在文件中的起始偏移量
-    val length: Int, // 数据长度
-)
-
 @Singleton
 class IconManager
     @Inject
@@ -25,6 +19,12 @@ class IconManager
         @ApplicationContext
         private val context: Context,
     ) {
+        data class IconMetadata(
+            val componentId: String,
+            val offset: Long, // 在文件中的起始偏移量
+            val length: Int, // 数据长度
+        )
+
         private val packedIconsFile: File
             get() = File(context.filesDir, "packed_icons.bin")
 
@@ -81,7 +81,7 @@ class IconManager
                     }
                 }
                 return true
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 return false
             }
         }
