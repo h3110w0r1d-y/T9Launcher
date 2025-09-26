@@ -27,7 +27,6 @@ jobs:
 
       - name: Sign APK (Default)
         uses: r0adkll/sign-android-release@v1
-        id: sign_app
         with:
           releaseDirectory: app/build/outputs/apk/default/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
@@ -39,7 +38,6 @@ jobs:
 
       - name: Sign APK (Xposed)
         uses: r0adkll/sign-android-release@v1
-        id: sign_app
         with:
           releaseDirectory: app/build/outputs/apk/xposed/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
@@ -51,7 +49,6 @@ jobs:
 
       - name: Sign AAB
         uses: r0adkll/sign-android-release@v1
-        id: sign_aab
         with:
           releaseDirectory: app/build/outputs/bundle/defaultRelease
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
