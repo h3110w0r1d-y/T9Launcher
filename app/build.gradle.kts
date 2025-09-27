@@ -24,8 +24,8 @@ android {
         applicationId = "com.h3110w0r1d.t9launcher"
         minSdk = 26
         targetSdk = 36
-        versionCode = 30
-        versionName = "1.7.5"
+        versionCode = 31
+        versionName = "1.7.6"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -105,24 +105,24 @@ android {
 }
 
 dependencies {
+    implementation("androidx.activity:activity-compose:1.11.0")
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
-    implementation("androidx.navigation:navigation-compose:2.9.5")
-    implementation("androidx.activity:activity-compose:1.11.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
+    implementation("androidx.navigation:navigation-compose:2.9.5")
 
     implementation(platform("androidx.compose:compose-bom:2025.09.01"))
     implementation("androidx.compose.animation:animation-graphics")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-text")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.foundation:foundation")
-    implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("com.google.dagger:hilt-android:2.57.2")
     kapt("com.google.dagger:hilt-compiler:2.57.2")
-    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     compileOnly(files("libs/api-82.jar"))
 }

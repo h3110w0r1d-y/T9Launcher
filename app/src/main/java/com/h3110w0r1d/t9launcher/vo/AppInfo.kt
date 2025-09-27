@@ -6,8 +6,16 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.core.net.toUri
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class AppInfo(
     val className: String,
@@ -19,6 +27,10 @@ class AppInfo(
     var searchData: ArrayList<ArrayList<String>>,
 ) {
     var matchRate: Float = 0f
+    private val _matchRange: MutableStateFlow<Pair<Int, Int>> = MutableStateFlow(Pair(0, 0))
+    val matchRange: StateFlow<Pair<Int, Int>> = _matchRange
+    private val _annotatedName: MutableStateFlow<AnnotatedString> = MutableStateFlow(AnnotatedString(appName))
+    val annotatedName: StateFlow<AnnotatedString> = _annotatedName
 
     class SortByMatchRate : Comparator<AppInfo> {
         override fun compare(
@@ -37,6 +49,37 @@ class AppInfo(
             p0: AppInfo,
             p1: AppInfo,
         ): Int = p1.startCount - p0.startCount
+    }
+
+    fun setMatchRange(
+        start: Int,
+        end: Int,
+    ) {
+        if (start == 0 && end == 0) {
+            return
+        }
+        _matchRange.value = Pair(start, end)
+    }
+
+    fun updateAnnotatedName(highlightColor: Color) {
+        _annotatedName.value =
+            buildAnnotatedString {
+                for (i in searchData.indices) {
+                    if (matchRange.value.first <= i && i < matchRange.value.second) {
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = highlightColor,
+                                    fontWeight = FontWeight.SemiBold,
+                                ),
+                        ) {
+                            append(searchData[i].last())
+                        }
+                    } else {
+                        append(searchData[i].last())
+                    }
+                }
+            }
     }
 
     fun start(ctx: Context): Boolean {

@@ -28,7 +28,7 @@ fun AppDropdownMenu(
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = { onExpandedChange(false) },
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(16.dp),
         containerColor = colorScheme.surfaceContainer,
     ) {
         DropdownMenuItem(

@@ -28,8 +28,14 @@ import java.util.Locale
 import javax.inject.Inject
 
 data class AppConfig(
-    val isHideSystemApp: Boolean = false,
+    val hideSystemAppEnabled: Boolean = false,
     val hiddenComponentIds: Set<String> = emptySet(),
+    val englishFuzzyMatchEnabled: Boolean = false,
+    val nightModeFollowSystem: Boolean = true,
+    val nightModeEnabled: Boolean = false,
+    val highlightSearchResultEnabled: Boolean = false,
+    val isUseSystemColor: Boolean = true,
+    val themeColor: String = "blue",
     // 应用列表样式配置
     val iconSize: Float = 50f,
     val iconHorizonPadding: Float = 10f,
@@ -51,7 +57,6 @@ data class AppConfig(
     // 配置是否初始化完成
     // 只有读取配置后，isConfigInitialized才会是true
     val isConfigInitialized: Boolean = false,
-    val englishFuzzyMatch: Boolean = false,
 )
 
 @HiltViewModel
@@ -65,7 +70,12 @@ class AppViewModel
         private var searchText: String = ""
         private var isLoadingAppList: Boolean = false
         private var isAppListListenerStarted: Boolean = false
-        private val isHideSystemAppKey = booleanPreferencesKey("is_hide_system_app")
+        private val hideSystemAppEnabledKey = booleanPreferencesKey("is_hide_system_app")
+        private val nightModeFollowSystemKey = booleanPreferencesKey("night_mode_follow_system")
+        private val nightModeEnabledKey = booleanPreferencesKey("night_mode_enabled")
+        private val isHighlightSearchResultKey = booleanPreferencesKey("is_highlight_search_result")
+        private val isUseSystemColorKey = booleanPreferencesKey("is_use_system_color")
+        private val themeColorKey = stringPreferencesKey("theme_color")
         private val hiddenComponentIdKey = stringSetPreferencesKey("hidden_class_names")
         private val iconSizeKey = floatPreferencesKey("icon_size")
         private val iconHorizonPaddingKey = floatPreferencesKey("icon_horizon_padding")
@@ -89,21 +99,30 @@ class AppViewModel
             dataStore.data
                 .map { preferences ->
                     AppConfig(
-                        isHideSystemApp = preferences[isHideSystemAppKey] ?: false,
+                        hideSystemAppEnabled = preferences[hideSystemAppEnabledKey] ?: false,
                         hiddenComponentIds = preferences[hiddenComponentIdKey] ?: emptySet(),
+                        nightModeFollowSystem = preferences[nightModeFollowSystemKey] ?: true,
+                        nightModeEnabled = preferences[nightModeEnabledKey] ?: false,
+                        highlightSearchResultEnabled = preferences[isHighlightSearchResultKey] ?: false,
+                        englishFuzzyMatchEnabled = preferences[englishFuzzyMatchKey] ?: false,
+                        isUseSystemColor = preferences[isUseSystemColorKey] ?: true,
+                        themeColor = preferences[themeColorKey] ?: "blue",
+                        // 应用列表样式配置
                         iconSize = preferences[iconSizeKey] ?: 50f,
                         iconHorizonPadding = preferences[iconHorizonPaddingKey] ?: 10f,
                         iconVerticalPadding = preferences[iconVerticalPaddingKey] ?: 10f,
                         rowSpacing = preferences[rowSpacingKey] ?: 10f,
                         gridColumns = preferences[gridColumnsKey] ?: 5,
                         appListHeight = preferences[appListHeightKey] ?: 210f,
+                        appNameSize = preferences[appNameSizeKey] ?: 12f,
+                        iconCornerRadius = preferences[iconCornerRadiusKey] ?: 26,
+                        // 键盘样式配置
                         keyboardButtonHeight = preferences[keyboardButtonHeightKey] ?: 60f,
                         keyboardWidth = preferences[keyboardWidthKey] ?: .8f,
                         keyboardBottomPadding = preferences[keyboardBottomPaddingKey] ?: 10f,
                         keyboardQSIconSize = preferences[keyboardQSIconSizeKey] ?: 48f,
                         keyboardQSIconAlpha = preferences[keyboardQSIconAlphaKey] ?: 0.5f,
-                        appNameSize = preferences[appNameSizeKey] ?: 12f,
-                        iconCornerRadius = preferences[iconCornerRadiusKey] ?: 26,
+                        // 引导界面是否展示过
                         isShowedOnboarding = preferences[isShowedOnboardingKey] ?: false,
                         shortcutConfig =
                             Json.decodeFromString<ArrayList<String>>(
@@ -111,7 +130,6 @@ class AppViewModel
                                     ?: "[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]",
                             ),
                         isConfigInitialized = preferences[isConfigInitializedKey] ?: true,
-                        englishFuzzyMatch = preferences[englishFuzzyMatchKey] ?: false,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -178,7 +196,47 @@ class AppViewModel
         fun setIsHideSystemApp(isHide: Boolean) {
             viewModelScope.launch {
                 dataStore.edit { preferences ->
-                    preferences[isHideSystemAppKey] = isHide
+                    preferences[hideSystemAppEnabledKey] = isHide
+                }
+            }
+        }
+
+        fun setIsHighlightSearchResult(isHighlight: Boolean) {
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[isHighlightSearchResultKey] = isHighlight
+                }
+            }
+        }
+
+        fun setNightModeFollowSystem(follow: Boolean) {
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[nightModeFollowSystemKey] = follow
+                }
+            }
+        }
+
+        fun setNightModeEnabled(enabled: Boolean) {
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[nightModeEnabledKey] = enabled
+                }
+            }
+        }
+
+        fun setIsUseSystemColor(isUse: Boolean) {
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[isUseSystemColorKey] = isUse
+                }
+            }
+        }
+
+        fun setThemeColor(color: String) {
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[themeColorKey] = color
                 }
             }
         }
@@ -251,12 +309,13 @@ class AppViewModel
             val config = appConfig.value
 
             for (app in currentAppList) {
-                if (config.isHideSystemApp && app.isSystemApp) {
+                if (config.hideSystemAppEnabled && app.isSystemApp) {
                     continue
                 }
                 if (isAppHide(app)) {
                     continue
                 }
+                app.setMatchRange(-1, -1)
                 appInfo.add(app)
             }
             _searchResultAppList.value = appInfo
@@ -277,13 +336,13 @@ class AppViewModel
             val config = appConfig.value
 
             for (app in currentAppList) {
-                if (config.isHideSystemApp && app.isSystemApp) {
+                if (config.hideSystemAppEnabled && app.isSystemApp) {
                     continue
                 }
                 if (config.hiddenComponentIds.contains(app.componentId())) {
                     continue
                 }
-                val matchRate = pinyinUtil.search(app, key, config.englishFuzzyMatch) // 匹配度
+                val matchRate = pinyinUtil.search(app, key, config.englishFuzzyMatchEnabled) // 匹配度
                 if (matchRate > 0) {
                     app.matchRate = matchRate
                     appInfo.add(app)
@@ -341,7 +400,7 @@ class AppViewModel
             val config = appConfig.value
 
             for (app in currentAppList) {
-                if (config.isHideSystemApp && app.isSystemApp) {
+                if (config.hideSystemAppEnabled && app.isSystemApp) {
                     continue
                 }
                 if (app.packageName
@@ -376,8 +435,9 @@ class AppViewModel
             val config = appConfig.value
 
             for (app in currentAppList) {
-                if (isAppHide(app) || (config.isHideSystemApp && app.isSystemApp)) {
+                if (isAppHide(app) || (config.hideSystemAppEnabled && app.isSystemApp)) {
                     appInfo.add(app)
+                    app.setMatchRange(-1, -1)
                 }
             }
             _searchResultAppList.value = appInfo

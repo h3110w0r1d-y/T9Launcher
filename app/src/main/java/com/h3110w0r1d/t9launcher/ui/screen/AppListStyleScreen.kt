@@ -7,16 +7,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,6 +56,8 @@ fun AppListStyleScreen(
     var isChanged by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var previewAppConfig by remember { mutableStateOf(appConfig) }
+    val scrollState = rememberScrollState()
+
     LaunchedEffect(appConfig) {
         previewAppConfig = appConfig
     }
@@ -114,102 +118,101 @@ fun AppListStyleScreen(
                     .fillMaxSize()
                     .padding(innerPadding),
         ) {
-            LazyColumn(
+            Column(
                 modifier =
                     Modifier
                         .weight(1f)
+                        .verticalScroll(scrollState)
                         .padding(horizontal = 16.dp),
             ) {
-                item {
-                    StyleSettingCard(title = stringResource(R.string.grid_columns)) {
-                        Slider(
-                            value = previewAppConfig.gridColumns.toFloat(),
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(gridColumns = it.toInt())
-                                isChanged = true
-                            },
-                            valueRange = 2f..10f,
-                            steps = 7,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.app_list_height)) {
-                        Slider(
-                            value = previewAppConfig.appListHeight,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(appListHeight = it)
-                                isChanged = true
-                            },
-                            valueRange = 100f..500f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.icon_size)) {
-                        Slider(
-                            value = previewAppConfig.iconSize,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(iconSize = it)
-                                isChanged = true
-                            },
-                            valueRange = 10f..100f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.icon_corner_radius)) {
-                        Slider(
-                            value = previewAppConfig.iconCornerRadius.toFloat(),
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(iconCornerRadius = it.toInt())
-                                isChanged = true
-                            },
-                            valueRange = 0f..50f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.app_name_size)) {
-                        Slider(
-                            value = previewAppConfig.appNameSize,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(appNameSize = it)
-                                isChanged = true
-                            },
-                            valueRange = 8f..16f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.icon_horizon_padding)) {
-                        Slider(
-                            value = previewAppConfig.iconHorizonPadding,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(iconHorizonPadding = it)
-                                isChanged = true
-                            },
-                            valueRange = 0f..20f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.icon_vertical_padding)) {
-                        Slider(
-                            value = previewAppConfig.iconVerticalPadding,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(iconVerticalPadding = it)
-                                isChanged = true
-                            },
-                            valueRange = 0f..20f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.row_spacing)) {
-                        Slider(
-                            value = previewAppConfig.rowSpacing,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(rowSpacing = it)
-                                isChanged = true
-                            },
-                            valueRange = 0f..20f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
+                StyleSettingCard(title = stringResource(R.string.grid_columns)) {
+                    Slider(
+                        value = previewAppConfig.gridColumns.toFloat(),
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(gridColumns = it.toInt())
+                            isChanged = true
+                        },
+                        valueRange = 2f..10f,
+                        steps = 7,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.app_list_height)) {
+                    Slider(
+                        value = previewAppConfig.appListHeight,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(appListHeight = it)
+                            isChanged = true
+                        },
+                        valueRange = 100f..500f,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.icon_size)) {
+                    Slider(
+                        value = previewAppConfig.iconSize,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(iconSize = it)
+                            isChanged = true
+                        },
+                        valueRange = 10f..100f,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.icon_corner_radius)) {
+                    Slider(
+                        value = previewAppConfig.iconCornerRadius.toFloat(),
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(iconCornerRadius = it.toInt())
+                            isChanged = true
+                        },
+                        valueRange = 0f..50f,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.app_name_size)) {
+                    Slider(
+                        value = previewAppConfig.appNameSize,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(appNameSize = it)
+                            isChanged = true
+                        },
+                        valueRange = 8f..16f,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.icon_horizon_padding)) {
+                    Slider(
+                        value = previewAppConfig.iconHorizonPadding,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(iconHorizonPadding = it)
+                            isChanged = true
+                        },
+                        valueRange = 0f..20f,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.icon_vertical_padding)) {
+                    Slider(
+                        value = previewAppConfig.iconVerticalPadding,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(iconVerticalPadding = it)
+                            isChanged = true
+                        },
+                        valueRange = 0f..20f,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.row_spacing)) {
+                    Slider(
+                        value = previewAppConfig.rowSpacing,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(rowSpacing = it)
+                            isChanged = true
+                        },
+                        valueRange = 0f..20f,
+                        modifier = Modifier.height(20.dp),
+                    )
                 }
             }
             Card(
@@ -222,7 +225,7 @@ fun AppListStyleScreen(
                         topEnd = 20.dp,
                     ),
                 elevation =
-                    androidx.compose.material3.CardDefaults.cardElevation(
+                    CardDefaults.cardElevation(
                         defaultElevation = 10.dp,
                     ),
             ) {

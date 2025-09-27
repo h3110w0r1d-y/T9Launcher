@@ -6,14 +6,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +53,7 @@ fun KeyboardStyleScreen(
     var isChanged by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var previewAppConfig by remember { mutableStateOf(appConfig) }
+    val scrollState = rememberScrollState()
     LaunchedEffect(appConfig) {
         previewAppConfig = appConfig
     }
@@ -111,68 +114,67 @@ fun KeyboardStyleScreen(
                     .fillMaxSize()
                     .padding(innerPadding),
         ) {
-            LazyColumn(
+            Column(
                 modifier =
                     Modifier
                         .weight(1f)
+                        .verticalScroll(scrollState)
                         .padding(horizontal = 16.dp),
             ) {
-                item {
-                    StyleSettingCard(title = stringResource(R.string.keyboard_height)) {
-                        Slider(
-                            value = previewAppConfig.keyboardButtonHeight,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(keyboardButtonHeight = it)
-                                isChanged = true
-                            },
-                            valueRange = 30f..90f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.keyboard_width)) {
-                        Slider(
-                            value = previewAppConfig.keyboardWidth,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(keyboardWidth = it)
-                                isChanged = true
-                            },
-                            valueRange = .5f..1f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.keyboard_bottom_padding)) {
-                        Slider(
-                            value = previewAppConfig.keyboardBottomPadding,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(keyboardBottomPadding = it)
-                                isChanged = true
-                            },
-                            valueRange = 0f..100f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.shortcut_icon_size)) {
-                        Slider(
-                            value = previewAppConfig.keyboardQSIconSize,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(keyboardQSIconSize = it)
-                                isChanged = true
-                            },
-                            valueRange = 20f..80f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
-                    StyleSettingCard(title = stringResource(R.string.shortcut_icon_opacity)) {
-                        Slider(
-                            value = previewAppConfig.keyboardQSIconAlpha,
-                            onValueChange = {
-                                previewAppConfig = previewAppConfig.copy(keyboardQSIconAlpha = it)
-                                isChanged = true
-                            },
-                            valueRange = 0f..1f,
-                            modifier = Modifier.height(20.dp),
-                        )
-                    }
+                StyleSettingCard(title = stringResource(R.string.keyboard_height)) {
+                    Slider(
+                        value = previewAppConfig.keyboardButtonHeight,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(keyboardButtonHeight = it)
+                            isChanged = true
+                        },
+                        valueRange = 30f..90f,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.keyboard_width)) {
+                    Slider(
+                        value = previewAppConfig.keyboardWidth,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(keyboardWidth = it)
+                            isChanged = true
+                        },
+                        valueRange = .5f..1f,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.keyboard_bottom_padding)) {
+                    Slider(
+                        value = previewAppConfig.keyboardBottomPadding,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(keyboardBottomPadding = it)
+                            isChanged = true
+                        },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.shortcut_icon_size)) {
+                    Slider(
+                        value = previewAppConfig.keyboardQSIconSize,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(keyboardQSIconSize = it)
+                            isChanged = true
+                        },
+                        valueRange = 20f..80f,
+                        modifier = Modifier.height(20.dp),
+                    )
+                }
+                StyleSettingCard(title = stringResource(R.string.shortcut_icon_opacity)) {
+                    Slider(
+                        value = previewAppConfig.keyboardQSIconAlpha,
+                        onValueChange = {
+                            previewAppConfig = previewAppConfig.copy(keyboardQSIconAlpha = it)
+                            isChanged = true
+                        },
+                        valueRange = 0f..1f,
+                        modifier = Modifier.height(20.dp),
+                    )
                 }
             }
             Card(
@@ -182,7 +184,7 @@ fun KeyboardStyleScreen(
                         topEnd = 20.dp,
                     ),
                 elevation =
-                    androidx.compose.material3.CardDefaults.cardElevation(
+                    CardDefaults.cardElevation(
                         defaultElevation = 10.dp,
                     ),
             ) {

@@ -24,7 +24,7 @@
 
 1. 加入Google群组/Join the Google group
 
-    https://groups.google.com/u/1/g/t9launcher-test
+    https://groups.google.com/g/t9launcher-test
 
 2. 安装应用/Install the app
 

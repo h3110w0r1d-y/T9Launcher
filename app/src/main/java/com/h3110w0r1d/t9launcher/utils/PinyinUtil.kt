@@ -4,7 +4,6 @@ import android.content.Context
 import com.h3110w0r1d.t9launcher.R
 import com.h3110w0r1d.t9launcher.vo.AppInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,6 +43,7 @@ class PinyinUtil
         }
 
         private fun letter2Number(letters: String): String {
+            val letters = letters.lowercase()
             val number = StringBuilder()
             for (i in 0..<letters.length) {
                 val c = letters[i]
@@ -62,46 +62,42 @@ class PinyinUtil
             return number.toString()
         }
 
-        private fun isAllLetters(sb: StringBuilder): Boolean {
-            if (sb.isEmpty()) {
-                return false
-            }
-            for (char in sb) {
-                if (!char.isLetter()) {
-                    return false
-                }
-            }
-            return true
-        }
-
+        /**
+         * 获取字符串的拼音列表
+         * @param str 需要转换的字符串
+         * @return 拼音列表, 每个字/词对应一个列表, 列表为[该字/词的所有拼音...,原始字/词]
+         */
         fun getPinYin(str: String): ArrayList<ArrayList<String>> {
             val result: ArrayList<ArrayList<String>> = ArrayList()
-            var latterAndNumber = StringBuilder()
+            val word = StringBuilder()
             for (i in 0..<str.length) {
                 val c = str[i]
                 if ('a' <= c && c <= 'z') {
-                    latterAndNumber.append(c.toString().lowercase(Locale.getDefault()))
+                    word.append(c)
                     continue
                 }
-                if (latterAndNumber.isNotEmpty()) {
+                if (word.isNotEmpty()) {
                     val newList: ArrayList<String> = ArrayList()
-                    val allLetters = isAllLetters(latterAndNumber)
-                    newList.add((if (allLetters) "e" else "") + letter2Number(latterAndNumber.toString()))
-                    if (latterAndNumber.length > 1) {
-                        newList.add(letter2Number(latterAndNumber.substring(0, 1)))
-                    }
+                    newList.add(letter2Number(word.substring(0, 1)))
+                    newList.add("e" + letter2Number(word.toString()))
+
+                    // 添加原始单词
+                    newList.add(word.toString())
                     result.add(newList)
-                    latterAndNumber = StringBuilder()
+                    word.clear()
                 }
                 if ('A' <= c && c <= 'Z') {
-                    latterAndNumber.append(c.toString().lowercase(Locale.getDefault()))
+                    word.append(c)
                     continue
                 }
-                if (" " == c.toString()) {
+                if (' ' == c || '-' == c || '_' == c) {
+                    if (result.isNotEmpty()) {
+                        result.last()[result.last().size - 1] += c.toString()
+                    }
                     continue
                 }
                 if ('0' <= c && c <= '9') {
-                    result.add(arrayListOf(c.toString()))
+                    result.add(arrayListOf(c.toString(), c.toString()))
                     continue
                 }
                 if (0x4E00 <= c.code && c.code <= 0x9FA5) {
@@ -113,23 +109,25 @@ class PinyinUtil
                         }
                         newList.add(pinyin)
                     }
+                    // 添加原始汉字
+                    newList.add(c.toString())
                     result.add(newList)
                     continue
                 } else if (c.code == 0x3007) {
-                    result.add(arrayListOf("5", "5464")) // 〇 ling
+                    result.add(arrayListOf("5", "5464", c.toString())) // 〇 ling
                     continue
                 }
-                result.add(arrayListOf("0"))
+                result.add(arrayListOf("0", c.toString()))
             }
 
-            if (latterAndNumber.isNotEmpty()) {
+            if (word.isNotEmpty()) {
                 val newList: ArrayList<String> = ArrayList()
-                val allLetters = isAllLetters(latterAndNumber)
-                newList.add((if (allLetters) "e" else "") + letter2Number(latterAndNumber.toString()))
                 // 最后一个字/词不需要单独加首字母
                 // if (latterAndNumber.length > 1) {
                 //     newList.add(letter2Number(latterAndNumber.substring(0, 1)))
                 // }
+                newList.add("e" + letter2Number(word.toString()))
+                newList.add(word.toString())
                 result.add(newList)
             }
             return result
@@ -150,13 +148,22 @@ class PinyinUtil
             for (i in data.indices) {
                 val position = searchPosition(data, searchText, i, 0, englishFuzzyMatch)
                 if (position > 0) {
+                    app.setMatchRange(i, position)
                     return (position - i).toFloat() / data.size.toFloat()
                 }
             }
+            app.setMatchRange(0, 0)
             return 0f
         }
 
-        // 递归搜索 返回0匹配失败, 否则返回匹配到了第几个字
+        /**
+         * 递归搜索 返回0匹配失败, 否则返回匹配到了第几个字
+         * @param data 拼音数据
+         * @param searchText 搜索字符串
+         * @param i 当前匹配到第几个字
+         * @param k 当前匹配到搜索字符串的第几个字符
+         * @param englishFuzzyMatch 英文模糊匹配
+         */
         private fun searchPosition(
             data: ArrayList<ArrayList<String>>,
             searchText: String,
@@ -170,8 +177,8 @@ class PinyinUtil
             if (i >= data.size) { // 没有下一个字了
                 return 0
             }
-
-            for (j in data[i].indices) {
+            // size-2 忽略原始字/词
+            for (j in 0..data[i].size - 2) {
                 val matchLength = match(searchText, data[i][j], k, englishFuzzyMatch)
                 if (matchLength > 0) { // 当前字匹配, 匹配下一个字
                     val position = searchPosition(data, searchText, i + 1, k + matchLength, englishFuzzyMatch)
