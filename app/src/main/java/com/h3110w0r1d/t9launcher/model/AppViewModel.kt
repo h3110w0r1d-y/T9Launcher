@@ -36,6 +36,7 @@ data class AppConfig(
     val highlightSearchResultEnabled: Boolean = false,
     val isUseSystemColor: Boolean = true,
     val themeColor: String = "blue",
+    val highContrastEnabled: Boolean = false,
     // 应用列表样式配置
     val iconSize: Float = 50f,
     val iconHorizonPadding: Float = 10f,
@@ -76,6 +77,7 @@ class AppViewModel
         private val isHighlightSearchResultKey = booleanPreferencesKey("is_highlight_search_result")
         private val isUseSystemColorKey = booleanPreferencesKey("is_use_system_color")
         private val themeColorKey = stringPreferencesKey("theme_color")
+        private val highContrastEnabledKey = booleanPreferencesKey("high_contrast_enabled")
         private val hiddenComponentIdKey = stringSetPreferencesKey("hidden_class_names")
         private val iconSizeKey = floatPreferencesKey("icon_size")
         private val iconHorizonPaddingKey = floatPreferencesKey("icon_horizon_padding")
@@ -107,6 +109,7 @@ class AppViewModel
                         englishFuzzyMatchEnabled = preferences[englishFuzzyMatchKey] ?: false,
                         isUseSystemColor = preferences[isUseSystemColorKey] ?: true,
                         themeColor = preferences[themeColorKey] ?: "blue",
+                        highContrastEnabled = preferences[highContrastEnabledKey] ?: false,
                         // 应用列表样式配置
                         iconSize = preferences[iconSizeKey] ?: 50f,
                         iconHorizonPadding = preferences[iconHorizonPaddingKey] ?: 10f,
@@ -237,6 +240,14 @@ class AppViewModel
             viewModelScope.launch {
                 dataStore.edit { preferences ->
                     preferences[themeColorKey] = color
+                }
+            }
+        }
+
+        fun setHighContrastEnabled(enabled: Boolean) {
+            viewModelScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[highContrastEnabledKey] = enabled
                 }
             }
         }

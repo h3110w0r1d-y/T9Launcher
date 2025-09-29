@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -43,12 +42,6 @@ fun AppItem(
     onLongPress: (Offset) -> Unit = {},
     appConfig: AppConfig = AppConfig(),
 ) {
-    var darkTheme =
-        if (appConfig.nightModeFollowSystem) {
-            isSystemInDarkTheme()
-        } else {
-            appConfig.nightModeEnabled
-        }
     var scaleTarget by remember { mutableFloatStateOf(1f) }
     val scaleState by animateFloatAsState(
         targetValue = scaleTarget,
@@ -56,7 +49,7 @@ fun AppItem(
     )
     val annotatedName by app.annotatedName.collectAsState()
     val matchRange by app.matchRange.collectAsState()
-    val highlightColor = if (darkTheme) colorScheme.primaryFixedDim else colorScheme.primary
+    val highlightColor = colorScheme.primary
     app.updateAnnotatedName(highlightColor)
     LaunchedEffect(matchRange) {
         app.updateAnnotatedName(highlightColor)

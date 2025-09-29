@@ -4,10 +4,10 @@ import androidx.compose.ui.graphics.Color
 
 fun getPrimaryColorMap(
     darkTheme: Boolean,
-    colorSchema: String,
+    colorScheme: String,
 ): Color =
     if (darkTheme) {
-        when (colorSchema) {
+        when (colorScheme) {
             "amber" -> DarkAmberTheme.primary
             "blue_grey" -> DarkBlueGreyTheme.primary
             "blue" -> DarkBlueTheme.primary
@@ -24,13 +24,12 @@ fun getPrimaryColorMap(
             "pink" -> DarkPinkTheme.primary
             "purple" -> DarkPurpleTheme.primary
             "red" -> DarkRedTheme.primary
-            "sakura" -> DarkSakuraTheme.primary
             "teal" -> DarkTealTheme.primary
             "yellow" -> DarkYellowTheme.primary
             else -> DarkBlueTheme.primary
         }
     } else {
-        when (colorSchema) {
+        when (colorScheme) {
             "amber" -> LightAmberTheme.primary
             "blue_grey" -> LightBlueGreyTheme.primary
             "blue" -> LightBlueTheme.primary
@@ -47,7 +46,6 @@ fun getPrimaryColorMap(
             "pink" -> LightPinkTheme.primary
             "purple" -> LightPurpleTheme.primary
             "red" -> LightRedTheme.primary
-            "sakura" -> LightSakuraTheme.primary
             "teal" -> LightTealTheme.primary
             "yellow" -> LightYellowTheme.primary
             else -> LightBlueTheme.primary

@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
             T9LauncherTheme(
                 darkTheme = isDarkMode,
                 dynamicColor = appConfig.isUseSystemColor,
+                highContrast = appConfig.highContrastEnabled,
                 customColorScheme = appConfig.themeColor,
             ) {
                 if (!appConfig.isShowedOnboarding) {

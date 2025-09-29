@@ -3,27 +3,26 @@ package com.h3110w0r1d.t9launcher.ui.screen
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.outlined.Contrast
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material.icons.outlined.LayersClear
 import androidx.compose.material.icons.outlined.Merge
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Card
@@ -96,7 +95,6 @@ fun SettingScreen(
             "pink" to stringResource(R.string.pink_theme),
             "purple" to stringResource(R.string.purple_theme),
             "red" to stringResource(R.string.red_theme),
-            "sakura" to stringResource(R.string.sakura_theme),
             "teal" to stringResource(R.string.teal_theme),
             "yellow" to stringResource(R.string.yellow_theme),
         )
@@ -225,29 +223,42 @@ fun SettingScreen(
                 )
             }
 
-//            SettingItem(
-//                imageVector = ImageVector.vectorResource(R.drawable.palette_24px),
-//                title = stringResource(R.string.use_system_color),
-//                trailingContent = {
-//                    Switch(
-//                        checked = appConfig.isUseSystemColor,
-//                        onCheckedChange = null,
-//                    )
-//                },
-//                onClick = {
-//                    viewModel.setIsUseSystemColor(!appConfig.isUseSystemColor)
-//                },
-//            )
-//            if (!appConfig.isUseSystemColor) {
-//                SettingItem(
-//                    imageVector = ImageVector.vectorResource(R.drawable.colors_24px),
-//                    title = stringResource(R.string.theme_color),
-//                    description = themeColorNamesMap.get(appConfig.themeColor),
-//                    onClick = {
-//                        selectColorDialogOpened = true
-//                    },
-//                )
-//            }
+            SettingItem(
+                imageVector = Icons.Outlined.Palette,
+                title = stringResource(R.string.use_system_color),
+                trailingContent = {
+                    Switch(
+                        checked = appConfig.isUseSystemColor,
+                        onCheckedChange = null,
+                    )
+                },
+                onClick = {
+                    viewModel.setIsUseSystemColor(!appConfig.isUseSystemColor)
+                },
+            )
+            if (!appConfig.isUseSystemColor) {
+                SettingItem(
+                    imageVector = ImageVector.vectorResource(R.drawable.colors_24px),
+                    title = stringResource(R.string.theme_color),
+                    description = themeColorNamesMap.get(appConfig.themeColor),
+                    onClick = {
+                        selectColorDialogOpened = true
+                    },
+                )
+                SettingItem(
+                    imageVector = Icons.Outlined.Contrast,
+                    title = stringResource(R.string.high_contrast_enabled),
+                    trailingContent = {
+                        Switch(
+                            checked = appConfig.highContrastEnabled,
+                            onCheckedChange = null,
+                        )
+                    },
+                    onClick = {
+                        viewModel.setHighContrastEnabled(!appConfig.highContrastEnabled)
+                    },
+                )
+            }
 
             SettingItemGroup(stringResource(R.string.about))
 
@@ -333,14 +344,15 @@ fun SettingScreen(
                     items(themeColorKeys) { it ->
                         ListItem(
                             leadingContent = {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .size(40.dp)
-                                            .background(
-                                                color = getPrimaryColorMap(isDarkMode, it),
-                                                shape = RoundedCornerShape(100.dp),
-                                            ),
+                                Icon(
+                                    imageVector =
+                                        if (appConfig.themeColor == it) {
+                                            Icons.Filled.Palette
+                                        } else {
+                                            Icons.Outlined.Palette
+                                        },
+                                    contentDescription = null,
+                                    tint = getPrimaryColorMap(isDarkMode, it),
                                 )
                             },
                             headlineContent = {
@@ -366,7 +378,7 @@ fun SettingScreen(
 fun SettingItemGroup(title: String) {
     Text(
         text = title,
-        color = colorScheme.onPrimaryContainer,
+        color = colorScheme.onSurfaceVariant,
         fontSize = 14.sp,
         modifier =
             Modifier
