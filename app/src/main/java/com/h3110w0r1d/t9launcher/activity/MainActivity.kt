@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val appConfig by appViewModel.appConfig.collectAsState()
+            // 只有在配置初始化完成后才显示主界面，防止配置未加载完成时闪现引导界面
             if (!appConfig.isConfigInitialized) return@setContent
 
             val isDarkMode =
@@ -48,7 +49,6 @@ class MainActivity : ComponentActivity() {
                         Color.Transparent.toArgb(),
                     ) { isDarkMode },
             )
-            // 只有在配置初始化完成后才显示主界面，防止配置未加载完成时闪现引导界面
             T9LauncherTheme(
                 darkTheme = isDarkMode,
                 dynamicColor = appConfig.isUseSystemColor,
