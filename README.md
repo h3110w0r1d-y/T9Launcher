@@ -20,15 +20,11 @@
 
 习惯了氢OS的上划九键搜索，换到 ColorOS 后虽然可以下划搜索，但是不带九键键盘、内容冗杂、体验很差。其他替代品大多不支持全拼，搜索速度慢，所以自己造一个。
 
-## 封闭测试
+## 安装应用
 
-1. 加入Google群组/Join the Google group
+   - [![Get it on Play Store](image/google-play-badges.svg)](https://play.google.com/store/apps/details?id=com.h3110w0r1d.t9launcher)
 
-    https://groups.google.com/g/t9launcher-test
-
-2. 安装应用/Install the app
-
-   [![Get it on Play Store](image/google-play-badges.svg)](https://play.google.com/store/apps/details?id=com.h3110w0r1d.t9launcher)
+   - [Latest Release](https://github.com/h3110w0r1d-y/T9Launcher/releases/latest)
 
 ## 主要功能
 
