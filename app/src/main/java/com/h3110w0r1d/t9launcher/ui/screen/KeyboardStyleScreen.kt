@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,28 +35,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.h3110w0r1d.t9launcher.R
-import com.h3110w0r1d.t9launcher.model.AppConfig
-import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.data.config.KeyboardStyleConfig
+import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
+import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
+import com.h3110w0r1d.t9launcher.ui.LocalNavController
 import com.h3110w0r1d.t9launcher.ui.widget.StyleSettingCard
 import com.h3110w0r1d.t9launcher.ui.widget.T9Keyboard
 
 @SuppressLint("RestrictedApi", "FrequentlyChangingValue")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KeyboardStyleScreen(
-    navController: NavHostController,
-    viewModel: AppViewModel,
-) {
-    val appConfig by viewModel.appConfig.collectAsState()
+fun KeyboardStyleScreen() {
+    val navController = LocalNavController.current!!
+    val viewModel = LocalGlobalViewModel.current
+    val appConfig = LocalAppConfig.current
     val appMap by viewModel.appMap.collectAsState()
     var isChanged by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
-    var previewAppConfig by remember { mutableStateOf(appConfig) }
+    var previewKeyboardConfig by remember { mutableStateOf(appConfig.keyboardStyle) }
     val scrollState = rememberScrollState()
     LaunchedEffect(appConfig) {
-        previewAppConfig = appConfig
+        previewKeyboardConfig = appConfig.keyboardStyle
     }
 
     BackHandler(enabled = isChanged) {
@@ -86,7 +87,7 @@ fun KeyboardStyleScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            previewAppConfig = AppConfig()
+                            previewKeyboardConfig = KeyboardStyleConfig()
                             isChanged = true
                         },
                     ) {
@@ -95,7 +96,7 @@ fun KeyboardStyleScreen(
                     IconButton(
                         enabled = isChanged,
                         onClick = {
-                            viewModel.updateKeyboardStyle(previewAppConfig)
+                            viewModel.updateKeyboardStyle(previewKeyboardConfig)
                             navController.popBackStack()
                         },
                     ) {
@@ -123,9 +124,9 @@ fun KeyboardStyleScreen(
             ) {
                 StyleSettingCard(title = stringResource(R.string.keyboard_height)) {
                     Slider(
-                        value = previewAppConfig.keyboardButtonHeight,
+                        value = previewKeyboardConfig.keyboardButtonHeight,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(keyboardButtonHeight = it)
+                            previewKeyboardConfig = previewKeyboardConfig.copy(keyboardButtonHeight = it)
                             isChanged = true
                         },
                         valueRange = 30f..90f,
@@ -134,9 +135,9 @@ fun KeyboardStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.keyboard_width)) {
                     Slider(
-                        value = previewAppConfig.keyboardWidth,
+                        value = previewKeyboardConfig.keyboardWidth,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(keyboardWidth = it)
+                            previewKeyboardConfig = previewKeyboardConfig.copy(keyboardWidth = it)
                             isChanged = true
                         },
                         valueRange = .5f..1f,
@@ -145,9 +146,9 @@ fun KeyboardStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.keyboard_bottom_padding)) {
                     Slider(
-                        value = previewAppConfig.keyboardBottomPadding,
+                        value = previewKeyboardConfig.keyboardBottomPadding,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(keyboardBottomPadding = it)
+                            previewKeyboardConfig = previewKeyboardConfig.copy(keyboardBottomPadding = it)
                             isChanged = true
                         },
                         valueRange = 0f..100f,
@@ -156,9 +157,9 @@ fun KeyboardStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.shortcut_icon_size)) {
                     Slider(
-                        value = previewAppConfig.keyboardQSIconSize,
+                        value = previewKeyboardConfig.keyboardQSIconSize,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(keyboardQSIconSize = it)
+                            previewKeyboardConfig = previewKeyboardConfig.copy(keyboardQSIconSize = it)
                             isChanged = true
                         },
                         valueRange = 20f..80f,
@@ -167,9 +168,9 @@ fun KeyboardStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.shortcut_icon_opacity)) {
                     Slider(
-                        value = previewAppConfig.keyboardQSIconAlpha,
+                        value = previewKeyboardConfig.keyboardQSIconAlpha,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(keyboardQSIconAlpha = it)
+                            previewKeyboardConfig = previewKeyboardConfig.copy(keyboardQSIconAlpha = it)
                             isChanged = true
                         },
                         valueRange = 0f..1f,
@@ -188,7 +189,12 @@ fun KeyboardStyleScreen(
                         defaultElevation = 10.dp,
                     ),
             ) {
-                T9Keyboard(appConfig = previewAppConfig, appMap = appMap)
+                CompositionLocalProvider(
+                    LocalAppConfig provides
+                        appConfig.copy(keyboardStyle = previewKeyboardConfig),
+                ) {
+                    T9Keyboard(appMap = appMap)
+                }
             }
         }
     }
@@ -200,7 +206,7 @@ fun KeyboardStyleScreen(
             text = { Text(stringResource(R.string.save_changes_message)) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.updateKeyboardStyle(previewAppConfig)
+                    viewModel.updateKeyboardStyle(previewKeyboardConfig)
                     showSaveDialog = false
                     navController.popBackStack()
                 }) {

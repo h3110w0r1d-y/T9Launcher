@@ -33,17 +33,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import com.h3110w0r1d.t9launcher.R
-import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
+import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
+import com.h3110w0r1d.t9launcher.ui.LocalNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShortcutScreen(
-    navController: NavHostController,
-    viewModel: AppViewModel,
-) {
-    val appConfig by viewModel.appConfig.collectAsState()
+fun ShortcutScreen() {
+    val navController = LocalNavController.current!!
+    val viewModel = LocalGlobalViewModel.current
+    val appConfig = LocalAppConfig.current
     val appMap by viewModel.appMap.collectAsState()
 
     Scaffold(

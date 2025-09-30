@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.h3110w0r1d.t9launcher.di.AppRepository
+import com.h3110w0r1d.t9launcher.data.app.AppRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,7 @@ class PackageReceiver : BroadcastReceiver() {
     ) {
         val packageName = intent.data?.schemeSpecificPart
         val action = intent.action
-        
+
         // 在IO线程中异步执行数据更新，避免阻塞主线程
         receiverScope.launch {
             try {

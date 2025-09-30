@@ -31,8 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.h3110w0r1d.t9launcher.model.AppConfig
-import com.h3110w0r1d.t9launcher.vo.AppInfo
+import com.h3110w0r1d.t9launcher.data.app.AppInfo
+import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -40,8 +40,8 @@ fun AppItem(
     app: AppInfo,
     onClick: () -> Unit = {},
     onLongPress: (Offset) -> Unit = {},
-    appConfig: AppConfig = AppConfig(),
 ) {
+    val appConfig = LocalAppConfig.current
     var scaleTarget by remember { mutableFloatStateOf(1f) }
     val scaleState by animateFloatAsState(
         targetValue = scaleTarget,
@@ -85,8 +85,8 @@ fun AppItem(
         Box(
             modifier =
                 Modifier.padding(
-                    vertical = appConfig.iconVerticalPadding.dp,
-                    horizontal = appConfig.iconHorizonPadding.dp,
+                    vertical = appConfig.appListStyle.iconVerticalPadding.dp,
+                    horizontal = appConfig.appListStyle.iconHorizonPadding.dp,
                 ),
         ) {
             Image(
@@ -94,21 +94,21 @@ fun AppItem(
                 contentDescription = app.appName,
                 modifier =
                     Modifier
-                        .width(appConfig.iconSize.dp)
+                        .width(appConfig.appListStyle.iconSize.dp)
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(percent = appConfig.iconCornerRadius)),
+                        .clip(RoundedCornerShape(percent = appConfig.appListStyle.iconCornerRadius)),
             )
         }
         Text(
-            text = if (appConfig.highlightSearchResultEnabled) annotatedName else AnnotatedString(app.appName),
+            text = if (appConfig.search.highlightSearchResultEnabled) annotatedName else AnnotatedString(app.appName),
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            fontSize = appConfig.appNameSize.sp,
-            lineHeight = (appConfig.appNameSize * 1.2).sp,
+            fontSize = appConfig.appListStyle.appNameSize.sp,
+            lineHeight = (appConfig.appListStyle.appNameSize * 1.2).sp,
             modifier =
                 Modifier
-                    .padding(bottom = appConfig.rowSpacing.dp)
+                    .padding(bottom = appConfig.appListStyle.rowSpacing.dp)
                     .padding(horizontal = 4.dp),
         )
     }

@@ -12,12 +12,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.net.toUri
+import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
 import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
 import com.h3110w0r1d.t9launcher.ui.AppNavigation
 import com.h3110w0r1d.t9launcher.ui.screen.OnboardingScreen
 import com.h3110w0r1d.t9launcher.ui.theme.T9LauncherTheme
@@ -37,10 +40,10 @@ class MainActivity : ComponentActivity() {
             if (!appConfig.isConfigInitialized) return@setContent
 
             val isDarkMode =
-                if (appConfig.nightModeFollowSystem) {
+                if (appConfig.theme.nightModeFollowSystem) {
                     isSystemInDarkTheme()
                 } else {
-                    appConfig.nightModeEnabled
+                    appConfig.theme.nightModeEnabled
                 }
             enableEdgeToEdge(
                 statusBarStyle =
@@ -51,14 +54,19 @@ class MainActivity : ComponentActivity() {
             )
             T9LauncherTheme(
                 darkTheme = isDarkMode,
-                dynamicColor = appConfig.isUseSystemColor,
-                highContrast = appConfig.highContrastEnabled,
-                customColorScheme = appConfig.themeColor,
+                dynamicColor = appConfig.theme.isUseSystemColor,
+                highContrast = appConfig.theme.highContrastEnabled,
+                customColorScheme = appConfig.theme.themeColor,
             ) {
-                if (!appConfig.isShowedOnboarding) {
-                    OnboardingScreen(appViewModel, null)
-                } else {
-                    AppNavigation(appViewModel)
+                CompositionLocalProvider(
+                    LocalGlobalViewModel provides appViewModel,
+                    LocalAppConfig provides appConfig,
+                ) {
+                    if (!appConfig.isShowedOnboarding) {
+                        OnboardingScreen()
+                    } else {
+                        AppNavigation()
+                    }
                 }
             }
         }

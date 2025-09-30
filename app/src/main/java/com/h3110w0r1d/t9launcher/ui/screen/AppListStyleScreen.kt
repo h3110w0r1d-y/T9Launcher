@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,29 +38,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.h3110w0r1d.t9launcher.R
-import com.h3110w0r1d.t9launcher.model.AppConfig
-import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.data.config.AppListStyleConfig
+import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
+import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
+import com.h3110w0r1d.t9launcher.ui.LocalNavController
 import com.h3110w0r1d.t9launcher.ui.widget.AppItem
 import com.h3110w0r1d.t9launcher.ui.widget.StyleSettingCard
 
 @SuppressLint("RestrictedApi", "FrequentlyChangingValue")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppListStyleScreen(
-    navController: NavHostController,
-    viewModel: AppViewModel,
-) {
+fun AppListStyleScreen() {
+    val navController = LocalNavController.current!!
+    val viewModel = LocalGlobalViewModel.current
     val apps by viewModel.searchResultAppList.collectAsState()
-    val appConfig by viewModel.appConfig.collectAsState()
+    val appConfig = LocalAppConfig.current
     var isChanged by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
-    var previewAppConfig by remember { mutableStateOf(appConfig) }
+    var previewAppListConfig by remember { mutableStateOf(appConfig.appListStyle) }
     val scrollState = rememberScrollState()
 
     LaunchedEffect(appConfig) {
-        previewAppConfig = appConfig
+        previewAppListConfig = appConfig.appListStyle
     }
 
     BackHandler(enabled = isChanged) {
@@ -90,7 +91,7 @@ fun AppListStyleScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            previewAppConfig = AppConfig()
+                            previewAppListConfig = AppListStyleConfig()
                             isChanged = true
                         },
                     ) {
@@ -99,7 +100,7 @@ fun AppListStyleScreen(
                     IconButton(
                         enabled = isChanged,
                         onClick = {
-                            viewModel.updateAppListStyle(previewAppConfig)
+                            viewModel.updateAppListStyle(previewAppListConfig)
                             navController.popBackStack()
                         },
                     ) {
@@ -127,9 +128,9 @@ fun AppListStyleScreen(
             ) {
                 StyleSettingCard(title = stringResource(R.string.grid_columns)) {
                     Slider(
-                        value = previewAppConfig.gridColumns.toFloat(),
+                        value = previewAppListConfig.gridColumns.toFloat(),
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(gridColumns = it.toInt())
+                            previewAppListConfig = previewAppListConfig.copy(gridColumns = it.toInt())
                             isChanged = true
                         },
                         valueRange = 2f..10f,
@@ -139,9 +140,9 @@ fun AppListStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.app_list_height)) {
                     Slider(
-                        value = previewAppConfig.appListHeight,
+                        value = previewAppListConfig.appListHeight,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(appListHeight = it)
+                            previewAppListConfig = previewAppListConfig.copy(appListHeight = it)
                             isChanged = true
                         },
                         valueRange = 100f..500f,
@@ -150,9 +151,9 @@ fun AppListStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.icon_size)) {
                     Slider(
-                        value = previewAppConfig.iconSize,
+                        value = previewAppListConfig.iconSize,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(iconSize = it)
+                            previewAppListConfig = previewAppListConfig.copy(iconSize = it)
                             isChanged = true
                         },
                         valueRange = 10f..100f,
@@ -161,9 +162,9 @@ fun AppListStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.icon_corner_radius)) {
                     Slider(
-                        value = previewAppConfig.iconCornerRadius.toFloat(),
+                        value = previewAppListConfig.iconCornerRadius.toFloat(),
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(iconCornerRadius = it.toInt())
+                            previewAppListConfig = previewAppListConfig.copy(iconCornerRadius = it.toInt())
                             isChanged = true
                         },
                         valueRange = 0f..50f,
@@ -172,9 +173,9 @@ fun AppListStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.app_name_size)) {
                     Slider(
-                        value = previewAppConfig.appNameSize,
+                        value = previewAppListConfig.appNameSize,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(appNameSize = it)
+                            previewAppListConfig = previewAppListConfig.copy(appNameSize = it)
                             isChanged = true
                         },
                         valueRange = 8f..16f,
@@ -183,9 +184,9 @@ fun AppListStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.icon_horizon_padding)) {
                     Slider(
-                        value = previewAppConfig.iconHorizonPadding,
+                        value = previewAppListConfig.iconHorizonPadding,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(iconHorizonPadding = it)
+                            previewAppListConfig = previewAppListConfig.copy(iconHorizonPadding = it)
                             isChanged = true
                         },
                         valueRange = 0f..20f,
@@ -194,9 +195,9 @@ fun AppListStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.icon_vertical_padding)) {
                     Slider(
-                        value = previewAppConfig.iconVerticalPadding,
+                        value = previewAppListConfig.iconVerticalPadding,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(iconVerticalPadding = it)
+                            previewAppListConfig = previewAppListConfig.copy(iconVerticalPadding = it)
                             isChanged = true
                         },
                         valueRange = 0f..20f,
@@ -205,9 +206,9 @@ fun AppListStyleScreen(
                 }
                 StyleSettingCard(title = stringResource(R.string.row_spacing)) {
                     Slider(
-                        value = previewAppConfig.rowSpacing,
+                        value = previewAppListConfig.rowSpacing,
                         onValueChange = {
-                            previewAppConfig = previewAppConfig.copy(rowSpacing = it)
+                            previewAppListConfig = previewAppListConfig.copy(rowSpacing = it)
                             isChanged = true
                         },
                         valueRange = 0f..20f,
@@ -218,7 +219,7 @@ fun AppListStyleScreen(
             Card(
                 modifier =
                     Modifier
-                        .height(previewAppConfig.appListHeight.dp),
+                        .height(previewAppListConfig.appListHeight.dp),
                 shape =
                     RoundedCornerShape(
                         topStart = 20.dp,
@@ -229,15 +230,18 @@ fun AppListStyleScreen(
                         defaultElevation = 10.dp,
                     ),
             ) {
-                Box(modifier = Modifier.padding(10.dp)) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(previewAppConfig.gridColumns),
-                        modifier =
-                            Modifier
-                                .fillMaxSize(),
-                    ) {
-                        items(apps.size) { i ->
-                            AppItem(app = apps[i], appConfig = previewAppConfig)
+                CompositionLocalProvider(
+                    LocalAppConfig provides
+                        appConfig.copy(appListStyle = previewAppListConfig),
+                ) {
+                    Box(modifier = Modifier.padding(10.dp)) {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(previewAppListConfig.gridColumns),
+                            modifier =
+                                Modifier
+                                    .fillMaxSize(),
+                        ) {
+                            items(apps.size) { AppItem(app = apps[it]) }
                         }
                     }
                 }
@@ -252,7 +256,7 @@ fun AppListStyleScreen(
             text = { Text(stringResource(R.string.save_changes_message)) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.updateAppListStyle(previewAppConfig)
+                    viewModel.updateAppListStyle(previewAppListConfig)
                     showSaveDialog = false
                     navController.popBackStack()
                 }) {

@@ -37,17 +37,17 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.h3110w0r1d.t9launcher.R
-import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
+import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
+import com.h3110w0r1d.t9launcher.ui.LocalNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HideAppScreen(
-    navController: NavHostController,
-    viewModel: AppViewModel,
-) {
-    val appConfig by viewModel.appConfig.collectAsState()
+fun HideAppScreen() {
+    val navController = LocalNavController.current!!
+    val viewModel = LocalGlobalViewModel.current
+    val appConfig = LocalAppConfig.current
     val hideAppList by viewModel.hideAppList.collectAsState()
     var searchText by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
@@ -161,7 +161,7 @@ fun HideAppScreen(
                     trailingContent = {
                         Box(modifier = Modifier.padding(vertical = 10.dp)) {
                             Checkbox(
-                                checked = appConfig.hiddenComponentIds.contains(hideAppList[i].componentId()),
+                                checked = appConfig.search.hiddenComponentIds.contains(hideAppList[i].componentId()),
                                 onCheckedChange = null,
                             )
                         }

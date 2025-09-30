@@ -1,4 +1,4 @@
-package com.h3110w0r1d.t9launcher.vo
+package com.h3110w0r1d.t9launcher.data.app
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -29,7 +29,11 @@ class AppInfo(
     var matchRate: Float = 0f
     private val _matchRange: MutableStateFlow<Pair<Int, Int>> = MutableStateFlow(Pair(0, 0))
     val matchRange: StateFlow<Pair<Int, Int>> = _matchRange
-    private val _annotatedName: MutableStateFlow<AnnotatedString> = MutableStateFlow(AnnotatedString(appName))
+    private val _annotatedName: MutableStateFlow<AnnotatedString> =
+        MutableStateFlow(
+            androidx.compose.ui.text
+                .AnnotatedString(appName),
+        )
     val annotatedName: StateFlow<AnnotatedString> = _annotatedName
 
     class SortByMatchRate : Comparator<AppInfo> {
@@ -70,7 +74,7 @@ class AppInfo(
                             style =
                                 SpanStyle(
                                     color = highlightColor,
-                                    fontWeight = FontWeight.SemiBold,
+                                    fontWeight = FontWeight.Companion.SemiBold,
                                 ),
                         ) {
                             append(searchData[i].last())

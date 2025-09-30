@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.h3110w0r1d.t9launcher.R
-import com.h3110w0r1d.t9launcher.vo.AppInfo
+import com.h3110w0r1d.t9launcher.data.app.AppInfo
 
 @Composable
 fun AppDropdownMenu(

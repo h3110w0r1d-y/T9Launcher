@@ -16,7 +16,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -28,17 +27,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.h3110w0r1d.t9launcher.R
-import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
+import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
+import com.h3110w0r1d.t9launcher.ui.LocalNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun OnboardingScreen(
-    viewModel: AppViewModel,
-    navController: NavHostController?,
-) {
+fun OnboardingScreen() {
+    val navController = LocalNavController.current
+    val viewModel = LocalGlobalViewModel.current
     val longClickMenuVector = AnimatedImageVector.animatedVectorResource(R.drawable.long_click_menu)
     val longClickMenuText = stringResource(R.string.long_click_menu)
     val longClickDeleteVector = AnimatedImageVector.animatedVectorResource(R.drawable.long_click_delete)
@@ -49,7 +48,7 @@ fun OnboardingScreen(
     val slideDeleteText = stringResource(R.string.slide_delete)
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
-    val appConfig by viewModel.appConfig.collectAsState()
+    val appConfig = LocalAppConfig.current
 
     Scaffold(
         modifier =

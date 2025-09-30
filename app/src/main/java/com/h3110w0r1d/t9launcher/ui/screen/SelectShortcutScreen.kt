@@ -35,17 +35,15 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.h3110w0r1d.t9launcher.R
-import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
+import com.h3110w0r1d.t9launcher.ui.LocalNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectShortcutScreen(
-    navController: NavHostController,
-    viewModel: AppViewModel,
-    index: Int,
-) {
+fun SelectShortcutScreen(index: Int) {
+    val navController = LocalNavController.current!!
+    val viewModel = LocalGlobalViewModel.current
     val hideAppList by viewModel.hideAppList.collectAsState()
     var searchText by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }

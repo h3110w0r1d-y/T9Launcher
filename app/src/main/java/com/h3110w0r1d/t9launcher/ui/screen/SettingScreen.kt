@@ -37,7 +37,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -53,27 +52,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
-import androidx.navigation.NavHostController
 import com.h3110w0r1d.t9launcher.BuildConfig
 import com.h3110w0r1d.t9launcher.R
-import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
+import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
+import com.h3110w0r1d.t9launcher.ui.LocalNavController
 import com.h3110w0r1d.t9launcher.ui.theme.getPrimaryColorMap
 
 @SuppressLint("ShowToast")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingScreen(
-    navController: NavHostController,
-    viewModel: AppViewModel,
-) {
-    val appConfig by viewModel.appConfig.collectAsState()
+fun SettingScreen() {
+    val navController = LocalNavController.current!!
+    val viewModel = LocalGlobalViewModel.current
+    val appConfig = LocalAppConfig.current
     val context = LocalContext.current
 
     val isDarkMode =
-        if (appConfig.nightModeFollowSystem) {
+        if (appConfig.theme.nightModeFollowSystem) {
             isSystemInDarkTheme()
         } else {
-            appConfig.nightModeEnabled
+            appConfig.theme.nightModeEnabled
         }
     var selectColorDialogOpened by remember { mutableStateOf(false) }
 
@@ -125,12 +124,16 @@ fun SettingScreen(
                 title = stringResource(R.string.hide_system_app),
                 trailingContent = {
                     Switch(
-                        checked = appConfig.hideSystemAppEnabled,
+                        checked = appConfig.search.hideSystemAppEnabled,
                         onCheckedChange = null,
                     )
                 },
                 onClick = {
-                    viewModel.setIsHideSystemApp(!appConfig.hideSystemAppEnabled)
+                    viewModel.updateSearchConfig(
+                        appConfig.search.copy(
+                            hideSystemAppEnabled = !appConfig.search.hideSystemAppEnabled,
+                        ),
+                    )
                 },
             )
             SettingItem(
@@ -153,12 +156,16 @@ fun SettingScreen(
                 description = "udio -> Audio",
                 trailingContent = {
                     Switch(
-                        checked = appConfig.englishFuzzyMatchEnabled,
+                        checked = appConfig.search.englishFuzzyMatchEnabled,
                         onCheckedChange = null,
                     )
                 },
                 onClick = {
-                    viewModel.setEnglishFuzzyMatch(!appConfig.englishFuzzyMatchEnabled)
+                    viewModel.updateSearchConfig(
+                        appConfig.search.copy(
+                            englishFuzzyMatchEnabled = !appConfig.search.englishFuzzyMatchEnabled,
+                        ),
+                    )
                 },
             )
 
@@ -185,12 +192,16 @@ fun SettingScreen(
                 title = stringResource(R.string.is_highlight_search_result),
                 trailingContent = {
                     Switch(
-                        checked = appConfig.highlightSearchResultEnabled,
+                        checked = appConfig.search.highlightSearchResultEnabled,
                         onCheckedChange = null,
                     )
                 },
                 onClick = {
-                    viewModel.setIsHighlightSearchResult(!appConfig.highlightSearchResultEnabled)
+                    viewModel.updateSearchConfig(
+                        appConfig.search.copy(
+                            highlightSearchResultEnabled = !appConfig.search.highlightSearchResultEnabled,
+                        ),
+                    )
                 },
             )
 
@@ -199,26 +210,34 @@ fun SettingScreen(
                 title = stringResource(R.string.night_mode_follow_system),
                 trailingContent = {
                     Switch(
-                        checked = appConfig.nightModeFollowSystem,
+                        checked = appConfig.theme.nightModeFollowSystem,
                         onCheckedChange = null,
                     )
                 },
                 onClick = {
-                    viewModel.setNightModeFollowSystem(!appConfig.nightModeFollowSystem)
+                    viewModel.updateThemeConfig(
+                        appConfig.theme.copy(
+                            nightModeFollowSystem = !appConfig.theme.nightModeFollowSystem,
+                        ),
+                    )
                 },
             )
-            if (!appConfig.nightModeFollowSystem) {
+            if (!appConfig.theme.nightModeFollowSystem) {
                 SettingItem(
                     imageVector = ImageVector.vectorResource(R.drawable.dark_mode_24px),
                     title = stringResource(R.string.night_mode_enabled),
                     trailingContent = {
                         Switch(
-                            checked = appConfig.nightModeEnabled,
+                            checked = appConfig.theme.nightModeEnabled,
                             onCheckedChange = null,
                         )
                     },
                     onClick = {
-                        viewModel.setNightModeEnabled(!appConfig.nightModeEnabled)
+                        viewModel.updateThemeConfig(
+                            appConfig.theme.copy(
+                                nightModeEnabled = !appConfig.theme.nightModeEnabled,
+                            ),
+                        )
                     },
                 )
             }
@@ -228,19 +247,23 @@ fun SettingScreen(
                 title = stringResource(R.string.use_system_color),
                 trailingContent = {
                     Switch(
-                        checked = appConfig.isUseSystemColor,
+                        checked = appConfig.theme.isUseSystemColor,
                         onCheckedChange = null,
                     )
                 },
                 onClick = {
-                    viewModel.setIsUseSystemColor(!appConfig.isUseSystemColor)
+                    viewModel.updateThemeConfig(
+                        appConfig.theme.copy(
+                            isUseSystemColor = !appConfig.theme.isUseSystemColor,
+                        ),
+                    )
                 },
             )
-            if (!appConfig.isUseSystemColor) {
+            if (!appConfig.theme.isUseSystemColor) {
                 SettingItem(
                     imageVector = ImageVector.vectorResource(R.drawable.colors_24px),
                     title = stringResource(R.string.theme_color),
-                    description = themeColorNamesMap.get(appConfig.themeColor),
+                    description = themeColorNamesMap.get(appConfig.theme.themeColor),
                     onClick = {
                         selectColorDialogOpened = true
                     },
@@ -250,12 +273,16 @@ fun SettingScreen(
                     title = stringResource(R.string.high_contrast_enabled),
                     trailingContent = {
                         Switch(
-                            checked = appConfig.highContrastEnabled,
+                            checked = appConfig.theme.highContrastEnabled,
                             onCheckedChange = null,
                         )
                     },
                     onClick = {
-                        viewModel.setHighContrastEnabled(!appConfig.highContrastEnabled)
+                        viewModel.updateThemeConfig(
+                            appConfig.theme.copy(
+                                highContrastEnabled = !appConfig.theme.highContrastEnabled,
+                            ),
+                        )
                     },
                 )
             }
@@ -346,7 +373,7 @@ fun SettingScreen(
                             leadingContent = {
                                 Icon(
                                     imageVector =
-                                        if (appConfig.themeColor == it) {
+                                        if (appConfig.theme.themeColor == it) {
                                             Icons.Filled.Palette
                                         } else {
                                             Icons.Outlined.Palette
@@ -362,7 +389,11 @@ fun SettingScreen(
                                 Modifier.clickable(
                                     enabled = true,
                                     onClick = {
-                                        viewModel.setThemeColor(it)
+                                        viewModel.updateThemeConfig(
+                                            appConfig.theme.copy(
+                                                themeColor = it,
+                                            ),
+                                        )
                                         selectColorDialogOpened = false
                                     },
                                 ),

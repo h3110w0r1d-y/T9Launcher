@@ -38,8 +38,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.h3110w0r1d.t9launcher.R
-import com.h3110w0r1d.t9launcher.model.AppConfig
-import com.h3110w0r1d.t9launcher.vo.AppInfo
+import com.h3110w0r1d.t9launcher.data.app.AppInfo
+import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
 
 @Composable
 fun T9Keyboard(
@@ -47,14 +47,14 @@ fun T9Keyboard(
     onClick: (String) -> Unit = {},
     onLongClick: (String) -> Unit = {},
     onCancel: (() -> Unit)? = null,
-    appConfig: AppConfig = AppConfig(),
     appMap: Map<String, AppInfo> = mapOf(),
 ) {
+    val appConfig = LocalAppConfig.current
     Column(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(top = 10.dp, bottom = appConfig.keyboardBottomPadding.dp)
+                .padding(top = 10.dp, bottom = appConfig.keyboardStyle.keyboardBottomPadding.dp)
                 .wrapContentHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -63,7 +63,6 @@ fun T9Keyboard(
                 btnTexts = Array(3) { j -> "${i + j}" },
                 onClick = onClick,
                 onLongClick = onLongClick,
-                appConfig = appConfig,
                 appMap = appMap,
             )
         }
@@ -72,7 +71,6 @@ fun T9Keyboard(
             onClick = onClick,
             onLongClick = onLongClick,
             onCancel = onCancel,
-            appConfig = appConfig,
         )
     }
 }
@@ -83,11 +81,11 @@ fun T9ButtonRow(
     onClick: (String) -> Unit = {},
     onLongClick: (String) -> Unit = {},
     onCancel: (() -> Unit)? = null,
-    appConfig: AppConfig,
     appMap: Map<String, AppInfo> = mapOf(),
 ) {
+    val appConfig = LocalAppConfig.current
     Row(
-        modifier = Modifier.fillMaxWidth(appConfig.keyboardWidth),
+        modifier = Modifier.fillMaxWidth(appConfig.keyboardStyle.keyboardWidth),
         horizontalArrangement = Arrangement.Center,
     ) {
         for (btnText in btnTexts) {
@@ -99,7 +97,6 @@ fun T9ButtonRow(
                 onClick = { onClick(btnText) },
                 onLongClick = { onLongClick(btnText) },
                 onCancel = onCancel,
-                appConfig = appConfig,
                 appMap = appMap,
             )
         }
@@ -113,9 +110,9 @@ fun T9Button(
     onClick: () -> Unit,
     onLongClick: () -> Unit = {},
     onCancel: (() -> Unit)? = null,
-    appConfig: AppConfig,
     appMap: Map<String, AppInfo>,
 ) {
+    val appConfig = LocalAppConfig.current
     val letterMap =
         mapOf(
             "1" to "^_^",
@@ -138,7 +135,7 @@ fun T9Button(
         shape = RoundedCornerShape(12.dp),
         modifier =
             modifier
-                .height(appConfig.keyboardButtonHeight.dp)
+                .height(appConfig.keyboardStyle.keyboardButtonHeight.dp)
                 .pointerInput(Unit) {
                     awaitEachGesture {
                         isCancel = true
@@ -167,10 +164,10 @@ fun T9Button(
                             contentDescription = appInfo.appName,
                             modifier =
                                 Modifier
-                                    .width(appConfig.keyboardQSIconSize.dp)
+                                    .width(appConfig.keyboardStyle.keyboardQSIconSize.dp)
                                     .aspectRatio(1f)
-                                    .alpha(appConfig.keyboardQSIconAlpha)
-                                    .clip(RoundedCornerShape(percent = appConfig.iconCornerRadius))
+                                    .alpha(appConfig.keyboardStyle.keyboardQSIconAlpha)
+                                    .clip(RoundedCornerShape(percent = appConfig.appListStyle.iconCornerRadius))
                                     .align(Alignment.Center),
                         )
                     }

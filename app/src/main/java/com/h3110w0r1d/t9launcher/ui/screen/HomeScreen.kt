@@ -47,9 +47,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.navigation.NavHostController
 import com.h3110w0r1d.t9launcher.R
-import com.h3110w0r1d.t9launcher.model.AppViewModel
+import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
+import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
+import com.h3110w0r1d.t9launcher.ui.LocalNavController
 import com.h3110w0r1d.t9launcher.ui.widget.AppDropdownMenu
 import com.h3110w0r1d.t9launcher.ui.widget.AppItem
 import com.h3110w0r1d.t9launcher.ui.widget.T9Keyboard
@@ -57,13 +58,12 @@ import com.h3110w0r1d.t9launcher.ui.widget.T9Keyboard
 @SuppressLint("RestrictedApi", "FrequentlyChangingValue", "ShowToast")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
-    navController: NavHostController,
-    viewModel: AppViewModel,
-) {
+fun HomeScreen() {
+    val navController = LocalNavController.current!!
+    val viewModel = LocalGlobalViewModel.current
     val apps by viewModel.searchResultAppList.collectAsState()
     val appMap by viewModel.appMap.collectAsState()
-    val appConfig by viewModel.appConfig.collectAsState()
+    val appConfig = LocalAppConfig.current
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
@@ -166,7 +166,7 @@ fun HomeScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .height(appConfig.appListHeight.dp)
+                                .height(appConfig.appListStyle.appListHeight.dp)
                                 .constrainAs(listRef) {
                                     bottom.linkTo(inputRef.top)
                                 },
@@ -182,7 +182,7 @@ fun HomeScreen(
                         },
                         modifier =
                             Modifier
-                                .height(appConfig.appListHeight.dp)
+                                .height(appConfig.appListStyle.appListHeight.dp)
                                 .padding(10.dp)
                                 .constrainAs(listRef) {
                                     bottom.linkTo(inputRef.top)
@@ -190,7 +190,7 @@ fun HomeScreen(
                     ) {
                         LazyVerticalGrid(
                             state = lazyGridState,
-                            columns = GridCells.Fixed(appConfig.gridColumns),
+                            columns = GridCells.Fixed(appConfig.appListStyle.gridColumns),
                             modifier =
                                 Modifier
                                     .fillMaxSize(),
@@ -211,7 +211,6 @@ fun HomeScreen(
                                         onLongPress = {
                                             expanded = true
                                         },
-                                        appConfig = appConfig,
                                     )
                                     AppDropdownMenu(apps[i], expanded) { expanded = it }
                                 }
@@ -294,7 +293,6 @@ fun HomeScreen(
                         searchText = ""
                         viewModel.searchApp("")
                     },
-                    appConfig = appConfig,
                     appMap = appMap,
                 )
             }
