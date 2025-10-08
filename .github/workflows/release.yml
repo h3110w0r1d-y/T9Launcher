@@ -72,6 +72,6 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: com.h3110w0r1d.t9launcher
           releaseFiles: app/build/outputs/bundle/defaultRelease/*.aab
-          track: beta
+          track: production
           whatsNewDirectory: distribution/whatsnew
           mappingFile: app/build/outputs/mapping/defaultRelease/mapping.txt

@@ -1,5 +1,7 @@
 import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.impl.VariantOutputImpl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.android.application")
@@ -24,8 +26,8 @@ android {
         applicationId = "com.h3110w0r1d.t9launcher"
         minSdk = 26
         targetSdk = 36
-        versionCode = 33
-        versionName = "1.7.8"
+        versionCode = 34
+        versionName = "1.7.9"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -90,14 +92,14 @@ android {
     }
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
     buildFeatures {
         compose = true
         buildConfig = true
     }
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             freeCompilerArgs.add("-Xannotation-default-target=param-property")
         }

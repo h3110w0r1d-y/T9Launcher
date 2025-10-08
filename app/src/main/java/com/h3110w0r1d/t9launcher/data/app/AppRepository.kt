@@ -111,7 +111,7 @@ class AppRepository(
                     statement.bindString(5, row[4] as String)
                     statement.executeInsert()
                 }
-            } finally {
+            } catch (_: Exception) {
             }
         }
         statement.close()
