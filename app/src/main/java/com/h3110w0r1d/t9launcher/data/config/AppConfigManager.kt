@@ -101,7 +101,7 @@ class AppConfigManager(
                         ),
                     isShowedOnboarding = preferences[ConfigKeys.isShowedOnboarding] ?: false,
                     shortcutConfig =
-                        Json.decodeFromString<ArrayList<String>>(
+                        Json.decodeFromString<List<String>>(
                             preferences[ConfigKeys.shortcutConfig] ?: "[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]",
                         ),
                     isConfigInitialized = preferences[ConfigKeys.isConfigInitialized] ?: true,
@@ -154,7 +154,7 @@ class AppConfigManager(
         }
     }
 
-    suspend fun updateShortcutConfig(shortcutConfig: ArrayList<String>) {
+    suspend fun updateShortcutConfig(shortcutConfig: List<String>) {
         dataStore.edit { preferences ->
             preferences[ConfigKeys.shortcutConfig] = Json.encodeToString(shortcutConfig)
         }

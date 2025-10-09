@@ -55,6 +55,6 @@ data class AppConfig(
     val theme: ThemeConfig = ThemeConfig(),
     val search: SearchConfig = SearchConfig(),
     val isShowedOnboarding: Boolean = false,
-    val shortcutConfig: ArrayList<String> = arrayListOf("", "", "", "", "", "", "", "", ""),
+    val shortcutConfig: List<String> = listOf("", "", "", "", "", "", "", "", ""),
     val isConfigInitialized: Boolean = false,
 )

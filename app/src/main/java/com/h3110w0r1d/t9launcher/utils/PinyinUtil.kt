@@ -7,7 +7,7 @@ import com.h3110w0r1d.t9launcher.data.app.AppInfo
 class PinyinUtil(
     context: Context,
 ) {
-    private val charPinyinMapping: ArrayList<ArrayList<String>> = ArrayList()
+    private val charPinyinMapping = mutableListOf<MutableList<String>>()
 
     init {
         val pinyinFile = context.resources.openRawResource(R.raw.pinyin)
@@ -22,14 +22,12 @@ class PinyinUtil(
         var index = 0
         while (pinyinIndexFile.read().also { byte = it } != -1) {
             if (cursor < 20902) {
-                charPinyinMapping.add(arrayListOf(pinyinList[byte]))
+                charPinyinMapping.add(mutableListOf(pinyinList[byte]))
             } else {
-                if ((cursor - 20902) % 3 == 0) {
-                    index = byte * 256
-                } else if ((cursor - 20902) % 3 == 1) {
-                    index += byte
-                } else {
-                    charPinyinMapping[index].add(pinyinList[byte])
+                when ((cursor - 20902) % 3) {
+                    0 -> index = byte * 256
+                    1 -> index += byte
+                    2 -> charPinyinMapping[index].add(pinyinList[byte])
                 }
             }
             cursor += 1
@@ -61,17 +59,21 @@ class PinyinUtil(
      * @param str 需要转换的字符串
      * @return 拼音列表, 每个字/词对应一个列表, 列表为[该字/词的所有拼音...,原始字/词]
      */
-    fun getPinYin(str: String): ArrayList<ArrayList<String>> {
-        val result: ArrayList<ArrayList<String>> = ArrayList()
+    fun getPinYin(str: String): List<List<String>> {
+        val result = mutableListOf<MutableList<String>>()
         val word = StringBuilder()
-        for (i in 0..<str.length) {
-            val c = str[i]
-            if ('a' <= c && c <= 'z') {
-                word.append(c)
-                continue
+
+        str.codePoints().forEach { codePoint ->
+            val chars = Character.toChars(codePoint)
+            val c = chars[0]
+            if (chars.size == 1) {
+                if ('a' <= c && c <= 'z') {
+                    word.append(c)
+                    return@forEach
+                }
             }
             if (word.isNotEmpty()) {
-                val newList: ArrayList<String> = ArrayList()
+                val newList = mutableListOf<String>()
                 newList.add(letter2Number(word.substring(0, 1)))
                 newList.add("e" + letter2Number(word.toString()))
 
@@ -80,42 +82,49 @@ class PinyinUtil(
                 result.add(newList)
                 word.clear()
             }
-            if ('A' <= c && c <= 'Z') {
-                word.append(c)
-                continue
-            }
-            if (' ' == c || '-' == c || '_' == c) {
-                if (result.isNotEmpty()) {
-                    result.last()[result.last().size - 1] += c.toString()
+            if (chars.size == 1) {
+                if ('A' <= c && c <= 'Z') {
+                    word.append(c)
+                    return@forEach
                 }
-                continue
-            }
-            if ('0' <= c && c <= '9') {
-                result.add(arrayListOf(c.toString(), c.toString()))
-                continue
-            }
-            if (0x4E00 <= c.code && c.code <= 0x9FA5) {
-                val pinyinArray = charPinyinMapping[c.code - 0x4E00]
-                val newList: ArrayList<String> = ArrayList()
-                pinyinArray.forEach { pinyin ->
-                    if (newList.indexOf(pinyin.substring(0, 1)) == -1) {
-                        newList.add(pinyin.substring(0, 1))
+                if (' ' == c || '-' == c || '_' == c) {
+                    if (result.isNotEmpty()) {
+                        result.last()[result.last().size - 1] += c.toString()
+                    } else {
+                        result.add(mutableListOf("0", c.toString()))
                     }
-                    newList.add(pinyin)
+                    return@forEach
                 }
-                // 添加原始汉字
-                newList.add(c.toString())
-                result.add(newList)
-                continue
-            } else if (c.code == 0x3007) {
-                result.add(arrayListOf("5", "5464", c.toString())) // 〇 ling
-                continue
+                if ('0' <= c && c <= '9') {
+                    result.add(mutableListOf(c.toString(), c.toString()))
+                    return@forEach
+                }
+                if (0x4E00 <= c.code && c.code <= 0x9FA5) {
+                    val pinyinList = charPinyinMapping[c.code - 0x4E00]
+                    val newList = mutableListOf<String>()
+                    pinyinList.forEach { pinyin ->
+                        if (newList.indexOf(pinyin.substring(0, 1)) == -1) {
+                            newList.add(pinyin.substring(0, 1))
+                        }
+                        newList.add(pinyin)
+                    }
+                    // 添加原始汉字
+                    newList.add(c.toString())
+                    result.add(newList)
+                    return@forEach
+                } else if (c.code == 0x3007) {
+                    result.add(mutableListOf("5", "5464", c.toString())) // 〇 ling
+                    return@forEach
+                }
             }
-            result.add(arrayListOf("0", c.toString()))
+            if (chars.size > 1) {
+                result.add(mutableListOf("0", String(chars)))
+                return@forEach
+            }
         }
 
         if (word.isNotEmpty()) {
-            val newList: ArrayList<String> = ArrayList()
+            val newList = mutableListOf<String>()
             // 最后一个字/词不需要单独加首字母
             // if (latterAndNumber.length > 1) {
             //     newList.add(letter2Number(latterAndNumber.substring(0, 1)))
@@ -159,7 +168,7 @@ class PinyinUtil(
      * @param englishFuzzyMatch 英文模糊匹配
      */
     private fun searchPosition(
-        data: ArrayList<ArrayList<String>>,
+        data: List<List<String>>,
         searchText: String,
         i: Int,
         k: Int,

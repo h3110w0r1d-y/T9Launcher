@@ -41,12 +41,11 @@ class AppViewModel
         val isLoading: StateFlow<Boolean> = _isLoading
         private val _isRefreshing: MutableStateFlow<Boolean> = MutableStateFlow(false)
         val isRefreshing: StateFlow<Boolean> = _isRefreshing
-        private val _searchResultAppList: MutableStateFlow<ArrayList<AppInfo>> = MutableStateFlow(ArrayList())
-        val searchResultAppList: StateFlow<ArrayList<AppInfo>> = _searchResultAppList
+        private val _searchResultAppList: MutableStateFlow<List<AppInfo>> = MutableStateFlow(listOf())
+        val searchResultAppList: StateFlow<List<AppInfo>> = _searchResultAppList
 
-        private val _hideAppList: MutableStateFlow<ArrayList<AppInfo>> =
-            MutableStateFlow(ArrayList())
-        val hideAppList: StateFlow<ArrayList<AppInfo>> = _hideAppList
+        private val _hideAppList: MutableStateFlow<List<AppInfo>> = MutableStateFlow(listOf())
+        val hideAppList: StateFlow<List<AppInfo>> = _hideAppList
 
         fun switchAppHide(app: AppInfo) {
             val config = appConfig.value
@@ -127,7 +126,7 @@ class AppViewModel
             val newQuickStartConfig = config.shortcutConfig.toMutableList()
             newQuickStartConfig[index] = componentId
             viewModelScope.launch {
-                configManager.updateShortcutConfig(ArrayList(newQuickStartConfig))
+                configManager.updateShortcutConfig(newQuickStartConfig)
             }
         }
 
@@ -172,7 +171,7 @@ class AppViewModel
         }
 
         fun showDefaultAppList() {
-            val appInfo = ArrayList<AppInfo>()
+            val appInfo = mutableListOf<AppInfo>()
             val currentAppList = appRepository.appList.value
             val config = appConfig.value
 
@@ -199,7 +198,7 @@ class AppViewModel
                 searchText = key
                 return true
             }
-            val appInfo = ArrayList<AppInfo>()
+            val appInfo = mutableListOf<AppInfo>()
             val currentAppList = appRepository.appList.value
             val config = appConfig.value
 
@@ -234,7 +233,7 @@ class AppViewModel
         fun searchHideApp(key: String) {
             var key = key
             key = key.lowercase(Locale.getDefault())
-            val appInfo = ArrayList<AppInfo>()
+            val appInfo = mutableListOf<AppInfo>()
             val currentAppList = appRepository.appList.value
             val config = appConfig.value
 
@@ -269,7 +268,7 @@ class AppViewModel
         }
 
         fun showHideApp() {
-            val appInfo = ArrayList<AppInfo>()
+            val appInfo = mutableListOf<AppInfo>()
             val currentAppList = appRepository.appList.value
             val config = appConfig.value
 

@@ -24,7 +24,7 @@ class AppInfo(
     var startCount: Int,
     var appIcon: ImageBitmap,
     var isSystemApp: Boolean,
-    var searchData: ArrayList<ArrayList<String>>,
+    var searchData: List<List<String>>,
 ) {
     var matchRate: Float = 0f
     private val _matchRange: MutableStateFlow<Pair<Int, Int>> = MutableStateFlow(Pair(0, 0))

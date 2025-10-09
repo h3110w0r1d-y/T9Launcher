@@ -1,1 +1,1 @@
-Fix bugs
+Fixed an issue where the app would crash when processing specific special characters, such as emojis.

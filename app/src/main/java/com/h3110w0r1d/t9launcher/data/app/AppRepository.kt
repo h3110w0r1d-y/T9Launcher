@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.text.Collator
 import java.util.Locale
+import kotlin.collections.mutableListOf
 
 class AppRepository(
     private val context: Context,
@@ -30,8 +31,8 @@ class AppRepository(
 ) {
     private val table = "T_AppInfo"
 
-    private val _appList = MutableStateFlow<ArrayList<AppInfo>>(ArrayList())
-    val appList: StateFlow<ArrayList<AppInfo>> = _appList.asStateFlow()
+    private val _appList = MutableStateFlow<List<AppInfo>>(listOf())
+    val appList: StateFlow<List<AppInfo>> = _appList.asStateFlow()
 
     private val _appMap = MutableStateFlow<HashMap<String, AppInfo>>(HashMap())
     val appMap: StateFlow<HashMap<String, AppInfo>> = _appMap.asStateFlow()
@@ -42,11 +43,11 @@ class AppRepository(
     /**
      * 对应用列表进行排序
      */
-    private fun sortAppList(appList: ArrayList<AppInfo>): ArrayList<AppInfo> {
+    private fun sortAppList(appList: List<AppInfo>): List<AppInfo> {
         val sortedList = appList.toMutableList()
         sortedList.sortWith(compareBy(collator) { it.appName })
         sortedList.sortWith(AppInfo.SortByStartCount())
-        return ArrayList(sortedList)
+        return sortedList
     }
 
     private fun queryAllApps(): Cursor {
@@ -83,7 +84,7 @@ class AppRepository(
         iconManager.deleteIcon(packageName, className)
     }
 
-    private fun insertOrUpdate(insertOrUpdateList: ArrayList<ArrayList<Any>>) {
+    private fun insertOrUpdate(insertOrUpdateList: MutableList<List<Any>>) {
         val db = dbHelper.writableDatabase
         val upsertSql = (
             "INSERT INTO $table (" +
@@ -111,7 +112,8 @@ class AppRepository(
                     statement.bindString(5, row[4] as String)
                     statement.executeInsert()
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
         statement.close()
@@ -167,7 +169,7 @@ class AppRepository(
         val searchData = pinyinUtil.getPinYin(appName)
         val applicationInfo = packageInfo.applicationInfo
         val isSystemApp = (applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-        val searchDataJson = Json.Default.encodeToString<ArrayList<ArrayList<String>>>(searchData)
+        val searchDataJson = Json.encodeToString<List<List<String>>>(searchData)
 
         // 确定启动次数
         val startCount = startCounts?.get(componentId) ?: defaultStartCount
@@ -183,8 +185,8 @@ class AppRepository(
                 searchData,
             )
 
-        val insertData: ArrayList<Any> =
-            arrayListOf(
+        val insertData: List<Any> =
+            listOf(
                 className,
                 packageName,
                 appName,
@@ -200,7 +202,7 @@ class AppRepository(
      */
     private data class ProcessResult(
         val appInfo: AppInfo,
-        val insertData: ArrayList<Any>,
+        val insertData: List<Any>,
     )
 
     suspend fun loadAllApps() {
@@ -210,7 +212,7 @@ class AppRepository(
 
         return withContext(Dispatchers.IO) {
             iconManager.loadAllIcons()
-            val result = ArrayList<AppInfo>()
+            val result = mutableListOf<AppInfo>()
             val resultMap = HashMap<String, AppInfo>()
             val cursor = queryAllApps()
 
@@ -227,9 +229,13 @@ class AppRepository(
                     continue
                 }
                 val appIcon = iconBitmap.asImageBitmap()
-
-                val searchData =
-                    Json.Default.decodeFromString<ArrayList<ArrayList<String>>>(searchDataJson)
+                var searchData: List<List<String>>
+                try {
+                    searchData = Json.decodeFromString<List<List<String>>>(searchDataJson)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    continue
+                }
                 val appInfo =
                     AppInfo(
                         className,
@@ -256,7 +262,7 @@ class AppRepository(
 
     suspend fun updateAppInfo(updateIcon: Boolean = false) =
         withContext(Dispatchers.IO) {
-            val componentIds: ArrayList<String> = ArrayList()
+            val componentIds = mutableListOf<String>()
             val packageManager = context.packageManager
             val resolveInfoList =
                 packageManager.queryIntentActivities(
@@ -272,7 +278,7 @@ class AppRepository(
                 componentIds.add(componentId)
             }
             val cursor = queryAllApps()
-            val needRemove: ArrayList<Array<String>> = ArrayList()
+            val needRemove = mutableListOf<Array<String>>()
             val startCounts: HashMap<String, Int> = HashMap()
             while (cursor.moveToNext()) {
                 val className = cursor.getString(0)
@@ -291,9 +297,9 @@ class AppRepository(
                 deleteApp(name[0], name[1])
             }
 
-            val result = ArrayList<AppInfo>()
+            val result = mutableListOf<AppInfo>()
             val resultMap = HashMap<String, AppInfo>()
-            val insertOrUpdateList = ArrayList<ArrayList<Any>>()
+            val insertOrUpdateList = mutableListOf<List<Any>>()
             for (resolveInfo in resolveInfoList) {
                 val processResult =
                     processResolveInfo(
@@ -360,8 +366,8 @@ class AppRepository(
                     }
                 val resolveInfoList = packageManager.queryIntentActivities(intent, 0)
 
-                val insertOrUpdateList = ArrayList<ArrayList<Any>>()
-                val newApps = ArrayList<AppInfo>()
+                val insertOrUpdateList = mutableListOf<List<Any>>()
+                val newApps = mutableListOf<AppInfo>()
                 val currentAppMap = _appMap.value.toMutableMap()
 
                 for (resolveInfo in resolveInfoList) {
@@ -388,7 +394,7 @@ class AppRepository(
                     // 更新应用列表
                     val currentAppList = _appList.value.toMutableList()
                     currentAppList.addAll(newApps)
-                    val sortedResult = sortAppList(ArrayList(currentAppList))
+                    val sortedResult = sortAppList(currentAppList)
 
                     _appList.value = sortedResult
                     _appMap.value = HashMap(currentAppMap)
@@ -412,7 +418,7 @@ class AppRepository(
             try {
                 val currentAppList = _appList.value.toMutableList()
                 val currentAppMap = _appMap.value.toMutableMap()
-                val appsToRemove = ArrayList<AppInfo>()
+                val appsToRemove = mutableListOf<AppInfo>()
 
                 // 查找需要移除的应用
                 for (app in currentAppList) {
@@ -427,7 +433,7 @@ class AppRepository(
                 currentAppList.removeAll(appsToRemove)
 
                 if (appsToRemove.isNotEmpty()) {
-                    _appList.value = ArrayList(currentAppList)
+                    _appList.value = currentAppList
                     _appMap.value = HashMap(currentAppMap)
                 }
             } catch (e: Exception) {
@@ -454,8 +460,8 @@ class AppRepository(
                     }
                 val resolveInfoList = packageManager.queryIntentActivities(intent, 0)
 
-                val insertOrUpdateList = ArrayList<ArrayList<Any>>()
-                val updatedApps = ArrayList<AppInfo>()
+                val insertOrUpdateList = mutableListOf<List<Any>>()
+                val updatedApps = mutableListOf<AppInfo>()
                 val currentAppMap = _appMap.value.toMutableMap()
                 val currentAppList = _appList.value.toMutableList()
 
@@ -491,7 +497,7 @@ class AppRepository(
 
                     // 更新应用列表
                     currentAppList.addAll(updatedApps)
-                    val sortedResult = sortAppList(ArrayList(currentAppList))
+                    val sortedResult = sortAppList(currentAppList)
 
                     _appList.value = sortedResult
                     _appMap.value = HashMap(currentAppMap)
