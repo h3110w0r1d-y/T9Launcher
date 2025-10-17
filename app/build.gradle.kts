@@ -117,5 +117,4 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.57.2")
     kapt("com.google.dagger:hilt-compiler:2.57.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-    compileOnly(files("libs/api-82.jar"))
 }
