@@ -60,17 +60,14 @@ fun HideAppScreen() {
     LaunchedEffect(isSearching) {
         if (isSearching) {
             focusRequester.requestFocus()
+        } else {
+            searchText = ""
+            viewModel.searchHideApp("")
         }
     }
 
-    BackHandler(enabled = true) {
-        if (isSearching) {
-            isSearching = false
-            searchText = ""
-            viewModel.searchHideApp("")
-        } else {
-            navController.popBackStack()
-        }
+    BackHandler(enabled = isSearching) {
+        isSearching = false
     }
     Scaffold(
         topBar = {

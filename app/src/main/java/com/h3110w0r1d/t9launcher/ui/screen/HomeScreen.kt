@@ -22,11 +22,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -71,6 +74,25 @@ fun HomeScreen() {
     val context = LocalContext.current
     val lazyGridState = rememberLazyGridState()
     val lastToastTime = remember { mutableLongStateOf(0L) }
+
+    // 检测是否正在滚动
+    var isScrolling by remember { mutableStateOf(false) }
+
+    val isScrolledToTop by remember {
+        derivedStateOf {
+            lazyGridState.firstVisibleItemIndex == 0 &&
+                lazyGridState.firstVisibleItemScrollOffset == 0
+        }
+    }
+    // 监听滚动状态变化
+    LaunchedEffect(lazyGridState.isScrollInProgress) {
+        isScrolling =
+            if (lazyGridState.isScrollInProgress) {
+                !isScrolledToTop
+            } else {
+                false
+            }
+    }
 
     val is12Key: Boolean = LocalConfiguration.current.keyboard == Configuration.KEYBOARD_12KEY
 
@@ -175,16 +197,23 @@ fun HomeScreen() {
                         CircularProgressIndicator()
                     }
                 } else {
-                    PullToRefreshBox(
-                        isRefreshing = isRefreshing,
-                        onRefresh = {
-                            viewModel.refresh()
-                        },
+                    val pullRefreshState = rememberPullToRefreshState()
+                    val shouldEnablePullToRefresh by remember {
+                        derivedStateOf {
+                            isScrolledToTop && !isScrolling
+                        }
+                    }
+                    Box(
                         modifier =
                             Modifier
                                 .height(appConfig.appListStyle.appListHeight.dp)
                                 .padding(10.dp)
-                                .constrainAs(listRef) {
+                                .pullToRefresh(
+                                    isRefreshing = isRefreshing,
+                                    state = pullRefreshState,
+                                    enabled = shouldEnablePullToRefresh,
+                                    onRefresh = { viewModel.refresh() },
+                                ).constrainAs(listRef) {
                                     bottom.linkTo(inputRef.top)
                                 },
                     ) {
@@ -216,6 +245,12 @@ fun HomeScreen() {
                                 }
                             }
                         }
+
+                        Indicator(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            isRefreshing = isRefreshing,
+                            state = pullRefreshState,
+                        )
                     }
                 }
 

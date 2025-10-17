@@ -17,8 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.outlined.Book
-import androidx.compose.material.icons.outlined.Contrast
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.InvertColors
 import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material.icons.outlined.LayersClear
 import androidx.compose.material.icons.outlined.Merge
@@ -96,6 +96,7 @@ fun SettingScreen() {
             "red" to stringResource(R.string.red_theme),
             "teal" to stringResource(R.string.teal_theme),
             "yellow" to stringResource(R.string.yellow_theme),
+            "sakura" to stringResource(R.string.sakura_theme),
         )
     val themeColorKeys = themeColorNamesMap.keys.toList()
     val scrollState = rememberScrollState()
@@ -268,25 +269,25 @@ fun SettingScreen() {
                         selectColorDialogOpened = true
                     },
                 )
-                SettingItem(
-                    imageVector = Icons.Outlined.Contrast,
-                    title = stringResource(R.string.high_contrast_enabled),
-                    trailingContent = {
-                        Switch(
-                            checked = appConfig.theme.highContrastEnabled,
-                            onCheckedChange = null,
-                        )
-                    },
-                    onClick = {
-                        viewModel.updateThemeConfig(
-                            appConfig.theme.copy(
-                                highContrastEnabled = !appConfig.theme.highContrastEnabled,
-                            ),
-                        )
-                    },
-                )
             }
-
+            SettingItem(
+                imageVector = Icons.Outlined.InvertColors,
+                title = stringResource(R.string.pure_black_dark_theme),
+                description = stringResource(R.string.pure_black_dark_theme_summary),
+                trailingContent = {
+                    Switch(
+                        checked = appConfig.theme.pureBlackDarkTheme,
+                        onCheckedChange = null,
+                    )
+                },
+                onClick = {
+                    viewModel.updateThemeConfig(
+                        appConfig.theme.copy(
+                            pureBlackDarkTheme = !appConfig.theme.pureBlackDarkTheme,
+                        ),
+                    )
+                },
+            )
             SettingItemGroup(stringResource(R.string.about))
 
             SettingItem(
@@ -409,7 +410,7 @@ fun SettingScreen() {
 fun SettingItemGroup(title: String) {
     Text(
         text = title,
-        color = colorScheme.onSurfaceVariant,
+        color = colorScheme.primary,
         fontSize = 14.sp,
         modifier =
             Modifier

@@ -23,23 +23,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build APK and AAB
-        run: ./gradlew assembleRelease;./gradlew bundleDefaultRelease
+        run: ./gradlew assembleRelease;./gradlew bundleRelease
 
-      - name: Sign APK (Default)
+      - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/build/outputs/apk/default/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-
-      - name: Sign APK (Xposed)
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: app/build/outputs/apk/xposed/release
+          releaseDirectory: app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -50,7 +39,7 @@ jobs:
       - name: Sign AAB
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/build/outputs/bundle/defaultRelease
+          releaseDirectory: app/build/outputs/bundle/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -71,7 +60,7 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: com.h3110w0r1d.t9launcher
-          releaseFiles: app/build/outputs/bundle/defaultRelease/*.aab
+          releaseFiles: app/build/outputs/bundle/release/*.aab
           track: production
           whatsNewDirectory: distribution/whatsnew
-          mappingFile: app/build/outputs/mapping/defaultRelease/mapping.txt
+          mappingFile: app/build/outputs/mapping/release/mapping.txt

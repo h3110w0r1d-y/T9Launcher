@@ -44,7 +44,7 @@ private object ConfigKeys {
     val themeColor = stringPreferencesKey("theme_color")
     val nightModeFollowSystem = booleanPreferencesKey("night_mode_follow_system")
     val nightModeEnabled = booleanPreferencesKey("night_mode_enabled")
-    val highContrastEnabled = booleanPreferencesKey("high_contrast_enabled")
+    val pureBlackDarkTheme = booleanPreferencesKey("pure_black_dark_theme")
 
     // 搜索键
     val hideSystemAppEnabled = booleanPreferencesKey("is_hide_system_app")
@@ -55,7 +55,6 @@ private object ConfigKeys {
     // 其他键
     val isShowedOnboarding = booleanPreferencesKey("is_showed_onboarding")
     val shortcutConfig = stringPreferencesKey("shortcut_config")
-    val isConfigInitialized = booleanPreferencesKey("is_config_initialized")
 }
 
 class AppConfigManager(
@@ -90,7 +89,7 @@ class AppConfigManager(
                             themeColor = preferences[ConfigKeys.themeColor] ?: "blue",
                             nightModeFollowSystem = preferences[ConfigKeys.nightModeFollowSystem] ?: true,
                             nightModeEnabled = preferences[ConfigKeys.nightModeEnabled] ?: false,
-                            highContrastEnabled = preferences[ConfigKeys.highContrastEnabled] ?: false,
+                            pureBlackDarkTheme = preferences[ConfigKeys.pureBlackDarkTheme] ?: false,
                         ),
                     search =
                         SearchConfig(
@@ -102,9 +101,9 @@ class AppConfigManager(
                     isShowedOnboarding = preferences[ConfigKeys.isShowedOnboarding] ?: false,
                     shortcutConfig =
                         Json.decodeFromString<List<String>>(
-                            preferences[ConfigKeys.shortcutConfig] ?: "[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]",
+                            preferences[ConfigKeys.shortcutConfig] ?: Json.encodeToString(List(9) { "\"\"" }),
                         ),
-                    isConfigInitialized = preferences[ConfigKeys.isConfigInitialized] ?: true,
+                    isConfigInitialized = true,
                 )
             }.stateIn(
                 scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
@@ -141,7 +140,7 @@ class AppConfigManager(
             preferences[ConfigKeys.themeColor] = config.themeColor
             preferences[ConfigKeys.nightModeFollowSystem] = config.nightModeFollowSystem
             preferences[ConfigKeys.nightModeEnabled] = config.nightModeEnabled
-            preferences[ConfigKeys.highContrastEnabled] = config.highContrastEnabled
+            preferences[ConfigKeys.pureBlackDarkTheme] = config.pureBlackDarkTheme
         }
     }
 

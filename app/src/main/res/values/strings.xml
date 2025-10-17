@@ -68,5 +68,7 @@
     <string name="red_theme">Red</string>
     <string name="teal_theme">Teal</string>
     <string name="yellow_theme">Yellow</string>
-    <string name="high_contrast_enabled">High Contrast</string>
+    <string name="sakura_theme">Sakura</string>
+    <string name="pure_black_dark_theme">Black dark theme</string>
+    <string name="pure_black_dark_theme_summary">Use the pure black theme if dark theme is enabled</string>
 </resources>

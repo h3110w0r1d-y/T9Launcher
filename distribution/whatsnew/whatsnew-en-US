@@ -1,1 +1,4 @@
-Fixed an issue where the app would crash when processing specific special characters, such as emojis.
+1. Added Pure Black Theme for Dark Mode
+2. Optimized Theme Color
+3. Removed High Contrast Theme
+4. Optimized Pull-to-Refresh Logic

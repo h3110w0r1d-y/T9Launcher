@@ -26,7 +26,8 @@
 
    - [Latest Release](https://github.com/h3110w0r1d-y/T9Launcher/releases/latest)
 
-   > 关于 Xposed 版本：借助Xposed实现应用保活，保证每次使用时不用等待加载应用列表。Play商店版本无Xposed功能。
+   > 关于 Xposed 版本：~~借助Xposed实现应用保活，保证每次使用时不用等待加载应用列表。Play商店版本无Xposed功能。~~
+   > 已经把保活功能单独做成了Xposed模块：https://github.com/h3110w0r1d-y/phoenix
 
 ## 主要功能
 

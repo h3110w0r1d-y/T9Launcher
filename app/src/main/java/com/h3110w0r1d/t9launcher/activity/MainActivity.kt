@@ -23,7 +23,7 @@ import com.h3110w0r1d.t9launcher.model.AppViewModel
 import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
 import com.h3110w0r1d.t9launcher.ui.AppNavigation
 import com.h3110w0r1d.t9launcher.ui.screen.OnboardingScreen
-import com.h3110w0r1d.t9launcher.ui.theme.T9LauncherTheme
+import com.h3110w0r1d.t9launcher.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -52,10 +52,10 @@ class MainActivity : ComponentActivity() {
                         Color.Transparent.toArgb(),
                     ) { isDarkMode },
             )
-            T9LauncherTheme(
+            AppTheme(
                 darkTheme = isDarkMode,
                 dynamicColor = appConfig.theme.isUseSystemColor,
-                highContrast = appConfig.theme.highContrastEnabled,
+                pureBlackDarkTheme = appConfig.theme.pureBlackDarkTheme,
                 customColorScheme = appConfig.theme.themeColor,
             ) {
                 CompositionLocalProvider(

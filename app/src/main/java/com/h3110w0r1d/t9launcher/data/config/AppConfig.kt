@@ -33,7 +33,7 @@ data class ThemeConfig(
     val themeColor: String = "blue",
     val nightModeFollowSystem: Boolean = true,
     val nightModeEnabled: Boolean = false,
-    val highContrastEnabled: Boolean = false,
+    val pureBlackDarkTheme: Boolean = false,
 )
 
 /**

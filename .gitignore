@@ -2,6 +2,7 @@
 .gradle
 /local.properties
 /.idea
+/.kotlin
 .DS_Store
 /build
 /captures
@@ -9,4 +10,3 @@
 .cxx
 local.properties
 /keystore.properties
-/.idea/
