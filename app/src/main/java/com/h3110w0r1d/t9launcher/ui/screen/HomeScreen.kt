@@ -108,7 +108,7 @@ fun HomeScreen() {
         onDispose { }
     }
 
-    BackHandler(enabled = true) {
+    BackHandler(true) {
         if (searchText.isNotEmpty()) {
             searchText = ""
             viewModel.searchApp("")

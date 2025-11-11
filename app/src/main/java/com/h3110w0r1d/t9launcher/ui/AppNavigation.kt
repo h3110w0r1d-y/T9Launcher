@@ -1,11 +1,15 @@
 package com.h3110w0r1d.t9launcher.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring.StiffnessMediumLow
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,27 +32,38 @@ fun AppNavigation() {
     LaunchedEffect(Unit) {
         viewModel.loadAppList()
     }
+
+    val animationSpec =
+        tween<IntOffset>(
+            durationMillis = StiffnessMediumLow.toInt(),
+            easing = FastOutSlowInEasing,
+        )
+
     CompositionLocalProvider(LocalNavController provides navController) {
         NavHost(
             navController = navController,
             startDestination = "home",
             enterTransition = {
                 slideInHorizontally(
+                    animationSpec = animationSpec,
                     initialOffsetX = { fullWidth -> fullWidth },
                 )
             },
             exitTransition = {
                 slideOutHorizontally(
-                    targetOffsetX = { fullWidth -> -fullWidth },
+                    animationSpec = animationSpec,
+                    targetOffsetX = { fullWidth -> -fullWidth / 2 },
                 )
             },
             popEnterTransition = {
                 slideInHorizontally(
-                    initialOffsetX = { fullWidth -> -fullWidth },
+                    animationSpec = animationSpec,
+                    initialOffsetX = { fullWidth -> -fullWidth / 2 },
                 )
             },
             popExitTransition = {
                 slideOutHorizontally(
+                    animationSpec = animationSpec,
                     targetOffsetX = { fullWidth -> fullWidth },
                 )
             },

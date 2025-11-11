@@ -59,14 +59,10 @@ fun SelectShortcutScreen(index: Int) {
         }
     }
 
-    BackHandler(enabled = true) {
-        if (isSearching) {
-            isSearching = false
-            searchText = ""
-            viewModel.searchHideApp("")
-        } else {
-            navController.popBackStack()
-        }
+    BackHandler(enabled = isSearching) {
+        isSearching = false
+        searchText = ""
+        viewModel.searchHideApp("")
     }
     Scaffold(
         topBar = {
