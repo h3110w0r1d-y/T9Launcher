@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.res.Configuration
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -50,6 +49,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.h3110w0r1d.t9launcher.R
 import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
 import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
@@ -74,6 +76,11 @@ fun HomeScreen() {
     val context = LocalContext.current
     val lazyGridState = rememberLazyGridState()
     val lastToastTime = remember { mutableLongStateOf(0L) }
+
+    fun clearSearch() {
+        searchText = ""
+        viewModel.searchApp("")
+    }
 
     // 检测是否正在滚动
     var isScrolling by remember { mutableStateOf(false) }
@@ -103,17 +110,24 @@ fun HomeScreen() {
         }
     }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(context) {
         viewModel.searchApp(searchText)
-        onDispose { }
-    }
-
-    BackHandler(true) {
-        if (searchText.isNotEmpty()) {
-            searchText = ""
-            viewModel.searchApp("")
+        val lifecycleOwner = context as? LifecycleOwner
+        if (lifecycleOwner == null) {
+            onDispose { }
+        } else {
+            val observer =
+                LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_STOP) {
+                        clearSearch()
+                        (context as? Activity)?.moveTaskToBack(true)
+                    }
+                }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
-        (context as? Activity)?.moveTaskToBack(true)
     }
 
     Box(
@@ -123,9 +137,6 @@ fun HomeScreen() {
                 .clickable(
                     enabled = true,
                     onClick = {
-                        viewModel.showHideApp()
-                        searchText = ""
-                        viewModel.searchApp("")
                         (context as? Activity)?.moveTaskToBack(true)
                     },
                 ).onKeyEvent { keyEvent: KeyEvent ->
@@ -147,6 +158,7 @@ fun HomeScreen() {
                             navController.navigate("setting")
                             return@onKeyEvent true
                         }
+
                         Key.Pound -> {
                             if (searchText.isNotEmpty()) {
                                 searchText = searchText.dropLast(1)
@@ -154,7 +166,10 @@ fun HomeScreen() {
                             viewModel.searchApp(searchText)
                             return@onKeyEvent true
                         }
-                        else -> false
+
+                        else -> {
+                            false
+                        }
                     }
                 },
         contentAlignment = Alignment.BottomCenter,
@@ -232,9 +247,6 @@ fun HomeScreen() {
                                         onClick = {
                                             if (apps[i].start(context)) {
                                                 viewModel.updateStartCount(apps[i])
-                                                searchText = ""
-                                                viewModel.searchApp("")
-                                                (context as? Activity)?.moveTaskToBack(true)
                                             }
                                         },
                                         onLongPress = {
@@ -302,20 +314,18 @@ fun HomeScreen() {
                     onLongClick = { text ->
                         when (text) {
                             "delete" -> {
-                                searchText = ""
-                                viewModel.searchApp("")
+                                clearSearch()
                             }
+
                             "setting" -> {
                                 navController.navigate("setting")
                             }
+
                             else -> {
                                 if (text.toInt() > 0) {
                                     val appInfo = appMap[appConfig.shortcutConfig[text.toInt() - 1]]
                                     if (appInfo != null) {
                                         if (appInfo.start(context)) {
-                                            searchText = ""
-                                            viewModel.searchApp("")
-                                            (context as? Activity)?.moveTaskToBack(true)
                                             return@T9Keyboard
                                         }
                                     }
@@ -325,8 +335,7 @@ fun HomeScreen() {
                         }
                     },
                     onCancel = {
-                        searchText = ""
-                        viewModel.searchApp("")
+                        clearSearch()
                     },
                     appMap = appMap,
                 )
