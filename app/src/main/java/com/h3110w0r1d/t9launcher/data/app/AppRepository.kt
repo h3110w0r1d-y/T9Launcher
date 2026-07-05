@@ -30,6 +30,8 @@ class AppRepository(
     private val iconManager: IconManager,
 ) {
     private val table = "T_AppInfo"
+    private val startRecordTable = "T_AppStartRecord"
+    private val recentStartWindowMillis = 7L * 24 * 60 * 60 * 1000
 
     private val _appList = MutableStateFlow<List<AppInfo>>(listOf())
     val appList: StateFlow<List<AppInfo>> = _appList.asStateFlow()
@@ -45,29 +47,62 @@ class AppRepository(
      */
     private fun sortAppList(appList: List<AppInfo>): List<AppInfo> {
         val sortedList = appList.toMutableList()
-        sortedList.sortWith(compareBy(collator) { it.appName })
-        sortedList.sortWith(AppInfo.SortByStartCount())
+        sortedList.sortWith(
+            compareByDescending<AppInfo> { it.startCount }
+                .thenBy(collator) { it.appName },
+        )
         return sortedList
+    }
+
+    private fun recentStartCutoff(): Long = System.currentTimeMillis() - recentStartWindowMillis
+
+    private fun pruneOldStartRecords() {
+        val db = dbHelper.writableDatabase
+        db.delete(
+            startRecordTable,
+            "startedAt < ?",
+            arrayOf(recentStartCutoff().toString()),
+        )
     }
 
     private fun queryAllApps(): Cursor {
         val db = dbHelper.readableDatabase
 
-        return db.query(
-            table,
-            arrayOf(
-                "className",
-                "packageName",
-                "appName",
-                "startCount",
-                "isSystemApp",
-                "searchData",
-            ),
-            null,
-            null,
-            null,
-            null,
-            "startCount DESC",
+        return db.rawQuery(
+            """
+            SELECT
+                app.className,
+                app.packageName,
+                app.appName,
+                COALESCE(recent.recentStartCount, 0) AS recentStartCount,
+                app.isSystemApp,
+                app.searchData
+            FROM $table app
+            LEFT JOIN (
+                SELECT className, packageName, COUNT(*) AS recentStartCount
+                FROM $startRecordTable
+                WHERE startedAt >= ?
+                GROUP BY className, packageName
+            ) recent
+                ON app.className = recent.className
+                AND app.packageName = recent.packageName
+            ORDER BY recentStartCount DESC
+            """.trimIndent(),
+            arrayOf(recentStartCutoff().toString()),
+        )
+    }
+
+    private fun queryRecentStartCounts(): Cursor {
+        val db = dbHelper.readableDatabase
+
+        return db.rawQuery(
+            """
+            SELECT className, packageName, COUNT(*) AS recentStartCount
+            FROM $startRecordTable
+            WHERE startedAt >= ?
+            GROUP BY className, packageName
+            """.trimIndent(),
+            arrayOf(recentStartCutoff().toString()),
         )
     }
 
@@ -78,6 +113,11 @@ class AppRepository(
         val db = dbHelper.writableDatabase
         db.delete(
             table,
+            "packageName = ? AND className = ?",
+            arrayOf(packageName, className),
+        )
+        db.delete(
+            startRecordTable,
             "packageName = ? AND className = ?",
             arrayOf(packageName, className),
         )
@@ -123,7 +163,7 @@ class AppRepository(
      * 处理单个resolveInfo的通用函数
      * @param resolveInfo 要处理的resolveInfo
      * @param packageManager PackageManager实例
-     * @param startCounts 启动次数映射，用于获取现有应用的启动次数
+     * @param startCounts 启动次数映射，用于获取现有应用近7天的启动次数
      * @param updateIcon 是否更新图标
      * @param defaultStartCount 默认启动次数（用于新应用或更新应用）
      * @param skipExisting 是否跳过已存在的应用（用于addApp场景）
@@ -211,6 +251,7 @@ class AppRepository(
         }
 
         return withContext(Dispatchers.IO) {
+            pruneOldStartRecords()
             iconManager.loadAllIcons()
             val result = mutableListOf<AppInfo>()
             val resultMap = HashMap<String, AppInfo>()
@@ -260,8 +301,33 @@ class AppRepository(
         }
     }
 
+    suspend fun refreshRecentStartCounts() =
+        withContext(Dispatchers.IO) {
+            val currentAppList = _appList.value
+            if (currentAppList.isEmpty()) {
+                return@withContext
+            }
+
+            pruneOldStartRecords()
+            val recentStartCounts = HashMap<String, Int>()
+            val cursor = queryRecentStartCounts()
+            while (cursor.moveToNext()) {
+                val className = cursor.getString(0)
+                val packageName = cursor.getString(1)
+                val componentId = "$packageName/$className"
+                recentStartCounts[componentId] = cursor.getInt(2)
+            }
+            cursor.close()
+
+            currentAppList.forEach { app ->
+                app.startCount = recentStartCounts[app.componentId()] ?: 0
+            }
+            _appList.value = sortAppList(currentAppList)
+        }
+
     suspend fun updateAppInfo(updateIcon: Boolean = false) =
         withContext(Dispatchers.IO) {
+            pruneOldStartRecords()
             val componentIds = mutableListOf<String>()
             val packageManager = context.packageManager
             val resolveInfoList =
@@ -332,17 +398,18 @@ class AppRepository(
     fun updateStartCount(app: AppInfo) {
         val packageName = app.packageName
         val className = app.className
-        val startCount = app.startCount
         val db = dbHelper.writableDatabase
         try {
             db.execSQL(
-                "UPDATE $table SET startCount = ? WHERE packageName = ? AND className = ?",
+                "INSERT INTO $startRecordTable (packageName, className, startedAt) VALUES (?, ?, ?)",
                 arrayOf<Any>(
-                    startCount,
                     packageName,
                     className,
+                    System.currentTimeMillis(),
                 ),
             )
+            app.startCount += 1
+            _appList.value = sortAppList(_appList.value)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -467,6 +534,12 @@ class AppRepository(
 
                 // 先移除旧的应用信息
                 val appsToRemove = currentAppList.filter { it.packageName == packageName }
+                val startCounts =
+                    HashMap<String, Int>().apply {
+                        appsToRemove.forEach { app ->
+                            put(app.componentId(), app.startCount)
+                        }
+                    }
                 currentAppList.removeAll(appsToRemove)
                 for (app in appsToRemove) {
                     currentAppMap.remove("${app.packageName}/${app.className}")
@@ -478,6 +551,7 @@ class AppRepository(
                         processResolveInfo(
                             resolveInfo = resolveInfo,
                             packageManager = packageManager,
+                            startCounts = startCounts,
                             updateIcon = true,
                             defaultStartCount = 0,
                         )

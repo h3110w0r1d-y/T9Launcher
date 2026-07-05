@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Info
@@ -55,6 +56,7 @@ import androidx.core.net.toUri
 import com.h3110w0r1d.t9launcher.BuildConfig
 import com.h3110w0r1d.t9launcher.R
 import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
+import com.h3110w0r1d.t9launcher.data.config.SearchSortPriority
 import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
 import com.h3110w0r1d.t9launcher.ui.LocalNavController
 import com.h3110w0r1d.t9launcher.ui.theme.getPrimaryColorMap
@@ -149,6 +151,28 @@ fun SettingScreen() {
                 title = stringResource(R.string.shortcut_setting),
                 onClick = {
                     navController.navigate("shortcut")
+                },
+            )
+            SettingItem(
+                imageVector = Icons.AutoMirrored.Outlined.Sort,
+                title = stringResource(R.string.search_sort_priority),
+                description =
+                    if (appConfig.search.sortPriority == SearchSortPriority.MATCH_RATE) {
+                        stringResource(R.string.search_sort_priority_match_rate)
+                    } else {
+                        stringResource(R.string.search_sort_priority_recent_start_count)
+                    },
+                onClick = {
+                    viewModel.updateSearchConfig(
+                        appConfig.search.copy(
+                            sortPriority =
+                                if (appConfig.search.sortPriority == SearchSortPriority.MATCH_RATE) {
+                                    SearchSortPriority.RECENT_START_COUNT
+                                } else {
+                                    SearchSortPriority.MATCH_RATE
+                                },
+                        ),
+                    )
                 },
             )
             SettingItem(

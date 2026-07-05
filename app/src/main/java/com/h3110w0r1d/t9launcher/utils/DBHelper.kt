@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper
 
 class DBHelper(
     context: Context,
-) : SQLiteOpenHelper(context, "AppList4.db", null, 1) {
+) : SQLiteOpenHelper(context, "AppList4.db", null, 2) {
     private val tAppInfo =
         "create table T_AppInfo(" +
             "className VARCHAR(256) NOT NULL," +
@@ -17,13 +17,31 @@ class DBHelper(
             "searchData TEXT NOT NULL," +
             "UNIQUE(className, packageName))"
 
+    private val tAppStartRecord =
+        "create table T_AppStartRecord(" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "className VARCHAR(256) NOT NULL," +
+            "packageName VARCHAR(256) NOT NULL," +
+            "startedAt INTEGER NOT NULL)"
+
+    private val idxAppStartRecordApp =
+        "create index IF NOT EXISTS idx_app_start_record_app " +
+            "ON T_AppStartRecord(packageName, className, startedAt)"
+
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(tAppInfo)
+        db.execSQL(tAppStartRecord)
+        db.execSQL(idxAppStartRecordApp)
     }
 
     override fun onUpgrade(
-        db: SQLiteDatabase?,
-        i: Int,
-        i1: Int,
-    ) {}
+        db: SQLiteDatabase,
+        oldVersion: Int,
+        newVersion: Int,
+    ) {
+        if (oldVersion < 2) {
+            db.execSQL(tAppStartRecord)
+            db.execSQL(idxAppStartRecordApp)
+        }
+    }
 }

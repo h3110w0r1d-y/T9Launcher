@@ -45,6 +45,9 @@
     <string name="select_shortcut_app">Choose a Shortcut App</string>
     <string name="not_set">Not set</string>
     <string name="english_fuzzy_match">Fuzzy Match Word</string>
+    <string name="search_sort_priority">Search Sort Priority</string>
+    <string name="search_sort_priority_match_rate">Match rate first</string>
+    <string name="search_sort_priority_recent_start_count">Recent 7-day launches first</string>
     <string name="is_highlight_search_result">Highlight Search Result</string>
     <string name="night_mode_follow_system">Follow System\'s Dark Theme</string>
     <string name="night_mode_enabled">Enable Dark Mode</string>

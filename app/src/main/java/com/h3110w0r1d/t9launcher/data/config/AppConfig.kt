@@ -39,11 +39,17 @@ data class ThemeConfig(
 /**
  * 搜索配置
  */
+enum class SearchSortPriority {
+    MATCH_RATE,
+    RECENT_START_COUNT,
+}
+
 data class SearchConfig(
     val hideSystemAppEnabled: Boolean = false,
     val hiddenComponentIds: Set<String> = emptySet(),
     val englishFuzzyMatchEnabled: Boolean = false,
     val highlightSearchResultEnabled: Boolean = false,
+    val sortPriority: SearchSortPriority = SearchSortPriority.RECENT_START_COUNT,
 )
 
 /**

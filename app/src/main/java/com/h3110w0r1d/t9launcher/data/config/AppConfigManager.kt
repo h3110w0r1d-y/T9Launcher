@@ -51,6 +51,7 @@ private object ConfigKeys {
     val hiddenComponentIds = stringSetPreferencesKey("hidden_class_names")
     val englishFuzzyMatchEnabled = booleanPreferencesKey("english_fuzzy_match")
     val highlightSearchResultEnabled = booleanPreferencesKey("is_highlight_search_result")
+    val searchSortPriority = stringPreferencesKey("search_sort_priority")
 
     // 其他键
     val isShowedOnboarding = booleanPreferencesKey("is_showed_onboarding")
@@ -97,6 +98,13 @@ class AppConfigManager(
                             hiddenComponentIds = preferences[ConfigKeys.hiddenComponentIds] ?: emptySet(),
                             englishFuzzyMatchEnabled = preferences[ConfigKeys.englishFuzzyMatchEnabled] ?: false,
                             highlightSearchResultEnabled = preferences[ConfigKeys.highlightSearchResultEnabled] ?: false,
+                            sortPriority =
+                                runCatching {
+                                    SearchSortPriority.valueOf(
+                                        preferences[ConfigKeys.searchSortPriority]
+                                            ?: SearchSortPriority.MATCH_RATE.name,
+                                    )
+                                }.getOrDefault(SearchSortPriority.RECENT_START_COUNT),
                         ),
                     isShowedOnboarding = preferences[ConfigKeys.isShowedOnboarding] ?: false,
                     shortcutConfig =
@@ -150,6 +158,7 @@ class AppConfigManager(
             preferences[ConfigKeys.hiddenComponentIds] = config.hiddenComponentIds
             preferences[ConfigKeys.englishFuzzyMatchEnabled] = config.englishFuzzyMatchEnabled
             preferences[ConfigKeys.highlightSearchResultEnabled] = config.highlightSearchResultEnabled
+            preferences[ConfigKeys.searchSortPriority] = config.sortPriority.name
         }
     }
 

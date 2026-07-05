@@ -4,13 +4,13 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.h3110w0r1d.t9launcher.data.app.AppInfo
-import com.h3110w0r1d.t9launcher.data.app.AppInfo.SortByMatchRate
 import com.h3110w0r1d.t9launcher.data.app.AppRepository
 import com.h3110w0r1d.t9launcher.data.config.AppConfig
 import com.h3110w0r1d.t9launcher.data.config.AppConfigManager
 import com.h3110w0r1d.t9launcher.data.config.AppListStyleConfig
 import com.h3110w0r1d.t9launcher.data.config.KeyboardStyleConfig
 import com.h3110w0r1d.t9launcher.data.config.SearchConfig
+import com.h3110w0r1d.t9launcher.data.config.SearchSortPriority
 import com.h3110w0r1d.t9launcher.data.config.ThemeConfig
 import com.h3110w0r1d.t9launcher.utils.PinyinUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.Collator
 import java.util.Locale
 import javax.inject.Inject
 
@@ -46,6 +47,8 @@ class AppViewModel
 
         private val _hideAppList: MutableStateFlow<List<AppInfo>> = MutableStateFlow(listOf())
         val hideAppList: StateFlow<List<AppInfo>> = _hideAppList
+
+        private val collator: Collator = Collator.getInstance(Locale.CHINA)
 
         fun switchAppHide(app: AppInfo) {
             val config = appConfig.value
@@ -115,6 +118,7 @@ class AppViewModel
         fun updateSearchConfig(config: SearchConfig) {
             viewModelScope.launch {
                 configManager.updateSearchConfig(config)
+                searchApp(null, appConfig.value.copy(search = config))
             }
         }
 
@@ -170,10 +174,16 @@ class AppViewModel
             }
         }
 
-        fun showDefaultAppList() {
+        fun refreshRecentStartCounts() {
+            viewModelScope.launch {
+                appRepository.refreshRecentStartCounts()
+                searchApp(null)
+            }
+        }
+
+        fun showDefaultAppList(config: AppConfig = appConfig.value) {
             val appInfo = mutableListOf<AppInfo>()
             val currentAppList = appRepository.appList.value
-            val config = appConfig.value
 
             for (app in currentAppList) {
                 if (config.search.hideSystemAppEnabled && app.isSystemApp) {
@@ -188,19 +198,23 @@ class AppViewModel
             _searchResultAppList.value = appInfo
         }
 
-        fun searchApp(key: String?): Boolean {
+        fun searchApp(key: String?): Boolean = searchApp(key, appConfig.value)
+
+        private fun searchApp(
+            key: String?,
+            config: AppConfig,
+        ): Boolean {
             var key = key
             if (key == null) {
                 key = searchText
             }
             if (key.isEmpty()) {
-                showDefaultAppList()
+                showDefaultAppList(config)
                 searchText = key
                 return true
             }
             val appInfo = mutableListOf<AppInfo>()
             val currentAppList = appRepository.appList.value
-            val config = appConfig.value
 
             for (app in currentAppList) {
                 if (config.search.hideSystemAppEnabled && app.isSystemApp) {
@@ -218,11 +232,29 @@ class AppViewModel
             if (appInfo.isEmpty()) {
                 return false
             }
-            appInfo.sortWith(SortByMatchRate())
+            appInfo.sortWith(searchResultComparator(config.search.sortPriority))
             _searchResultAppList.value = appInfo
             searchText = key
             return true
         }
+
+        private fun searchResultComparator(sortPriority: SearchSortPriority): Comparator<AppInfo> =
+            Comparator { o1, o2 ->
+                val matchCompare = o2.matchRate.compareTo(o1.matchRate)
+                val recentStartCompare = o2.startCount.compareTo(o1.startCount)
+                val nameCompare = collator.compare(o1.appName, o2.appName)
+
+                when (sortPriority) {
+                    SearchSortPriority.MATCH_RATE ->
+                        matchCompare.takeIf { it != 0 }
+                            ?: recentStartCompare.takeIf { it != 0 }
+                            ?: nameCompare
+                    SearchSortPriority.RECENT_START_COUNT ->
+                        recentStartCompare.takeIf { it != 0 }
+                            ?: matchCompare.takeIf { it != 0 }
+                            ?: nameCompare
+                }
+            }
 
         fun setShowedOnboarding() {
             viewModelScope.launch {
@@ -263,7 +295,6 @@ class AppViewModel
         }
 
         fun updateStartCount(app: AppInfo) {
-            app.startCount += 1
             appRepository.updateStartCount(app)
         }
 

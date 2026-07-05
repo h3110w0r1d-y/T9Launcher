@@ -46,6 +46,9 @@
     <string name="select_shortcut_app">选择快捷启动应用</string>
     <string name="not_set">未设置</string>
     <string name="english_fuzzy_match">英文模糊匹配</string>
+    <string name="search_sort_priority">搜索排序优先级</string>
+    <string name="search_sort_priority_match_rate">匹配度优先</string>
+    <string name="search_sort_priority_recent_start_count">近 7 天打开次数优先</string>
     <string name="is_highlight_search_result">高亮搜索结果</string>
     <string name="night_mode_follow_system">深色模式跟随系统</string>
     <string name="night_mode_enabled">深色模式</string>
