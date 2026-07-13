@@ -36,25 +36,6 @@ class AppInfo(
         )
     val annotatedName: StateFlow<AnnotatedString> = _annotatedName
 
-    class SortByMatchRate : Comparator<AppInfo> {
-        override fun compare(
-            p0: AppInfo,
-            p1: AppInfo,
-        ): Int {
-            if (p0.matchRate == p1.matchRate) {
-                return 0
-            }
-            return if (p0.matchRate > p1.matchRate) -1 else 1
-        }
-    }
-
-    class SortByStartCount : Comparator<AppInfo> {
-        override fun compare(
-            p0: AppInfo,
-            p1: AppInfo,
-        ): Int = p1.startCount - p0.startCount
-    }
-
     fun setMatchRange(
         start: Int,
         end: Int,
@@ -74,7 +55,7 @@ class AppInfo(
                             style =
                                 SpanStyle(
                                     color = highlightColor,
-                                    fontWeight = FontWeight.Companion.SemiBold,
+                                    fontWeight = FontWeight.SemiBold,
                                 ),
                         ) {
                             append(searchData[i].last())
@@ -103,9 +84,12 @@ class AppInfo(
     }
 
     fun detail(context: Context) {
-        val intent = Intent()
-        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-        intent.data = "package:$packageName".toUri()
+        val intent =
+            Intent().apply {
+                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                data = "package:$packageName".toUri()
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
         context.startActivity(intent)
     }
 

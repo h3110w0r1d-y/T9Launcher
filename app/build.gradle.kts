@@ -25,8 +25,8 @@ android {
         applicationId = "com.h3110w0r1d.t9launcher"
         minSdk = 26
         targetSdk = 37
-        versionCode = 37
-        versionName = "1.7.12"
+        versionCode = 38
+        versionName = "1.7.13"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -114,8 +114,8 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-text")
 
-    implementation("com.google.dagger:hilt-android:2.60")
-    ksp("com.google.dagger:hilt-compiler:2.60")
+    implementation("com.google.dagger:hilt-android:2.60.1")
+    ksp("com.google.dagger:hilt-compiler:2.60.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     compileOnly("com.google.errorprone:error_prone_annotations:2.50.0")
 }
