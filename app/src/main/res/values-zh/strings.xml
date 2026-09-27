@@ -75,4 +75,14 @@
     <string name="sakura_theme">樱花色</string>
     <string name="pure_black_dark_theme">纯黑主题</string>
     <string name="pure_black_dark_theme_summary">当深色主题启用时使用纯黑主题</string>
+    <string name="launcher_background">桌面背景</string>
+    <string name="show_wallpaper">显示桌面壁纸</string>
+    <string name="solid_background">纯色背景</string>
+    <string name="background_color">背景颜色</string>
+    <string name="background_adaptive">自适应壁纸主题色</string>
+    <string name="background_adaptive_reset">恢复自适应颜色</string>
+    <string name="background_palette">色盘</string>
+    <string name="color_hue">色相</string>
+    <string name="color_saturation">饱和度</string>
+    <string name="color_brightness">明度</string>
 </resources>

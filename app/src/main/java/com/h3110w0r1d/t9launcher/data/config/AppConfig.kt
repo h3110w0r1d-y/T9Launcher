@@ -34,6 +34,8 @@ data class ThemeConfig(
     val nightModeFollowSystem: Boolean = true,
     val nightModeEnabled: Boolean = false,
     val pureBlackDarkTheme: Boolean = false,
+    val showWallpaper: Boolean = true,
+    val backgroundColor: Int? = null,
 )
 
 /**

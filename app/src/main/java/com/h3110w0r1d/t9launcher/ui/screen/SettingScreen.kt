@@ -45,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -59,7 +60,9 @@ import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
 import com.h3110w0r1d.t9launcher.data.config.SearchSortPriority
 import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
 import com.h3110w0r1d.t9launcher.ui.LocalNavController
+import com.h3110w0r1d.t9launcher.ui.theme.adaptiveBackgroundColor
 import com.h3110w0r1d.t9launcher.ui.theme.getPrimaryColorMap
+import com.h3110w0r1d.t9launcher.ui.widget.BackgroundColorDialog
 
 @SuppressLint("ShowToast")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,6 +79,8 @@ fun SettingScreen() {
         } else {
             appConfig.theme.nightModeEnabled
         }
+    val adaptiveBackground = adaptiveBackgroundColor()
+    var backgroundColorDialogOpened by remember { mutableStateOf(false) }
     var selectColorDialogOpened by remember { mutableStateOf(false) }
 
     val themeColorNamesMap =
@@ -195,6 +200,22 @@ fun SettingScreen() {
             )
 
             SettingItemGroup(stringResource(R.string.appearance))
+            SettingItem(
+                imageVector = Icons.Outlined.Palette,
+                title = stringResource(R.string.launcher_background),
+                description = stringResource(if (appConfig.theme.showWallpaper) R.string.show_wallpaper else R.string.solid_background),
+                trailingContent = { Switch(checked = appConfig.theme.showWallpaper, onCheckedChange = null) },
+                onClick = { viewModel.updateThemeConfig(appConfig.theme.copy(showWallpaper = !appConfig.theme.showWallpaper)) },
+            )
+            if (!appConfig.theme.showWallpaper) {
+                SettingItem(
+                    imageVector = Icons.Outlined.Palette,
+                    title = stringResource(R.string.background_color),
+                    description = appConfig.theme.backgroundColor?.let { "#%06X".format(it and 0xFFFFFF) }
+                        ?: stringResource(R.string.background_adaptive),
+                    onClick = { backgroundColorDialogOpened = true },
+                )
+            }
 
             SettingItem(
                 imageVector = ImageVector.vectorResource(R.drawable.app_registration_24px),
@@ -374,6 +395,16 @@ fun SettingScreen() {
                 },
             )
         }
+    }
+    if (backgroundColorDialogOpened) {
+        BackgroundColorDialog(
+            initialColor = appConfig.theme.backgroundColor?.let { Color(it) } ?: adaptiveBackground,
+            onDismiss = { backgroundColorDialogOpened = false },
+            onConfirm = { color ->
+                viewModel.updateThemeConfig(appConfig.theme.copy(backgroundColor = color))
+                backgroundColorDialogOpened = false
+            },
+        )
     }
     if (selectColorDialogOpened) {
         Dialog(onDismissRequest = {

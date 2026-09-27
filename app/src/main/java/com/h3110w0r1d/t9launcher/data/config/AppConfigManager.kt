@@ -46,6 +46,9 @@ private object ConfigKeys {
     val nightModeEnabled = booleanPreferencesKey("night_mode_enabled")
     val pureBlackDarkTheme = booleanPreferencesKey("pure_black_dark_theme")
 
+    val showWallpaper = booleanPreferencesKey("show_wallpaper")
+    val backgroundColor = intPreferencesKey("background_color")
+
     // 搜索键
     val hideSystemAppEnabled = booleanPreferencesKey("is_hide_system_app")
     val hiddenComponentIds = stringSetPreferencesKey("hidden_class_names")
@@ -91,6 +94,8 @@ class AppConfigManager(
                             nightModeFollowSystem = preferences[ConfigKeys.nightModeFollowSystem] ?: true,
                             nightModeEnabled = preferences[ConfigKeys.nightModeEnabled] ?: false,
                             pureBlackDarkTheme = preferences[ConfigKeys.pureBlackDarkTheme] ?: false,
+                            showWallpaper = preferences[ConfigKeys.showWallpaper] ?: true,
+                            backgroundColor = preferences[ConfigKeys.backgroundColor],
                         ),
                     search =
                         SearchConfig(
@@ -149,6 +154,9 @@ class AppConfigManager(
             preferences[ConfigKeys.nightModeFollowSystem] = config.nightModeFollowSystem
             preferences[ConfigKeys.nightModeEnabled] = config.nightModeEnabled
             preferences[ConfigKeys.pureBlackDarkTheme] = config.pureBlackDarkTheme
+            preferences[ConfigKeys.showWallpaper] = config.showWallpaper
+            config.backgroundColor?.let { preferences[ConfigKeys.backgroundColor] = it }
+                ?: preferences.remove(ConfigKeys.backgroundColor)
         }
     }
 

@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -38,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.key
@@ -49,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -56,6 +60,7 @@ import com.h3110w0r1d.t9launcher.R
 import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
 import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
 import com.h3110w0r1d.t9launcher.ui.LocalNavController
+import com.h3110w0r1d.t9launcher.ui.theme.adaptiveBackgroundColor
 import com.h3110w0r1d.t9launcher.ui.widget.AppDropdownMenu
 import com.h3110w0r1d.t9launcher.ui.widget.AppItem
 import com.h3110w0r1d.t9launcher.ui.widget.T9Keyboard
@@ -69,11 +74,30 @@ fun HomeScreen() {
     val apps by viewModel.searchResultAppList.collectAsState()
     val appMap by viewModel.appMap.collectAsState()
     val appConfig = LocalAppConfig.current
+    val background =
+        if (appConfig.theme.showWallpaper) {
+            Color.Transparent
+        } else {
+            appConfig.theme.backgroundColor?.let { Color(it) } ?: adaptiveBackgroundColor()
+        }
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
     var searchText by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val darkTheme = if (appConfig.theme.nightModeFollowSystem) isSystemInDarkTheme() else appConfig.theme.nightModeEnabled
+    val window = (context as? Activity)?.window
+    SideEffect {
+        window?.let {
+            WindowCompat.getInsetsController(it, it.decorView).isAppearanceLightStatusBars =
+                if (appConfig.theme.showWallpaper) !darkTheme else background.luminance() > 0.5f
+        }
+    }
+    DisposableEffect(window, darkTheme) {
+        onDispose {
+            window?.let { WindowCompat.getInsetsController(it, it.decorView).isAppearanceLightStatusBars = !darkTheme }
+        }
+    }
     val lazyGridState = rememberLazyGridState()
     val lastToastTime = remember { mutableLongStateOf(0L) }
 
@@ -134,6 +158,7 @@ fun HomeScreen() {
         modifier =
             Modifier
                 .fillMaxSize()
+                .background(background)
                 .clickable(
                     enabled = true,
                     onClick = {

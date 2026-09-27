@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -13,6 +14,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
@@ -40,6 +42,13 @@ class MainActivity : ComponentActivity() {
             // 只有在配置初始化完成后才显示主界面，防止配置未加载完成时闪现引导界面
             if (!appConfig.isConfigInitialized) return@setContent
 
+            SideEffect {
+                if (appConfig.theme.showWallpaper) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+                } else {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+                }
+            }
             val isDarkMode =
                 if (appConfig.theme.nightModeFollowSystem) {
                     isSystemInDarkTheme()
