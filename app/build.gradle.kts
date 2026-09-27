@@ -25,8 +25,8 @@ android {
         applicationId = "com.h3110w0r1d.t9launcher"
         minSdk = 26
         targetSdk = 37
-        versionCode = 38
-        versionName = "1.7.13"
+        versionCode = 1008000
+        versionName = "1.8.0"
         vectorDrawables {
             useSupportLibrary = true
         }
