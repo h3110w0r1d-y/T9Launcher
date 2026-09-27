@@ -84,4 +84,7 @@
     <string name="color_hue">Hue</string>
     <string name="color_saturation">Saturation</string>
     <string name="color_brightness">Brightness</string>
+    <string name="full_screen">Full screen</string>
+    <string name="full_screen_summary">Fill the screen and automatically size the app list above the keyboard and search field</string>
+    <string name="app_list_height_auto">Automatically adjusted in full screen; manual height is used only in bottom-aligned mode.</string>
 </resources>

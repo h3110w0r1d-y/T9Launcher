@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.outlined.Fullscreen
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.InvertColors
 import androidx.compose.material.icons.outlined.Keyboard
@@ -201,20 +202,35 @@ fun SettingScreen() {
 
             SettingItemGroup(stringResource(R.string.appearance))
             SettingItem(
-                imageVector = Icons.Outlined.Palette,
-                title = stringResource(R.string.launcher_background),
-                description = stringResource(if (appConfig.theme.showWallpaper) R.string.show_wallpaper else R.string.solid_background),
-                trailingContent = { Switch(checked = appConfig.theme.showWallpaper, onCheckedChange = null) },
-                onClick = { viewModel.updateThemeConfig(appConfig.theme.copy(showWallpaper = !appConfig.theme.showWallpaper)) },
+                imageVector = Icons.Outlined.Fullscreen,
+                title = stringResource(R.string.full_screen),
+                description = stringResource(R.string.full_screen_summary),
+                trailingContent = {
+                    Switch(checked = appConfig.theme.fullScreenEnabled, onCheckedChange = null)
+                },
+                onClick = {
+                    viewModel.updateThemeConfig(
+                        appConfig.theme.copy(fullScreenEnabled = !appConfig.theme.fullScreenEnabled),
+                    )
+                },
             )
-            if (!appConfig.theme.showWallpaper) {
+            if (!appConfig.theme.fullScreenEnabled) {
                 SettingItem(
                     imageVector = Icons.Outlined.Palette,
-                    title = stringResource(R.string.background_color),
-                    description = appConfig.theme.backgroundColor?.let { "#%06X".format(it and 0xFFFFFF) }
-                        ?: stringResource(R.string.background_adaptive),
-                    onClick = { backgroundColorDialogOpened = true },
+                    title = stringResource(R.string.launcher_background),
+                    description = stringResource(if (appConfig.theme.showWallpaper) R.string.show_wallpaper else R.string.solid_background),
+                    trailingContent = { Switch(checked = appConfig.theme.showWallpaper, onCheckedChange = null) },
+                    onClick = { viewModel.updateThemeConfig(appConfig.theme.copy(showWallpaper = !appConfig.theme.showWallpaper)) },
                 )
+                if (!appConfig.theme.showWallpaper) {
+                    SettingItem(
+                        imageVector = Icons.Outlined.Palette,
+                        title = stringResource(R.string.background_color),
+                        description = appConfig.theme.backgroundColor?.let { "#%06X".format(it and 0xFFFFFF) }
+                            ?: stringResource(R.string.background_adaptive),
+                        onClick = { backgroundColorDialogOpened = true },
+                    )
+                }
             }
 
             SettingItem(

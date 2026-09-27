@@ -139,7 +139,11 @@ fun AppListStyleScreen() {
                     )
                 }
                 StyleSettingCard(title = stringResource(R.string.app_list_height)) {
+                    if (appConfig.theme.fullScreenEnabled) {
+                        Text(stringResource(R.string.app_list_height_auto))
+                    }
                     Slider(
+                        enabled = !appConfig.theme.fullScreenEnabled,
                         value = previewAppListConfig.appListHeight,
                         onValueChange = {
                             previewAppListConfig = previewAppListConfig.copy(appListHeight = it)

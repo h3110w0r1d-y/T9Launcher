@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -52,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -74,6 +77,8 @@ fun HomeScreen() {
     val apps by viewModel.searchResultAppList.collectAsState()
     val appMap by viewModel.appMap.collectAsState()
     val appConfig = LocalAppConfig.current
+    val fullScreen = appConfig.theme.fullScreenEnabled
+    val cardColors = CardDefaults.cardColors()
     val background =
         if (appConfig.theme.showWallpaper) {
             Color.Transparent
@@ -90,7 +95,11 @@ fun HomeScreen() {
     SideEffect {
         window?.let {
             WindowCompat.getInsetsController(it, it.decorView).isAppearanceLightStatusBars =
-                if (appConfig.theme.showWallpaper) !darkTheme else background.luminance() > 0.5f
+                when {
+                    fullScreen -> cardColors.containerColor.luminance() > 0.5f
+                    appConfig.theme.showWallpaper -> !darkTheme
+                    else -> background.luminance() > 0.5f
+                }
         }
     }
     DisposableEffect(window, darkTheme) {
@@ -204,6 +213,7 @@ fun HomeScreen() {
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .then(if (fullScreen) Modifier.fillMaxSize() else Modifier)
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null,
@@ -211,27 +221,42 @@ fun HomeScreen() {
                     ),
             shape =
                 RoundedCornerShape(
-                    topStart = 20.dp,
-                    topEnd = 20.dp,
+                    topStart = if (fullScreen) 0.dp else 20.dp,
+                    topEnd = if (fullScreen) 0.dp else 20.dp,
+                    bottomStart = 0.dp,
+                    bottomEnd = 0.dp,
                 ),
+            colors = cardColors,
         ) {
             ConstraintLayout(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .navigationBarsPadding(),
+                        .then(
+                            if (fullScreen) {
+                                Modifier.fillMaxSize().safeDrawingPadding()
+                            } else {
+                                Modifier.navigationBarsPadding()
+                            },
+                        ),
             ) {
                 val (listRef, inputRef, keyboardRef) = createRefs()
+                // In full screen, only the list stretches; input and keyboard keep their measured heights.
+                val listModifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .then(if (fullScreen) Modifier else Modifier.height(appConfig.appListStyle.appListHeight.dp))
+                        .constrainAs(listRef) {
+                            bottom.linkTo(inputRef.top)
+                            if (fullScreen) {
+                                top.linkTo(parent.top)
+                                height = Dimension.fillToConstraints
+                            }
+                        }
                 if (isLoading) {
                     // 加载进度条
                     Box(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(appConfig.appListStyle.appListHeight.dp)
-                                .constrainAs(listRef) {
-                                    bottom.linkTo(inputRef.top)
-                                },
+                        modifier = listModifier,
                         contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator()
@@ -245,17 +270,14 @@ fun HomeScreen() {
                     }
                     Box(
                         modifier =
-                            Modifier
-                                .height(appConfig.appListStyle.appListHeight.dp)
+                            listModifier
                                 .padding(10.dp)
                                 .pullToRefresh(
                                     isRefreshing = isRefreshing,
                                     state = pullRefreshState,
                                     enabled = shouldEnablePullToRefresh,
                                     onRefresh = { viewModel.refresh() },
-                                ).constrainAs(listRef) {
-                                    bottom.linkTo(inputRef.top)
-                                },
+                                ),
                     ) {
                         LazyVerticalGrid(
                             state = lazyGridState,
@@ -303,7 +325,7 @@ fun HomeScreen() {
                             ).fillMaxWidth(.7f)
                             .padding(vertical = 8.dp)
                             .constrainAs(inputRef) {
-                                bottom.linkTo(keyboardRef.top)
+                                bottom.linkTo(if (is12Key) parent.bottom else keyboardRef.top)
                                 centerHorizontallyTo(parent)
                             },
                     textAlign = TextAlign.Center,

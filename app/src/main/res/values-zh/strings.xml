@@ -85,4 +85,7 @@
     <string name="color_hue">色相</string>
     <string name="color_saturation">饱和度</string>
     <string name="color_brightness">明度</string>
+    <string name="full_screen">全屏显示</string>
+    <string name="full_screen_summary">占满屏幕，应用列表自动填满键盘和输入框上方的空间</string>
+    <string name="app_list_height_auto">全屏模式下高度自动调整，仅在底部对齐模式下使用手动高度。</string>
 </resources>

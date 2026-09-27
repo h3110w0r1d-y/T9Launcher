@@ -36,6 +36,7 @@ data class ThemeConfig(
     val pureBlackDarkTheme: Boolean = false,
     val showWallpaper: Boolean = true,
     val backgroundColor: Int? = null,
+    val fullScreenEnabled: Boolean = false,
 )
 
 /**

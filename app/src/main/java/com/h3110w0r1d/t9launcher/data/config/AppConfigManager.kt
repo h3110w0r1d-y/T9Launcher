@@ -48,6 +48,7 @@ private object ConfigKeys {
 
     val showWallpaper = booleanPreferencesKey("show_wallpaper")
     val backgroundColor = intPreferencesKey("background_color")
+    val fullScreenEnabled = booleanPreferencesKey("full_screen_enabled")
 
     // 搜索键
     val hideSystemAppEnabled = booleanPreferencesKey("is_hide_system_app")
@@ -96,6 +97,7 @@ class AppConfigManager(
                             pureBlackDarkTheme = preferences[ConfigKeys.pureBlackDarkTheme] ?: false,
                             showWallpaper = preferences[ConfigKeys.showWallpaper] ?: true,
                             backgroundColor = preferences[ConfigKeys.backgroundColor],
+                            fullScreenEnabled = preferences[ConfigKeys.fullScreenEnabled] ?: false,
                         ),
                     search =
                         SearchConfig(
@@ -155,6 +157,7 @@ class AppConfigManager(
             preferences[ConfigKeys.nightModeEnabled] = config.nightModeEnabled
             preferences[ConfigKeys.pureBlackDarkTheme] = config.pureBlackDarkTheme
             preferences[ConfigKeys.showWallpaper] = config.showWallpaper
+            preferences[ConfigKeys.fullScreenEnabled] = config.fullScreenEnabled
             config.backgroundColor?.let { preferences[ConfigKeys.backgroundColor] = it }
                 ?: preferences.remove(ConfigKeys.backgroundColor)
         }
