@@ -19,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +42,8 @@ fun AppItem(
     onClick: () -> Unit = {},
     onLongPress: (Offset) -> Unit = {},
 ) {
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentOnLongPress by rememberUpdatedState(onLongPress)
     val appConfig = LocalAppConfig.current
     var scaleTarget by remember { mutableFloatStateOf(1f) }
     val scaleState by animateFloatAsState(
@@ -63,7 +66,7 @@ fun AppItem(
                     detectTapGestures(
                         onLongPress = {
                             scaleTarget = 1.1f
-                            onLongPress(it)
+                            currentOnLongPress(it)
                         },
                         onPress = {
                             // 在手指按下的瞬间触发
@@ -76,7 +79,7 @@ fun AppItem(
                             scaleTarget = 1f
                         },
                         onTap = {
-                            onClick()
+                            currentOnClick()
                         },
                     )
                 }.scale(scaleState)

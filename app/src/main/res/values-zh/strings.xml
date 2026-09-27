@@ -88,4 +88,25 @@
     <string name="full_screen">全屏显示</string>
     <string name="full_screen_summary">占满屏幕，应用列表自动填满键盘和输入框上方的空间</string>
     <string name="app_list_height_auto">全屏模式下高度自动调整，仅在底部对齐模式下使用手动高度。</string>
+    <string name="overlay_title">悬浮启动器</string>
+    <string name="overlay_enable">启用悬浮启动器</string>
+    <string name="overlay_enable_summary">点击侧边按钮搜索并打开应用，拖动后自动吸边；点击面板上方空白区域收起。</string>
+    <string name="overlay_service_status">无障碍服务</string>
+    <string name="overlay_connected">已连接 · 点击管理</string>
+    <string name="overlay_disconnected">未连接 · 点击开启或重新连接</string>
+    <string name="overlay_reset_position">重置悬浮按钮位置</string>
+    <string name="overlay_disclosure_title">启用无障碍服务</string>
+    <string name="overlay_disclosure_message">T9Launcher 使用无障碍服务，在其他应用上方显示悬浮按钮与启动面板，并打开你主动选择的应用。不会读取其他应用的屏幕内容、记录你在其他应用中的输入或执行自动点击。\n\n同意后，请在系统无障碍设置中启用 T9Launcher。你可以随时在此关闭悬浮启动器，或在系统设置中停用服务。</string>
+    <string name="overlay_agree">同意并开启</string>
+    <string name="overlay_service_label">T9Launcher 悬浮启动器</string>
+    <string name="overlay_service_description">Android 12 及以上通过系统无障碍快捷方式打开 T9 启动面板；旧版通过可拖动的侧边按钮打开。不读取屏幕内容，不执行自动点击。</string>
+    <string name="overlay_button_description">打开 T9Launcher，可拖动调整位置</string>
+    <string name="overlay_error">无法显示悬浮启动器，请在设置中重新连接无障碍服务。</string>
+    <string name="overlay_launch_failed">无法打开此应用或执行该操作。</string>
+    <string name="overlay_settings_failed">无法打开无障碍设置，请在系统设置中手动进入。</string>
+    <string name="overlay_system_shortcut">设置系统无障碍快捷方式</string>
+    <string name="overlay_system_shortcut_summary">Android 12 及以上：将 T9Launcher 添加到系统无障碍按钮或其他快捷方式。开启服务即显示面板，收起面板即停用服务。</string>
+    <string name="overlay_system_active">面板服务已开启 · 点击管理</string>
+    <string name="overlay_system_idle">面板服务已关闭 · 可通过已配置的系统快捷方式打开</string>
+    <string name="overlay_system_disclosure">T9Launcher 使用无障碍服务，在其他应用上方显示启动面板，并打开你主动选择的应用。不会读取其他应用的屏幕内容、记录你在其他应用中的输入或执行自动点击。\n\n请在系统无障碍设置中为 T9Launcher 配置快捷方式，例如无障碍按钮。开启服务后直接显示面板；收起面板、打开应用或返回 T9Launcher 时会停用服务，再次使用快捷方式即可重新打开。应用不再额外显示悬浮按钮。</string>
 </resources>

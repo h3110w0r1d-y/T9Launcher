@@ -83,20 +83,31 @@ class AppInfo(
         }
     }
 
-    fun detail(context: Context) {
+    fun detail(context: Context): Boolean {
         val intent =
             Intent().apply {
                 action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                 data = "package:$packageName".toUri()
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-        context.startActivity(intent)
+        return try {
+            context.startActivity(intent)
+            true
+        } catch (_: Exception) {
+            false
+        }
     }
 
-    fun uninstall(context: Context) {
+    fun uninstall(context: Context): Boolean {
         val intent = Intent(Intent.ACTION_DELETE)
         intent.data = "package:$packageName".toUri()
-        context.startActivity(intent)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return try {
+            context.startActivity(intent)
+            true
+        } catch (_: Exception) {
+            false
+        }
     }
 
     fun copyPackageName(context: Context) {

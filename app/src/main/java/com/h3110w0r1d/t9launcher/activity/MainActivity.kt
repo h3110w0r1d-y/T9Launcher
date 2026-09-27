@@ -17,12 +17,15 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.net.toUri
 import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
 import com.h3110w0r1d.t9launcher.model.AppViewModel
 import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
+import com.h3110w0r1d.t9launcher.overlay.OverlayServiceState
 import com.h3110w0r1d.t9launcher.ui.AppNavigation
 import com.h3110w0r1d.t9launcher.ui.screen.OnboardingScreen
 import com.h3110w0r1d.t9launcher.ui.theme.AppTheme
@@ -32,9 +35,12 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val appViewModel: AppViewModel by viewModels()
     private var hasStarted = false
+    private var openSettings by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        openSettings = intent.getBooleanExtra("open_settings", false)
+        intent.removeExtra("open_settings")
         ignoreBatteryOptimization()
 
         setContent {
@@ -75,7 +81,10 @@ class MainActivity : ComponentActivity() {
                     if (!appConfig.isShowedOnboarding) {
                         OnboardingScreen()
                     } else {
-                        AppNavigation()
+                        AppNavigation(
+                            openSettings = openSettings,
+                            onSettingsOpened = { openSettings = false },
+                        )
                     }
                 }
             }
@@ -83,11 +92,31 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStart() {
+        OverlayServiceState.setHostVisible(this, true)
         super.onStart()
         if (hasStarted) {
             appViewModel.refreshRecentStartCounts()
         } else {
             hasStarted = true
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        OverlayServiceState.setHostVisible(this, false)
+    }
+
+    override fun onDestroy() {
+        OverlayServiceState.setHostVisible(this, false)
+        super.onDestroy()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.getBooleanExtra("open_settings", false)) {
+            openSettings = true
+            intent.removeExtra("open_settings")
         }
     }
 

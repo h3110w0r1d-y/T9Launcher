@@ -115,6 +115,14 @@ class AppViewModel
             }
         }
 
+        fun updateOverlayEnabled(enabled: Boolean) {
+            viewModelScope.launch { configManager.updateOverlayEnabled(enabled) }
+        }
+
+        fun resetOverlayPosition() {
+            viewModelScope.launch { configManager.updateOverlayPosition(true, .5f) }
+        }
+
         fun updateSearchConfig(config: SearchConfig) {
             viewModelScope.launch {
                 configManager.updateSearchConfig(config)
@@ -183,7 +191,7 @@ class AppViewModel
 
         fun showDefaultAppList(config: AppConfig = appConfig.value) {
             val appInfo = mutableListOf<AppInfo>()
-            val currentAppList = appRepository.appList.value
+            val currentAppList = searchAppCopies()
 
             for (app in currentAppList) {
                 if (config.search.hideSystemAppEnabled && app.isSystemApp) {
@@ -214,7 +222,7 @@ class AppViewModel
                 return true
             }
             val appInfo = mutableListOf<AppInfo>()
-            val currentAppList = appRepository.appList.value
+            val currentAppList = searchAppCopies()
 
             for (app in currentAppList) {
                 if (config.search.hideSystemAppEnabled && app.isSystemApp) {
@@ -266,7 +274,7 @@ class AppViewModel
             var key = key
             key = key.lowercase(Locale.getDefault())
             val appInfo = mutableListOf<AppInfo>()
-            val currentAppList = appRepository.appList.value
+            val currentAppList = searchAppCopies()
             val config = appConfig.value
 
             for (app in currentAppList) {
@@ -295,12 +303,12 @@ class AppViewModel
         }
 
         fun updateStartCount(app: AppInfo) {
-            appRepository.updateStartCount(app)
+            appRepository.updateStartCount(appRepository.appMap.value[app.componentId()] ?: app)
         }
 
         fun showHideApp() {
             val appInfo = mutableListOf<AppInfo>()
-            val currentAppList = appRepository.appList.value
+            val currentAppList = searchAppCopies()
             val config = appConfig.value
 
             for (app in currentAppList) {
@@ -311,6 +319,20 @@ class AppViewModel
             }
             _searchResultAppList.value = appInfo
         }
+
+        // Matching mutates AppInfo. Each search session must own its match ranges and highlighting.
+        private fun searchAppCopies(): List<AppInfo> =
+            appRepository.appList.value.map { app ->
+                AppInfo(
+                    className = app.className,
+                    packageName = app.packageName,
+                    appName = app.appName,
+                    startCount = app.startCount,
+                    appIcon = app.appIcon,
+                    isSystemApp = app.isSystemApp,
+                    searchData = app.searchData,
+                )
+            }
     }
 
 val LocalGlobalViewModel =

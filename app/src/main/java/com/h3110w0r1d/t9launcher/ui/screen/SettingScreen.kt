@@ -226,8 +226,9 @@ fun SettingScreen() {
                     SettingItem(
                         imageVector = Icons.Outlined.Palette,
                         title = stringResource(R.string.background_color),
-                        description = appConfig.theme.backgroundColor?.let { "#%06X".format(it and 0xFFFFFF) }
-                            ?: stringResource(R.string.background_adaptive),
+                        description =
+                            appConfig.theme.backgroundColor?.let { "#%06X".format(it and 0xFFFFFF) }
+                                ?: stringResource(R.string.background_adaptive),
                         onClick = { backgroundColorDialogOpened = true },
                     )
                 }
@@ -349,6 +350,7 @@ fun SettingScreen() {
                     )
                 },
             )
+            OverlaySettingsItems()
             SettingItemGroup(stringResource(R.string.about))
 
             SettingItem(
@@ -440,7 +442,7 @@ fun SettingScreen() {
                         Modifier
                             .padding(8.dp, 16.dp),
                 ) {
-                    items(themeColorKeys) { it ->
+                    items(themeColorKeys) {
                         ListItem(
                             leadingContent = {
                                 Icon(
@@ -503,7 +505,7 @@ fun SettingItem(
             Icon(
                 imageVector = imageVector,
                 contentDescription = null,
-                modifier = if (description != null)Modifier.height(42.dp) else Modifier,
+                modifier = if (description != null) Modifier.height(42.dp) else Modifier,
             )
         },
         headlineContent = { Text(title) },

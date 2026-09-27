@@ -87,4 +87,25 @@
     <string name="full_screen">Full screen</string>
     <string name="full_screen_summary">Fill the screen and automatically size the app list above the keyboard and search field</string>
     <string name="app_list_height_auto">Automatically adjusted in full screen; manual height is used only in bottom-aligned mode.</string>
+    <string name="overlay_title">Floating launcher</string>
+    <string name="overlay_enable">Enable floating launcher</string>
+    <string name="overlay_enable_summary">Tap the side button to search and open apps. Drag it to either edge; tap above the panel to close it.</string>
+    <string name="overlay_service_status">Accessibility service</string>
+    <string name="overlay_connected">Connected · tap to manage</string>
+    <string name="overlay_disconnected">Not connected · tap to enable or reconnect</string>
+    <string name="overlay_reset_position">Reset floating button position</string>
+    <string name="overlay_disclosure_title">Enable accessibility service</string>
+    <string name="overlay_disclosure_message">T9Launcher uses an accessibility service to display a floating button and app launcher over other apps, and to open apps you select. It does not read other apps’ screen content, record your input in other apps, or perform automatic taps.\n\nAfter agreeing, enable T9Launcher in system accessibility settings. You can turn off the floating launcher here or disable the service in system settings at any time.</string>
+    <string name="overlay_agree">Agree and enable</string>
+    <string name="overlay_service_label">T9Launcher floating launcher</string>
+    <string name="overlay_service_description">Opens the T9 app launcher over other apps using a system accessibility shortcut on Android 12 and later, or a movable side button on older versions. Does not read screen content or perform automatic taps.</string>
+    <string name="overlay_button_description">Open T9Launcher. Drag to move.</string>
+    <string name="overlay_error">Unable to display floating launcher. Reconnect the accessibility service in settings.</string>
+    <string name="overlay_launch_failed">Unable to open this app or action.</string>
+    <string name="overlay_settings_failed">Unable to open accessibility settings. Open them manually in system settings.</string>
+    <string name="overlay_system_shortcut">Set up system accessibility shortcut</string>
+    <string name="overlay_system_shortcut_summary">Android 12+: assign T9Launcher to the system accessibility button or another shortcut. Enabling the service opens the panel; closing the panel turns the service off.</string>
+    <string name="overlay_system_active">Panel service active · tap to manage</string>
+    <string name="overlay_system_idle">Panel service off · use your configured system shortcut to open it</string>
+    <string name="overlay_system_disclosure">T9Launcher uses an accessibility service to show its launch panel over other apps and open apps you select. It does not read other apps’ screen content, record your input in other apps, or perform automatic taps.\n\nIn system accessibility settings, assign a shortcut to T9Launcher (such as the accessibility button). Turning the service on opens the panel. Closing the panel, opening an app or returning to T9Launcher turns the service off; use the shortcut to open it again. No extra floating button is created.</string>
 </resources>

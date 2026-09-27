@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -127,6 +128,9 @@ fun T9Button(
             "0" to "*",
         )
 
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentOnLongClick by rememberUpdatedState(onLongClick)
+    val currentOnCancel by rememberUpdatedState(onCancel)
     var isCancel by remember { mutableStateOf(true) }
     TextButton(
         onClick = {
@@ -142,12 +146,12 @@ fun T9Button(
                         val down = awaitFirstDown(false)
                         val longPress = awaitLongPressOrCancellation(down.id)
                         if (longPress != null) {
-                            onLongClick()
+                            currentOnLongClick()
                         } else {
                             if (text == "delete" && isCancel) {
-                                onCancel?.invoke()
+                                currentOnCancel?.invoke()
                             } else {
-                                onClick()
+                                currentOnClick()
                             }
                         }
                     }

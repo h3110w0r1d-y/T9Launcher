@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not request flagRequestAccessibilityButton: modern system shortcuts toggle the service
+     itself, and onServiceConnected opens the panel. Closing the panel calls disableSelf(). -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/overlay_service_description"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:notificationTimeout="100"
+    android:canRetrieveWindowContent="false"
+    android:settingsActivity="com.h3110w0r1d.t9launcher.activity.MainActivity" />

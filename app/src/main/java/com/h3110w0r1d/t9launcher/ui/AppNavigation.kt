@@ -25,12 +25,22 @@ import com.h3110w0r1d.t9launcher.ui.screen.SettingScreen
 import com.h3110w0r1d.t9launcher.ui.screen.ShortcutScreen
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(openSettings: Boolean = false, onSettingsOpened: () -> Unit = {}) {
     val navController = rememberNavController()
     val viewModel = LocalGlobalViewModel.current
 
     LaunchedEffect(Unit) {
         viewModel.loadAppList()
+    }
+
+    LaunchedEffect(openSettings) {
+        if (openSettings) {
+            navController.navigate("setting") {
+                popUpTo("home")
+                launchSingleTop = true
+            }
+            onSettingsOpened()
+        }
     }
 
     val animationSpec =

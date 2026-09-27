@@ -58,6 +58,9 @@ private object ConfigKeys {
     val searchSortPriority = stringPreferencesKey("search_sort_priority")
 
     // 其他键
+    val overlayEnabled = booleanPreferencesKey("overlay_enabled")
+    val overlayDockRight = booleanPreferencesKey("overlay_dock_right")
+    val overlayVerticalPosition = floatPreferencesKey("overlay_vertical_position")
     val isShowedOnboarding = booleanPreferencesKey("is_showed_onboarding")
     val shortcutConfig = stringPreferencesKey("shortcut_config")
 }
@@ -114,6 +117,12 @@ class AppConfigManager(
                                 }.getOrDefault(SearchSortPriority.RECENT_START_COUNT),
                         ),
                     isShowedOnboarding = preferences[ConfigKeys.isShowedOnboarding] ?: false,
+                    overlay = OverlayConfig(
+                        enabled = preferences[ConfigKeys.overlayEnabled] ?: false,
+                        dockRight = preferences[ConfigKeys.overlayDockRight] ?: true,
+                        verticalPosition = (preferences[ConfigKeys.overlayVerticalPosition] ?: .5f)
+                            .takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: .5f,
+                    ),
                     shortcutConfig =
                         Json.decodeFromString<List<String>>(
                             preferences[ConfigKeys.shortcutConfig] ?: Json.encodeToString(List(9) { "\"\"" }),
@@ -182,6 +191,18 @@ class AppConfigManager(
     suspend fun setShowedOnboarding() {
         dataStore.edit { preferences ->
             preferences[ConfigKeys.isShowedOnboarding] = true
+        }
+    }
+
+    suspend fun updateOverlayEnabled(enabled: Boolean) {
+        dataStore.edit { it[ConfigKeys.overlayEnabled] = enabled }
+    }
+
+    suspend fun updateOverlayPosition(dockRight: Boolean, verticalPosition: Float) {
+        dataStore.edit {
+            it[ConfigKeys.overlayDockRight] = dockRight
+            it[ConfigKeys.overlayVerticalPosition] =
+                verticalPosition.takeIf { position -> position.isFinite() }?.coerceIn(0f, 1f) ?: .5f
         }
     }
 }

@@ -56,13 +56,21 @@ data class SearchConfig(
 )
 
 /**
- * 主配置类
+ * 悬浮启动器配置。位置以可用屏幕高度的比例保存，便于旋转后恢复。
  */
+data class OverlayConfig(
+    val enabled: Boolean = false,
+    val dockRight: Boolean = true,
+    val verticalPosition: Float = .5f,
+)
+
+/** 主配置类 */
 data class AppConfig(
     val appListStyle: AppListStyleConfig = AppListStyleConfig(),
     val keyboardStyle: KeyboardStyleConfig = KeyboardStyleConfig(),
     val theme: ThemeConfig = ThemeConfig(),
     val search: SearchConfig = SearchConfig(),
+    val overlay: OverlayConfig = OverlayConfig(),
     val isShowedOnboarding: Boolean = false,
     val shortcutConfig: List<String> = listOf("", "", "", "", "", "", "", "", ""),
     val isConfigInitialized: Boolean = false,

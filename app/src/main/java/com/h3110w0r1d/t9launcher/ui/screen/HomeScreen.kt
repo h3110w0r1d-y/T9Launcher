@@ -1,81 +1,27 @@
 package com.h3110w0r1d.t9launcher.ui.screen
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.res.Configuration
-import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
-import androidx.compose.material3.pulltorefresh.pullToRefresh
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
-import com.h3110w0r1d.t9launcher.R
 import com.h3110w0r1d.t9launcher.data.config.LocalAppConfig
-import com.h3110w0r1d.t9launcher.model.LocalGlobalViewModel
 import com.h3110w0r1d.t9launcher.ui.LocalNavController
 import com.h3110w0r1d.t9launcher.ui.theme.adaptiveBackgroundColor
-import com.h3110w0r1d.t9launcher.ui.widget.AppDropdownMenu
-import com.h3110w0r1d.t9launcher.ui.widget.AppItem
-import com.h3110w0r1d.t9launcher.ui.widget.T9Keyboard
+import com.h3110w0r1d.t9launcher.ui.widget.LauncherPanel
 
-@SuppressLint("RestrictedApi", "FrequentlyChangingValue", "ShowToast")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
     val navController = LocalNavController.current!!
-    val viewModel = LocalGlobalViewModel.current
-    val apps by viewModel.searchResultAppList.collectAsState()
-    val appMap by viewModel.appMap.collectAsState()
     val appConfig = LocalAppConfig.current
     val fullScreen = appConfig.theme.fullScreenEnabled
     val cardColors = CardDefaults.cardColors()
@@ -85,10 +31,6 @@ fun HomeScreen() {
         } else {
             appConfig.theme.backgroundColor?.let { Color(it) } ?: adaptiveBackgroundColor()
         }
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-
-    var searchText by remember { mutableStateOf("") }
     val context = LocalContext.current
     val darkTheme = if (appConfig.theme.nightModeFollowSystem) isSystemInDarkTheme() else appConfig.theme.nightModeEnabled
     val window = (context as? Activity)?.window
@@ -107,286 +49,10 @@ fun HomeScreen() {
             window?.let { WindowCompat.getInsetsController(it, it.decorView).isAppearanceLightStatusBars = !darkTheme }
         }
     }
-    val lazyGridState = rememberLazyGridState()
-    val lastToastTime = remember { mutableLongStateOf(0L) }
-
-    fun clearSearch() {
-        searchText = ""
-        viewModel.searchApp("")
-    }
-
-    // 检测是否正在滚动
-    var isScrolling by remember { mutableStateOf(false) }
-
-    val isScrolledToTop by remember {
-        derivedStateOf {
-            lazyGridState.firstVisibleItemIndex == 0 &&
-                lazyGridState.firstVisibleItemScrollOffset == 0
-        }
-    }
-    // 监听滚动状态变化
-    LaunchedEffect(lazyGridState.isScrollInProgress) {
-        isScrolling =
-            if (lazyGridState.isScrollInProgress) {
-                !isScrolledToTop
-            } else {
-                false
-            }
-    }
-
-    val is12Key: Boolean = LocalConfiguration.current.keyboard == Configuration.KEYBOARD_12KEY
-
-    // 监听 apps 的变化
-    LaunchedEffect(apps) {
-        if (apps.isNotEmpty()) { // 可选：仅在列表不为空时滚动
-            lazyGridState.scrollToItem(0)
-        }
-    }
-
-    DisposableEffect(context) {
-        viewModel.searchApp(searchText)
-        val lifecycleOwner = context as? LifecycleOwner
-        if (lifecycleOwner == null) {
-            onDispose { }
-        } else {
-            val observer =
-                LifecycleEventObserver { _, event ->
-                    if (event == Lifecycle.Event.ON_STOP) {
-                        clearSearch()
-                        (context as? Activity)?.moveTaskToBack(true)
-                    }
-                }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
-    }
-
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(background)
-                .clickable(
-                    enabled = true,
-                    onClick = {
-                        (context as? Activity)?.moveTaskToBack(true)
-                    },
-                ).onKeyEvent { keyEvent: KeyEvent ->
-                    when (keyEvent.key) {
-                        // 实体键盘上的数字键，其 keyCode 通常与 Key.Zero 到 Key.Nine 对应
-                        Key.Zero, Key.One, Key.Two, Key.Three, Key.Four,
-                        Key.Five, Key.Six, Key.Seven, Key.Eight, Key.Nine,
-                        -> {
-                            val number = keyEvent.nativeKeyEvent.keyCode - Key.Zero.keyCode
-                            if (number in 0..9) {
-                                if (viewModel.searchApp(searchText + number) || isLoading) {
-                                    searchText += number.toString()
-                                }
-                            }
-                            return@onKeyEvent true
-                        }
-
-                        Key.Multiply -> {
-                            navController.navigate("setting")
-                            return@onKeyEvent true
-                        }
-
-                        Key.Pound -> {
-                            if (searchText.isNotEmpty()) {
-                                searchText = searchText.dropLast(1)
-                            }
-                            viewModel.searchApp(searchText)
-                            return@onKeyEvent true
-                        }
-
-                        else -> {
-                            false
-                        }
-                    }
-                },
-        contentAlignment = Alignment.BottomCenter,
-    ) {
-        val interactionSource = remember { MutableInteractionSource() }
-        Card(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .then(if (fullScreen) Modifier.fillMaxSize() else Modifier)
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null,
-                        onClick = {},
-                    ),
-            shape =
-                RoundedCornerShape(
-                    topStart = if (fullScreen) 0.dp else 20.dp,
-                    topEnd = if (fullScreen) 0.dp else 20.dp,
-                    bottomStart = 0.dp,
-                    bottomEnd = 0.dp,
-                ),
-            colors = cardColors,
-        ) {
-            ConstraintLayout(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .then(
-                            if (fullScreen) {
-                                Modifier.fillMaxSize().safeDrawingPadding()
-                            } else {
-                                Modifier.navigationBarsPadding()
-                            },
-                        ),
-            ) {
-                val (listRef, inputRef, keyboardRef) = createRefs()
-                // In full screen, only the list stretches; input and keyboard keep their measured heights.
-                val listModifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .then(if (fullScreen) Modifier else Modifier.height(appConfig.appListStyle.appListHeight.dp))
-                        .constrainAs(listRef) {
-                            bottom.linkTo(inputRef.top)
-                            if (fullScreen) {
-                                top.linkTo(parent.top)
-                                height = Dimension.fillToConstraints
-                            }
-                        }
-                if (isLoading) {
-                    // 加载进度条
-                    Box(
-                        modifier = listModifier,
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    val pullRefreshState = rememberPullToRefreshState()
-                    val shouldEnablePullToRefresh by remember {
-                        derivedStateOf {
-                            isScrolledToTop && !isScrolling
-                        }
-                    }
-                    Box(
-                        modifier =
-                            listModifier
-                                .padding(10.dp)
-                                .pullToRefresh(
-                                    isRefreshing = isRefreshing,
-                                    state = pullRefreshState,
-                                    enabled = shouldEnablePullToRefresh,
-                                    onRefresh = { viewModel.refresh() },
-                                ),
-                    ) {
-                        LazyVerticalGrid(
-                            state = lazyGridState,
-                            columns = GridCells.Fixed(appConfig.appListStyle.gridColumns),
-                            modifier =
-                                Modifier
-                                    .fillMaxSize(),
-                        ) {
-                            items(apps.size) { i ->
-                                var expanded by remember { mutableStateOf(false) }
-                                Box {
-                                    AppItem(
-                                        app = apps[i],
-                                        onClick = {
-                                            if (apps[i].start(context)) {
-                                                viewModel.updateStartCount(apps[i])
-                                            }
-                                        },
-                                        onLongPress = {
-                                            expanded = true
-                                        },
-                                    )
-                                    AppDropdownMenu(apps[i], expanded) { expanded = it }
-                                }
-                            }
-                        }
-
-                        Indicator(
-                            modifier = Modifier.align(Alignment.TopCenter),
-                            isRefreshing = isRefreshing,
-                            state = pullRefreshState,
-                        )
-                    }
-                }
-
-                // 搜索文本框
-                Text(
-                    text = searchText.ifEmpty { " " },
-                    modifier =
-                        Modifier
-                            .alpha(.7f)
-                            .background(
-                                Color(0x60808080),
-                                shape = RoundedCornerShape(100.dp),
-                            ).fillMaxWidth(.7f)
-                            .padding(vertical = 8.dp)
-                            .constrainAs(inputRef) {
-                                bottom.linkTo(if (is12Key) parent.bottom else keyboardRef.top)
-                                centerHorizontallyTo(parent)
-                            },
-                    textAlign = TextAlign.Center,
-                    fontSize = 20.sp,
-                )
-                if (is12Key) return@ConstraintLayout
-                // T9键盘区域
-                val enterSettingString = stringResource(id = R.string.long_press_open_settings)
-                T9Keyboard(
-                    modifier =
-                        Modifier
-                            .constrainAs(keyboardRef) {
-                                bottom.linkTo(parent.bottom)
-                            },
-                    onClick = { text ->
-                        if (text.all { char -> char.isDigit() }) {
-                            if (viewModel.searchApp(searchText + text) || isLoading) {
-                                searchText += text
-                            }
-                        }
-                        if (text == "delete") {
-                            if (searchText.isNotEmpty()) {
-                                searchText = searchText.dropLast(1)
-                            }
-                            viewModel.searchApp(searchText)
-                        } else if (text == "setting") {
-                            if (System.currentTimeMillis() - lastToastTime.longValue > 2000) {
-                                Toast.makeText(context, enterSettingString, Toast.LENGTH_SHORT).show()
-                                lastToastTime.longValue = System.currentTimeMillis()
-                            }
-                        }
-                    },
-                    onLongClick = { text ->
-                        when (text) {
-                            "delete" -> {
-                                clearSearch()
-                            }
-
-                            "setting" -> {
-                                navController.navigate("setting")
-                            }
-
-                            else -> {
-                                if (text.toInt() > 0) {
-                                    val appInfo = appMap[appConfig.shortcutConfig[text.toInt() - 1]]
-                                    if (appInfo != null) {
-                                        if (appInfo.start(context)) {
-                                            return@T9Keyboard
-                                        }
-                                    }
-                                }
-                                viewModel.showHideApp()
-                            }
-                        }
-                    },
-                    onCancel = {
-                        clearSearch()
-                    },
-                    appMap = appMap,
-                )
-            }
-        }
+    Box(Modifier.fillMaxSize().background(background)) {
+        LauncherPanel(
+            onDismiss = { (context as? Activity)?.moveTaskToBack(true) },
+            onOpenSettings = { navController.navigate("setting") },
+        )
     }
 }

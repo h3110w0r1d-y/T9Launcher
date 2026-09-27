@@ -16,7 +16,8 @@
         android:supportsRtl="true"
         android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
-        android:theme="@style/Theme.T9Launcher">
+        android:theme="@style/Theme.T9Launcher"
+        tools:targetApi="33">
         <activity
             android:name=".activity.MainActivity"
             android:excludeFromRecents="true"
@@ -27,6 +28,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".overlay.LauncherAccessibilityService"
+            android:label="@string/overlay_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true"
+            tools:ignore="AccessibilityPolicy">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/launcher_accessibility_service" />
+        </service>
 
         <receiver
             android:name=".PackageReceiver"
